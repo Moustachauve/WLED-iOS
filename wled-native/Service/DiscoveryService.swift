@@ -5,11 +5,9 @@ import CoreData
 import Network
 import SwiftUI
 
-class DiscoveryService: NSObject, Identifiable {
+final class DiscoveryService: NSObject, Identifiable, Sendable {
     
-    var browser: NWBrowser!
-    
-    func scan() {
+    let browser = {
         let bonjourTCP = NWBrowser.Descriptor.bonjour(type: "_wled._tcp" , domain: "local.")
         
         let bonjourParms = NWParameters.init()
@@ -17,12 +15,12 @@ class DiscoveryService: NSObject, Identifiable {
         bonjourParms.acceptLocalOnly = true
         bonjourParms.allowFastOpen = true
         
-        browser = NWBrowser(for: bonjourTCP, using: bonjourParms)
-        browser.stateUpdateHandler = {newState in
+        let browser = NWBrowser(for: bonjourTCP, using: bonjourParms)
+        browser.stateUpdateHandler = { @Sendable newState in
             switch newState {
             case .failed(let error):
                 print("NW Browser: now in Error state: \(error)")
-                self.browser.cancel()
+                browser.cancel()
             case .ready:
                 print("NW Browser: new bonjour discovery - ready")
             case .setup:
@@ -31,7 +29,7 @@ class DiscoveryService: NSObject, Identifiable {
                 break
             }
         }
-        browser.browseResultsChangedHandler = { ( results, changes ) in
+        browser.browseResultsChangedHandler = { @Sendable ( results, changes ) in
             print("NW Browser: Scan results found:")
             for result in results {
                 print(result.endpoint.debugDescription)
@@ -49,7 +47,7 @@ class DiscoveryService: NSObject, Identifiable {
                                    case .hostPort(let host, let port) = innerEndpoint {
                                     let remoteHost = "\(host)".split(separator: "%")[0]
                                     print("Connected to", "\(remoteHost):\(port)")
-                                    self.addDevice(name: name, host: "\(remoteHost)")
+                                    addDevice(name: name, host: "\(remoteHost)")
                                 }
                             default:
                                 break
@@ -60,10 +58,14 @@ class DiscoveryService: NSObject, Identifiable {
                 }
             }
         }
+        return browser
+    }()
+    
+    func scan() {
         self.browser.start(queue: DispatchQueue.main)
     }
     
-    func addDevice(name: String, host: String) {
+    static func addDevice(name: String, host: String) {
         let viewContext = PersistenceController.shared.container.viewContext
         viewContext.performAndWait {
             if (doesDeviceAlreadyExists(host: host, viewContext: viewContext)) {
@@ -76,12 +78,12 @@ class DiscoveryService: NSObject, Identifiable {
             newDevice.address = host
             newDevice.isHidden = false
             Task {
-                await newDevice.requestManager.addRequest(WLEDRefreshRequest(context: viewContext))
+                await newDevice.refresh()
             }
         }
     }
     
-    func doesDeviceAlreadyExists(host: String, viewContext: NSManagedObjectContext) -> Bool {
+    static func doesDeviceAlreadyExists(host: String, viewContext: NSManagedObjectContext) -> Bool {
         let fetchRequest: NSFetchRequest<Device>
         fetchRequest = Device.fetchRequest()
         

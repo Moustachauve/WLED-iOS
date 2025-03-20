@@ -75,7 +75,11 @@ struct DeviceUpdateInstalling: View {
             }
             .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
             .padding()
+            #if os(iOS)
             .background(Color(UIColor.secondarySystemBackground))
+            #else
+            .background(Color(NSColor.secondarySystemFill))
+            #endif
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .shadow(radius: 20)
             .offset(x: 0, y: offset)
@@ -128,7 +132,9 @@ struct DeviceUpdateInstalling: View {
     private func onDownloadCompleted(_ updateService: DeviceUpdateService) {
         print("Download is done.")
         statusString = String(localized: "Installing Update")
-        updateService.installUpdate(onCompletion: onInstallCompleted, onFailure: onInstallFailed)
+        Task {
+            await updateService.installUpdate(onCompletion: onInstallCompleted, onFailure: onInstallFailed)
+        }
     }
     
     private func onInstallCompleted() {
@@ -140,7 +146,7 @@ struct DeviceUpdateInstalling: View {
         Task {
             // Wait 3 seconds before sending a refresh request
             try await Task.sleep(nanoseconds: UInt64(3 * Double(NSEC_PER_SEC)))
-            await device.requestManager.addRequest(WLEDRefreshRequest(context: viewContext))
+            await device.getRequestManager().addRequest(WLEDRefreshRequest())
         }
     }
     

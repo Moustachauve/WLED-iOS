@@ -79,9 +79,7 @@ struct DeviceEditView: View {
                     device.branchValue = newBranch
                     device.latestUpdateVersionTagAvailable = ""
                     saveDevice()
-                    Task {
-                        await checkForUpdate()
-                    }
+                    checkForUpdate()
                 }
             }
             .padding(.bottom)
@@ -92,9 +90,7 @@ struct DeviceEditView: View {
                     Text("Version \(device.version ?? unknownVersion)")
                     HStack {
                         Button(action: {
-                            Task {
-                                await checkForUpdate()
-                            }
+                            checkForUpdate()
                         }) {
                             Text(isCheckingForUpdates ? "Checking for Updates" : "Check for Update")
                         }
@@ -127,14 +123,18 @@ struct DeviceEditView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .background(Color(UIColor.secondarySystemBackground))
+            .background(Color.black.opacity(0.5))
             .cornerRadius(8)
             
             Spacer()
         }
         .padding()
         .navigationTitle("Edit Device")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #elseif os(macOS)
+        //TODO: for mac os
+        #endif
         .onAppear() {
             address = device.address ?? ""
             customName = device.isCustomName ? (self.device.name ?? "") : ""
@@ -155,18 +155,21 @@ struct DeviceEditView: View {
         }
     }
     
-    private func checkForUpdate() async {
+    private func checkForUpdate() {
         withAnimation {
             isCheckingForUpdates = true
         }
         print("Refreshing available Releases")
-        await ReleaseService(context: viewContext).refreshVersions()
+        Task {
+            await ReleaseService(context: viewContext).refreshVersions()
+        }
+            
         UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: WLEDNativeApp.dateLastUpdateKey)
         
         device.skipUpdateTag = ""
         withAnimation {
-            Task {
-                await device.requestManager.addRequest(WLEDRefreshRequest(context: viewContext))
+            Task { @MainActor in
+                await device.getRequestManager().addRequest(WLEDRefreshRequest())
             }
             isCheckingForUpdates = false
         }

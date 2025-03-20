@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -21,11 +21,8 @@
 		C946FB982B6C953F00D5B00D /* WLEDWebsocketHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB972B6C953F00D5B00D /* WLEDWebsocketHandler.swift */; };
 		C946FB9A2B6CA10600D5B00D /* DeviceExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB992B6CA10600D5B00D /* DeviceExtensions.swift */; };
 		C946FB9C2B6E032800D5B00D /* WLEDChangeStateRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB9B2B6E032800D5B00D /* WLEDChangeStateRequest.swift */; };
-		C946FB9E2B6E0FE000D5B00D /* DeviceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB9D2B6E0FE000D5B00D /* DeviceState.swift */; };
-		C946FBA02B6E103600D5B00D /* DeviceStateFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB9F2B6E103600D5B00D /* DeviceStateFactory.swift */; };
 		C946FBA22B702F8B00D5B00D /* WLEDSoftwareUpdateRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FBA12B702F8B00D5B00D /* WLEDSoftwareUpdateRequest.swift */; };
 		C948F4952B3D1C480092C4B1 /* DeviceUpdateDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948F4942B3D1C480092C4B1 /* DeviceUpdateDetails.swift */; };
-		C948F4982B3D2B330092C4B1 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = C948F4972B3D2B330092C4B1 /* MarkdownUI */; };
 		C948F49A2B3E2B590092C4B1 /* DeviceUpdateInstalling.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948F4992B3E2B590092C4B1 /* DeviceUpdateInstalling.swift */; };
 		C95B4A832B3E3F540081F4C5 /* BackgroundBlurView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95B4A822B3E3F540081F4C5 /* BackgroundBlurView.swift */; };
 		C96440E22AEF6B6000C51204 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96440E12AEF6B6000C51204 /* Persistence.swift */; };
@@ -66,6 +63,79 @@
 		C9FCC3A3293DBD2200DEDDEA /* Info.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC3A0293DBD2200DEDDEA /* Info.swift */; };
 		C9FCC3A4293DBD2200DEDDEA /* Leds.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC39C293DBD2200DEDDEA /* Leds.swift */; };
 		C9FCC3A5293DBD2200DEDDEA /* Segment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC398293DBD2200DEDDEA /* Segment.swift */; };
+		E149382E2CB3C930000F0224 /* WLEDRequestManagerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E149382D2CB3C930000F0224 /* WLEDRequestManagerProvider.swift */; };
+		E149382F2CB3C930000F0224 /* WLEDRequestManagerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E149382D2CB3C930000F0224 /* WLEDRequestManagerProvider.swift */; };
+		E15C19DD2CA1CB4000431441 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9A9E5C92918D1C4005B5C22 /* Assets.xcassets */; };
+		E15C19DE2CA1CB7F00431441 /* DeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99BEF562AF8B926001AD80A /* DeviceView.swift */; };
+		E15C19DF2CA1CB7F00431441 /* FetchedObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9767DE22AFAE65C002F3EA9 /* FetchedObjects.swift */; };
+		E15C19E02CA1CB7F00431441 /* DeviceListItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96440E72AF095B500C51204 /* DeviceListItemView.swift */; };
+		E15C19E12CA1CB7F00431441 /* DeviceEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9767DDF2AFA04E0002F3EA9 /* DeviceEditView.swift */; };
+		E15C19E22CA1CB7F00431441 /* DeviceUpdateDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948F4942B3D1C480092C4B1 /* DeviceUpdateDetails.swift */; };
+		E15C19E32CA1CB7F00431441 /* DeviceUpdateInstalling.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948F4992B3E2B590092C4B1 /* DeviceUpdateInstalling.swift */; };
+		E15C19E42CA1CB7F00431441 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99BEF582AF8BA79001AD80A /* WebView.swift */; };
+		E15C19E52CA1CB7F00431441 /* DeviceAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9767DDD2AF9F435002F3EA9 /* DeviceAddView.swift */; };
+		E15C19E62CA1CB7F00431441 /* BackgroundBlurView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95B4A822B3E3F540081F4C5 /* BackgroundBlurView.swift */; };
+		E15C19E72CA1CB7F00431441 /* ToolbarBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99BAC2D2B735875009BC476 /* ToolbarBadge.swift */; };
+		E15C19E82CA1CB7F00431441 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		E15C19EA2CA1CB8600431441 /* WLEDWebsocketHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB972B6C953F00D5B00D /* WLEDWebsocketHandler.swift */; };
+		E15C19EB2CA1CB8600431441 /* ReleaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD4AA2B30175400420E93 /* ReleaseService.swift */; };
+		E15C19EC2CA1CB8600431441 /* DeviceUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B9FB3D2B3FB7280003E6F9 /* DeviceUpdateService.swift */; };
+		E15C19ED2CA1CB8600431441 /* WLEDRequestHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB932B6C93F000D5B00D /* WLEDRequestHandler.swift */; };
+		E15C19EE2CA1CB8600431441 /* DeviceExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB992B6CA10600D5B00D /* DeviceExtensions.swift */; };
+		E15C19EF2CA1CB8600431441 /* DiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99BEF542AF49513001AD80A /* DiscoveryService.swift */; };
+		E15C19F12CA1CB8600431441 /* WLEDRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB822B68C3B700D5B00D /* WLEDRequestManager.swift */; };
+		E15C19F22CA1CB8600431441 /* GithubApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD4A62B30107800420E93 /* GithubApi.swift */; };
+		E15C19F32CA1CB8600431441 /* WLEDRepoApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD4A82B30165900420E93 /* WLEDRepoApi.swift */; };
+		E15C19F42CA1CB8600431441 /* WLEDJsonApiHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB952B6C950200D5B00D /* WLEDJsonApiHandler.swift */; };
+		E15C19F62CA1CB8C00431441 /* Reactions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD4A02B269F8B00420E93 /* Reactions.swift */; };
+		E15C19F72CA1CB8C00431441 /* Author.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD49E2B269F6800420E93 /* Author.swift */; };
+		E15C19F82CA1CB8C00431441 /* Release.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD4A22B269F9400420E93 /* Release.swift */; };
+		E15C19F92CA1CB8C00431441 /* Uploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD4A42B269FA400420E93 /* Uploader.swift */; };
+		E15C19FA2CA1CB8C00431441 /* GithubAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD49C2B269F3000420E93 /* GithubAsset.swift */; };
+		E15C19FB2CA1CB9300431441 /* WLEDRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB8D2B6C8E8800D5B00D /* WLEDRequest.swift */; };
+		E15C19FC2CA1CB9300431441 /* WLEDRequestState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC38A293DB8A000DEDDEA /* WLEDRequestState.swift */; };
+		E15C19FD2CA1CB9300431441 /* WLEDRefreshRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB8F2B6C92C400D5B00D /* WLEDRefreshRequest.swift */; };
+		E15C19FE2CA1CB9300431441 /* WLEDChangeStateRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FB9B2B6E032800D5B00D /* WLEDChangeStateRequest.swift */; };
+		E15C19FF2CA1CB9300431441 /* WLEDSoftwareUpdateRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C946FBA12B702F8B00D5B00D /* WLEDSoftwareUpdateRequest.swift */; };
+		E15C1A002CA1CB9D00431441 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96440E12AEF6B6000C51204 /* Persistence.swift */; };
+		E15C1A012CA1CB9D00431441 /* DeviceStateInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC396293DBD1800DEDDEA /* DeviceStateInfo.swift */; };
+		E15C1A022CA1CB9D00431441 /* Wifi.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC390293DB95500DEDDEA /* Wifi.swift */; };
+		E15C1A032CA1CB9D00431441 /* Branch.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD4992B2519BC00420E93 /* Branch.swift */; };
+		E15C1A042CA1CB9D00431441 /* Nightlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC392293DB9A500DEDDEA /* Nightlight.swift */; };
+		E15C1A052CA1CB9D00431441 /* FileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC388293DB86900DEDDEA /* FileSystem.swift */; };
+		E15C1A062CA1CB9D00431441 /* WledState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC384293DB69F00DEDDEA /* WledState.swift */; };
+		E15C1A072CA1CB9D00431441 /* Leds.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC39C293DBD2200DEDDEA /* Leds.swift */; };
+		E15C1A082CA1CB9D00431441 /* Segment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC398293DBD2200DEDDEA /* Segment.swift */; };
+		E15C1A092CA1CB9D00431441 /* Info.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FCC3A0293DBD2200DEDDEA /* Info.swift */; };
+		E15C1A0A2CA1CBC900431441 /* WLEDNativeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A9E5C02918D1C3005B5C22 /* WLEDNativeApp.swift */; };
+		E15C1A272CA1CD3800431441 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = E15C1A262CA1CD3800431441 /* Collections */; };
+		E15C1A292CA1CD3C00431441 /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = E15C1A282CA1CD3C00431441 /* DequeModule */; };
+		E15C1A2D2CA1CD4400431441 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = E15C1A2C2CA1CD4400431441 /* OrderedCollections */; };
+		E15C1A2E2CA1CDB900431441 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C9D43A7D29BAE3BA005A71C2 /* Localizable.strings */; };
+		E15C1A2F2CA1CDC100431441 /* wled_native_data.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C97CD4962B25000300420E93 /* wled_native_data.xcdatamodeld */; };
+		E15C1A302CA1CDC700431441 /* 012_rip.png in Resources */ = {isa = PBXBuildFile; fileRef = C93470AD29D905BD0085D9D5 /* 012_rip.png */; };
+		E15C1A312CA1CDCE00431441 /* errorPage.en.html in Resources */ = {isa = PBXBuildFile; fileRef = C93470AB29D904C20085D9D5 /* errorPage.en.html */; };
+		E15C1A322CA1CDCE00431441 /* errorPage.fr.html in Resources */ = {isa = PBXBuildFile; fileRef = C96827222B01AFB900A5DDEC /* errorPage.fr.html */; };
+		E15C1A332CA1CDCE00431441 /* errorPage.css in Resources */ = {isa = PBXBuildFile; fileRef = C96827202B01AF5900A5DDEC /* errorPage.css */; };
+		E15C1A342CA1CDD400431441 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C906561F2BBA5B9500D4ADAF /* PrivacyInfo.xcprivacy */; };
+		E15C1A352CA1CDDD00431441 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = C9C4B47E2AC0050500791D20 /* README.md */; };
+		E15C1A362CA1CE0600431441 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C9F82F2429BBD0E100B8A5EE /* InfoPlist.strings */; };
+		E15C1A3A2CA1D4FD00431441 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = E15C1A392CA1D4FD00431441 /* MarkdownUI */; };
+		E15C1A3C2CA1D50500431441 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = E15C1A3B2CA1D50500431441 /* MarkdownUI */; };
+		E1CB004F2D8CA14400464260 /* Toolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CB004E2D8CA14400464260 /* Toolbar.swift */; };
+		E1CB00502D8CA14400464260 /* Toolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CB004E2D8CA14400464260 /* Toolbar.swift */; };
+		E1CB00542D8CA31600464260 /* ActiveToogle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CB00532D8CA31600464260 /* ActiveToogle.swift */; };
+		E1CB00552D8CA31600464260 /* ActiveToogle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CB00532D8CA31600464260 /* ActiveToogle.swift */; };
+		E1CB00572D8CA51900464260 /* BrightnessSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CB00562D8CA51900464260 /* BrightnessSlider.swift */; };
+		E1CB00582D8CA51900464260 /* BrightnessSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CB00562D8CA51900464260 /* BrightnessSlider.swift */; };
+		E1F7FC892D8AD5B4006BBD26 /* DeviceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9865AF52AEF1902000B2714 /* DeviceListView.swift */; };
+		E1F7FC8D2D8B3686006BBD26 /* DeviceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F7FC8C2D8B3686006BBD26 /* DeviceList.swift */; };
+		E1F7FC8E2D8B3686006BBD26 /* DeviceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F7FC8C2D8B3686006BBD26 /* DeviceList.swift */; };
+		E1F7FC912D8C30BB006BBD26 /* MenuBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F7FC902D8C30BB006BBD26 /* MenuBar.swift */; };
+		E1F7FC952D8C43A3006BBD26 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F7FC942D8C43A3006BBD26 /* Device.swift */; };
+		E1F7FC962D8C43A3006BBD26 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F7FC942D8C43A3006BBD26 /* Device.swift */; };
+		E1F7FC982D8C54B2006BBD26 /* IconImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F7FC972D8C54A8006BBD26 /* IconImages.swift */; };
+		E1F7FC992D8C54B2006BBD26 /* IconImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F7FC972D8C54A8006BBD26 /* IconImages.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,8 +150,6 @@
 		C946FB972B6C953F00D5B00D /* WLEDWebsocketHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDWebsocketHandler.swift; sourceTree = "<group>"; };
 		C946FB992B6CA10600D5B00D /* DeviceExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceExtensions.swift; sourceTree = "<group>"; };
 		C946FB9B2B6E032800D5B00D /* WLEDChangeStateRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDChangeStateRequest.swift; sourceTree = "<group>"; };
-		C946FB9D2B6E0FE000D5B00D /* DeviceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceState.swift; sourceTree = "<group>"; };
-		C946FB9F2B6E103600D5B00D /* DeviceStateFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStateFactory.swift; sourceTree = "<group>"; };
 		C946FBA12B702F8B00D5B00D /* WLEDSoftwareUpdateRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDSoftwareUpdateRequest.swift; sourceTree = "<group>"; };
 		C948F4942B3D1C480092C4B1 /* DeviceUpdateDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceUpdateDetails.swift; sourceTree = "<group>"; };
 		C948F4992B3E2B590092C4B1 /* DeviceUpdateInstalling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceUpdateInstalling.swift; sourceTree = "<group>"; };
@@ -128,7 +196,21 @@
 		C9FCC398293DBD2200DEDDEA /* Segment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Segment.swift; sourceTree = "<group>"; };
 		C9FCC39C293DBD2200DEDDEA /* Leds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Leds.swift; sourceTree = "<group>"; };
 		C9FCC3A0293DBD2200DEDDEA /* Info.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Info.swift; sourceTree = "<group>"; };
+		E149382D2CB3C930000F0224 /* WLEDRequestManagerProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDRequestManagerProvider.swift; sourceTree = "<group>"; };
+		E15C19CE2CA1CABD00431441 /* wled-native-osx.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "wled-native-osx.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E15C1A452CA1DC4B00431441 /* wled_native_osx.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = wled_native_osx.entitlements; sourceTree = "<group>"; };
+		E1CB004E2D8CA14400464260 /* Toolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toolbar.swift; sourceTree = "<group>"; };
+		E1CB00532D8CA31600464260 /* ActiveToogle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveToogle.swift; sourceTree = "<group>"; };
+		E1CB00562D8CA51900464260 /* BrightnessSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrightnessSlider.swift; sourceTree = "<group>"; };
+		E1F7FC8C2D8B3686006BBD26 /* DeviceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceList.swift; sourceTree = "<group>"; };
+		E1F7FC902D8C30BB006BBD26 /* MenuBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBar.swift; sourceTree = "<group>"; };
+		E1F7FC942D8C43A3006BBD26 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
+		E1F7FC972D8C54A8006BBD26 /* IconImages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconImages.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		E15C1A482CA1DFF000431441 /* Preview Content */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Preview Content"; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C9A9E5BA2918D1C3005B5C22 /* Frameworks */ = {
@@ -136,9 +218,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				C946FB862B68C53600D5B00D /* Collections in Frameworks */,
-				C948F4982B3D2B330092C4B1 /* MarkdownUI in Frameworks */,
 				C946FB8A2B68C53600D5B00D /* OrderedCollections in Frameworks */,
 				C946FB882B68C53600D5B00D /* DequeModule in Frameworks */,
+				E15C1A3C2CA1D50500431441 /* MarkdownUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E15C19CB2CA1CABD00431441 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E15C1A272CA1CD3800431441 /* Collections in Frameworks */,
+				E15C1A2D2CA1CD4400431441 /* OrderedCollections in Frameworks */,
+				E15C1A292CA1CD3C00431441 /* DequeModule in Frameworks */,
+				E15C1A3A2CA1D4FD00431441 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -175,6 +268,7 @@
 		C946FB922B6C93DA00D5B00D /* DeviceApi */ = {
 			isa = PBXGroup;
 			children = (
+				E149382D2CB3C930000F0224 /* WLEDRequestManagerProvider.swift */,
 				C946FB822B68C3B700D5B00D /* WLEDRequestManager.swift */,
 				C946FB932B6C93F000D5B00D /* WLEDRequestHandler.swift */,
 				C946FB952B6C950200D5B00D /* WLEDJsonApiHandler.swift */,
@@ -187,6 +281,7 @@
 		C96BF3F7291FFDC90011BC3B /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				E1F7FC942D8C43A3006BBD26 /* Device.swift */,
 				C97CD49B2B269D5D00420E93 /* Github */,
 				C9FCC381293DB18100DEDDEA /* DeviceApi */,
 				C97CD4992B2519BC00420E93 /* Branch.swift */,
@@ -219,9 +314,14 @@
 		C9865AF42AEF18E7000B2714 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				E1CB00522D8CA30400464260 /* Controlls */,
+				E1CB00512D8CA14900464260 /* Toolbar */,
+				E1F7FC932D8C31B4006BBD26 /* MenuBar */,
 				C9767DE12AFAE64A002F3EA9 /* Tool */,
+				E1F7FC972D8C54A8006BBD26 /* IconImages.swift */,
 				C9865AF52AEF1902000B2714 /* DeviceListView.swift */,
 				C96440E72AF095B500C51204 /* DeviceListItemView.swift */,
+				E1F7FC8C2D8B3686006BBD26 /* DeviceList.swift */,
 				C99BEF562AF8B926001AD80A /* DeviceView.swift */,
 				C99BEF582AF8BA79001AD80A /* WebView.swift */,
 				C9767DDD2AF9F435002F3EA9 /* DeviceAddView.swift */,
@@ -236,6 +336,7 @@
 			isa = PBXGroup;
 			children = (
 				C9A9E5BF2918D1C3005B5C22 /* wled-native */,
+				E15C1A252CA1CD3800431441 /* Frameworks */,
 				C9A9E5BE2918D1C3005B5C22 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -244,6 +345,7 @@
 			isa = PBXGroup;
 			children = (
 				C9A9E5BD2918D1C3005B5C22 /* wled-native.app */,
+				E15C19CE2CA1CABD00431441 /* wled-native-osx.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -251,6 +353,7 @@
 		C9A9E5BF2918D1C3005B5C22 /* wled-native */ = {
 			isa = PBXGroup;
 			children = (
+				E15C1A482CA1DFF000431441 /* Preview Content */,
 				C9865AF42AEF18E7000B2714 /* View */,
 				C9FCC37E293DAF8300DEDDEA /* Service */,
 				C96BF3F7291FFDC90011BC3B /* Model */,
@@ -258,6 +361,7 @@
 				C9A9E5C02918D1C3005B5C22 /* WLEDNativeApp.swift */,
 				C9A9E5C92918D1C4005B5C22 /* Assets.xcassets */,
 				C97CD4962B25000300420E93 /* wled_native_data.xcdatamodeld */,
+				E15C1A452CA1DC4B00431441 /* wled_native_osx.entitlements */,
 				C9D43A7D29BAE3BA005A71C2 /* Localizable.strings */,
 				C9F82F2429BBD0E100B8A5EE /* InfoPlist.strings */,
 				C93470AD29D905BD0085D9D5 /* 012_rip.png */,
@@ -281,8 +385,6 @@
 				C97CD4A82B30165900420E93 /* WLEDRepoApi.swift */,
 				C97CD4AA2B30175400420E93 /* ReleaseService.swift */,
 				C9B9FB3D2B3FB7280003E6F9 /* DeviceUpdateService.swift */,
-				C946FB9D2B6E0FE000D5B00D /* DeviceState.swift */,
-				C946FB9F2B6E103600D5B00D /* DeviceStateFactory.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -294,6 +396,38 @@
 				C946FB8B2B6C8E5F00D5B00D /* Response */,
 			);
 			path = DeviceApi;
+			sourceTree = "<group>";
+		};
+		E15C1A252CA1CD3800431441 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E1CB00512D8CA14900464260 /* Toolbar */ = {
+			isa = PBXGroup;
+			children = (
+				E1CB004E2D8CA14400464260 /* Toolbar.swift */,
+			);
+			path = Toolbar;
+			sourceTree = "<group>";
+		};
+		E1CB00522D8CA30400464260 /* Controlls */ = {
+			isa = PBXGroup;
+			children = (
+				E1CB00532D8CA31600464260 /* ActiveToogle.swift */,
+				E1CB00562D8CA51900464260 /* BrightnessSlider.swift */,
+			);
+			path = Controlls;
+			sourceTree = "<group>";
+		};
+		E1F7FC932D8C31B4006BBD26 /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				E1F7FC902D8C30BB006BBD26 /* MenuBar.swift */,
+			);
+			path = MenuBar;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -313,13 +447,39 @@
 			);
 			name = "wled-native";
 			packageProductDependencies = (
-				C948F4972B3D2B330092C4B1 /* MarkdownUI */,
 				C946FB852B68C53600D5B00D /* Collections */,
 				C946FB872B68C53600D5B00D /* DequeModule */,
 				C946FB892B68C53600D5B00D /* OrderedCollections */,
+				E15C1A3B2CA1D50500431441 /* MarkdownUI */,
 			);
 			productName = "wled-native";
 			productReference = C9A9E5BD2918D1C3005B5C22 /* wled-native.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E15C19CD2CA1CABD00431441 /* wled-native-osx */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E15C19DA2CA1CABE00431441 /* Build configuration list for PBXNativeTarget "wled-native-osx" */;
+			buildPhases = (
+				E15C19CA2CA1CABD00431441 /* Sources */,
+				E15C19CB2CA1CABD00431441 /* Frameworks */,
+				E15C19CC2CA1CABD00431441 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E15C1A482CA1DFF000431441 /* Preview Content */,
+			);
+			name = "wled-native-osx";
+			packageProductDependencies = (
+				E15C1A262CA1CD3800431441 /* Collections */,
+				E15C1A282CA1CD3C00431441 /* DequeModule */,
+				E15C1A2C2CA1CD4400431441 /* OrderedCollections */,
+				E15C1A392CA1D4FD00431441 /* MarkdownUI */,
+			);
+			productName = "wled-native-osx";
+			productReference = E15C19CE2CA1CABD00431441 /* wled-native-osx.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -329,11 +489,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1410;
+				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					C9A9E5BC2918D1C3005B5C22 = {
 						CreatedOnToolsVersion = 14.1;
+					};
+					E15C19CD2CA1CABD00431441 = {
+						CreatedOnToolsVersion = 16.0;
 					};
 				};
 			};
@@ -356,6 +519,7 @@
 			projectRoot = "";
 			targets = (
 				C9A9E5BC2918D1C3005B5C22 /* wled-native */,
+				E15C19CD2CA1CABD00431441 /* wled-native-osx */,
 			);
 		};
 /* End PBXProject section */
@@ -378,6 +542,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E15C19CC2CA1CABD00431441 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E15C1A2E2CA1CDB900431441 /* Localizable.strings in Resources */,
+				E15C19DD2CA1CB4000431441 /* Assets.xcassets in Resources */,
+				E15C1A302CA1CDC700431441 /* 012_rip.png in Resources */,
+				E15C1A312CA1CDCE00431441 /* errorPage.en.html in Resources */,
+				E15C1A322CA1CDCE00431441 /* errorPage.fr.html in Resources */,
+				E15C1A352CA1CDDD00431441 /* README.md in Resources */,
+				E15C1A342CA1CDD400431441 /* PrivacyInfo.xcprivacy in Resources */,
+				E15C1A332CA1CDCE00431441 /* errorPage.css in Resources */,
+				E15C1A362CA1CE0600431441 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -387,7 +567,9 @@
 			files = (
 				C946FB962B6C950200D5B00D /* WLEDJsonApiHandler.swift in Sources */,
 				C97CD4A52B269FA400420E93 /* Uploader.swift in Sources */,
+				E1F7FC962D8C43A3006BBD26 /* Device.swift in Sources */,
 				C946FB9A2B6CA10600D5B00D /* DeviceExtensions.swift in Sources */,
+				E149382E2CB3C930000F0224 /* WLEDRequestManagerProvider.swift in Sources */,
 				C946FB982B6C953F00D5B00D /* WLEDWebsocketHandler.swift in Sources */,
 				C9FCC389293DB86900DEDDEA /* FileSystem.swift in Sources */,
 				C97CD4A12B269F8B00420E93 /* Reactions.swift in Sources */,
@@ -408,28 +590,90 @@
 				C946FB832B68C3B700D5B00D /* WLEDRequestManager.swift in Sources */,
 				C948F49A2B3E2B590092C4B1 /* DeviceUpdateInstalling.swift in Sources */,
 				C9FCC38B293DB8A000DEDDEA /* WLEDRequestState.swift in Sources */,
+				E1CB00582D8CA51900464260 /* BrightnessSlider.swift in Sources */,
 				C96440E22AEF6B6000C51204 /* Persistence.swift in Sources */,
+				E1F7FC992D8C54B2006BBD26 /* IconImages.swift in Sources */,
+				E1CB004F2D8CA14400464260 /* Toolbar.swift in Sources */,
 				C97CD4A72B30107800420E93 /* GithubApi.swift in Sources */,
 				C9865AF62AEF1902000B2714 /* DeviceListView.swift in Sources */,
 				C9FCC393293DB9A500DEDDEA /* Nightlight.swift in Sources */,
 				C99BEF552AF49513001AD80A /* DiscoveryService.swift in Sources */,
 				C9FCC397293DBD1800DEDDEA /* DeviceStateInfo.swift in Sources */,
+				E1F7FC8E2D8B3686006BBD26 /* DeviceList.swift in Sources */,
 				C96440E82AF095B500C51204 /* DeviceListItemView.swift in Sources */,
 				C97CD4A32B269F9400420E93 /* Release.swift in Sources */,
 				C946FB942B6C93F000D5B00D /* WLEDRequestHandler.swift in Sources */,
 				C9FCC3A5293DBD2200DEDDEA /* Segment.swift in Sources */,
 				C9767DDE2AF9F435002F3EA9 /* DeviceAddView.swift in Sources */,
 				C9A9E5C12918D1C3005B5C22 /* WLEDNativeApp.swift in Sources */,
-				C946FBA02B6E103600D5B00D /* DeviceStateFactory.swift in Sources */,
 				C946FB8E2B6C8E8800D5B00D /* WLEDRequest.swift in Sources */,
-				C946FB9E2B6E0FE000D5B00D /* DeviceState.swift in Sources */,
 				C97CD49A2B2519BC00420E93 /* Branch.swift in Sources */,
 				C99BEF592AF8BA79001AD80A /* WebView.swift in Sources */,
+				E1CB00542D8CA31600464260 /* ActiveToogle.swift in Sources */,
 				C946FBA22B702F8B00D5B00D /* WLEDSoftwareUpdateRequest.swift in Sources */,
 				C97CD4AB2B30175400420E93 /* ReleaseService.swift in Sources */,
 				C9FCC3A3293DBD2200DEDDEA /* Info.swift in Sources */,
 				C99BEF572AF8B926001AD80A /* DeviceView.swift in Sources */,
 				C9B9FB3E2B3FB7280003E6F9 /* DeviceUpdateService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E15C19CA2CA1CABD00431441 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E15C19EA2CA1CB8600431441 /* WLEDWebsocketHandler.swift in Sources */,
+				E15C19EB2CA1CB8600431441 /* ReleaseService.swift in Sources */,
+				E15C19EC2CA1CB8600431441 /* DeviceUpdateService.swift in Sources */,
+				E1CB00572D8CA51900464260 /* BrightnessSlider.swift in Sources */,
+				E15C19ED2CA1CB8600431441 /* WLEDRequestHandler.swift in Sources */,
+				E149382F2CB3C930000F0224 /* WLEDRequestManagerProvider.swift in Sources */,
+				E15C19EE2CA1CB8600431441 /* DeviceExtensions.swift in Sources */,
+				E15C19EF2CA1CB8600431441 /* DiscoveryService.swift in Sources */,
+				E15C1A0A2CA1CBC900431441 /* WLEDNativeApp.swift in Sources */,
+				E15C19F12CA1CB8600431441 /* WLEDRequestManager.swift in Sources */,
+				E15C19F22CA1CB8600431441 /* GithubApi.swift in Sources */,
+				E15C19F32CA1CB8600431441 /* WLEDRepoApi.swift in Sources */,
+				E15C19F42CA1CB8600431441 /* WLEDJsonApiHandler.swift in Sources */,
+				E15C19DE2CA1CB7F00431441 /* DeviceView.swift in Sources */,
+				E15C19DF2CA1CB7F00431441 /* FetchedObjects.swift in Sources */,
+				E1F7FC912D8C30BB006BBD26 /* MenuBar.swift in Sources */,
+				E15C19E02CA1CB7F00431441 /* DeviceListItemView.swift in Sources */,
+				E15C19FB2CA1CB9300431441 /* WLEDRequest.swift in Sources */,
+				E1CB00552D8CA31600464260 /* ActiveToogle.swift in Sources */,
+				E15C19FC2CA1CB9300431441 /* WLEDRequestState.swift in Sources */,
+				E15C19FD2CA1CB9300431441 /* WLEDRefreshRequest.swift in Sources */,
+				E15C19FE2CA1CB9300431441 /* WLEDChangeStateRequest.swift in Sources */,
+				E15C19FF2CA1CB9300431441 /* WLEDSoftwareUpdateRequest.swift in Sources */,
+				E15C19E12CA1CB7F00431441 /* DeviceEditView.swift in Sources */,
+				E15C19E22CA1CB7F00431441 /* DeviceUpdateDetails.swift in Sources */,
+				E15C19E32CA1CB7F00431441 /* DeviceUpdateInstalling.swift in Sources */,
+				E15C19E42CA1CB7F00431441 /* WebView.swift in Sources */,
+				E15C19E52CA1CB7F00431441 /* DeviceAddView.swift in Sources */,
+				E15C19E62CA1CB7F00431441 /* BackgroundBlurView.swift in Sources */,
+				E1CB00502D8CA14400464260 /* Toolbar.swift in Sources */,
+				E15C19E72CA1CB7F00431441 /* ToolbarBadge.swift in Sources */,
+				E15C19E82CA1CB7F00431441 /* (null) in Sources */,
+				E15C19F62CA1CB8C00431441 /* Reactions.swift in Sources */,
+				E15C19F72CA1CB8C00431441 /* Author.swift in Sources */,
+				E15C19F82CA1CB8C00431441 /* Release.swift in Sources */,
+				E15C19F92CA1CB8C00431441 /* Uploader.swift in Sources */,
+				E15C1A002CA1CB9D00431441 /* Persistence.swift in Sources */,
+				E15C1A012CA1CB9D00431441 /* DeviceStateInfo.swift in Sources */,
+				E15C1A022CA1CB9D00431441 /* Wifi.swift in Sources */,
+				E15C1A032CA1CB9D00431441 /* Branch.swift in Sources */,
+				E15C1A042CA1CB9D00431441 /* Nightlight.swift in Sources */,
+				E15C1A052CA1CB9D00431441 /* FileSystem.swift in Sources */,
+				E1F7FC952D8C43A3006BBD26 /* Device.swift in Sources */,
+				E15C1A2F2CA1CDC100431441 /* wled_native_data.xcdatamodeld in Sources */,
+				E1F7FC8D2D8B3686006BBD26 /* DeviceList.swift in Sources */,
+				E15C1A062CA1CB9D00431441 /* WledState.swift in Sources */,
+				E15C1A072CA1CB9D00431441 /* Leds.swift in Sources */,
+				E15C1A082CA1CB9D00431441 /* Segment.swift in Sources */,
+				E1F7FC892D8AD5B4006BBD26 /* DeviceListView.swift in Sources */,
+				E15C1A092CA1CB9D00431441 /* Info.swift in Sources */,
+				E1F7FC982D8C54B2006BBD26 /* IconImages.swift in Sources */,
+				E15C19FA2CA1CB8C00431441 /* GithubAsset.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -516,6 +760,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -571,6 +816,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -582,9 +828,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = RWLNCUSDCJ;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "wled-native/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = WLED;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WLED uses the local network to connect to WLED devices around you.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -600,8 +847,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "ca.cgagnier.wled-native";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -613,9 +863,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = RWLNCUSDCJ;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "wled-native/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = WLED;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WLED uses the local network to connect to WLED devices around you.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -631,9 +882,85 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "ca.cgagnier.wled-native";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E15C19DB2CA1CABE00431441 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=macosx*]" = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "wled-native/wled_native_osx.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"wled-native/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = WLED;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 6.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "ca.cgagnier.wled-native";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E15C19DC2CA1CABE00431441 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=macosx*]" = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "wled-native/wled_native_osx.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"wled-native/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = WLED;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 6.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "ca.cgagnier.wled-native";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
@@ -654,6 +981,15 @@
 			buildConfigurations = (
 				C9A9E5D22918D1C4005B5C22 /* Debug */,
 				C9A9E5D32918D1C4005B5C22 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E15C19DA2CA1CABE00431441 /* Build configuration list for PBXNativeTarget "wled-native-osx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E15C19DB2CA1CABE00431441 /* Debug */,
+				E15C19DC2CA1CABE00431441 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -695,7 +1031,27 @@
 			package = C946FB842B68C53600D5B00D /* XCRemoteSwiftPackageReference "swift-collections" */;
 			productName = OrderedCollections;
 		};
-		C948F4972B3D2B330092C4B1 /* MarkdownUI */ = {
+		E15C1A262CA1CD3800431441 /* Collections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C946FB842B68C53600D5B00D /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = Collections;
+		};
+		E15C1A282CA1CD3C00431441 /* DequeModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C946FB842B68C53600D5B00D /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = DequeModule;
+		};
+		E15C1A2C2CA1CD4400431441 /* OrderedCollections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C946FB842B68C53600D5B00D /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = OrderedCollections;
+		};
+		E15C1A392CA1D4FD00431441 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C948F4962B3D2B320092C4B1 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
+		};
+		E15C1A3B2CA1D50500431441 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C948F4962B3D2B320092C4B1 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;

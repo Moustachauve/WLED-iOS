@@ -59,12 +59,16 @@ struct DeviceUpdateDetails: View {
             .background(.bar)
         }
         .navigationTitle("Version \(version?.tagName ?? "")")
+        #if os(iOS)
         .fullScreenCover(isPresented: $showInstallingDialog) {
             if let version = version {
                 DeviceUpdateInstalling(version: version)
                     .background(BackgroundBlurView())
             }
         }
+        #else
+        //TODO: Missing feature MAC os
+        #endif
         .onReceive(NotificationCenter.default.publisher(for: .didCompleteUpdateInstall)) {_ in
             dismiss()
         }

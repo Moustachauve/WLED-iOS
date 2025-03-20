@@ -2,6 +2,7 @@
 import SwiftUI
 import WebKit
 
+#if os(iOS)
 struct WebView: UIViewRepresentable {
     
     var webView: WKWebView = WKWebView()
@@ -44,6 +45,7 @@ struct WebView: UIViewRepresentable {
     }
     
     class Coordinator: NSObject, WKUIDelegate, WKNavigationDelegate, WKDownloadDelegate {
+        
         var parent: WebView
         private var filePathDestination: URL?
         
@@ -82,17 +84,21 @@ struct WebView: UIViewRepresentable {
             }
         }
         
-        func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
-            filePathDestination = getDownloadPath(suggestedFilename as NSString)
-            completionHandler(filePathDestination)
-        }
-        
         func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
             download.delegate = self
         }
         
         func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
             download.delegate = self
+        }
+        
+        func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String) async -> URL? {
+            getDownloadPath(suggestedFilename as NSString)
+        }
+        
+        func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+            filePathDestination = getDownloadPath(suggestedFilename as NSString)
+            completionHandler(filePathDestination)
         }
         
         func download(didFailWithError: Error, resumeData: Data?) {
@@ -244,3 +250,4 @@ struct WebView: UIViewRepresentable {
         Coordinator(self)
     }
 }
+#endif

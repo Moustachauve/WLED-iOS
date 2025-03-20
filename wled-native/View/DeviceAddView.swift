@@ -22,8 +22,10 @@ struct DeviceAddView: View {
                     Text("IP Address or URL")
                     TextField("IP Address or URL", text: $address)
                         .focused($focusedField, equals: .address)
+                    #if os(iOS)
                         .keyboardType(.URL)
                         .submitLabel(.next)
+                    #endif
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(address.isEmpty || isAddressValid() ? Color.clear : Color.red))
                         .onChange(of: address) { _ in
@@ -55,6 +57,7 @@ struct DeviceAddView: View {
             }
             .padding()
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .topBarLeading) {
                     Button(role: .cancel) {
                         dismiss()
@@ -62,6 +65,16 @@ struct DeviceAddView: View {
                         Text("Cancel")
                     }
                 }
+                #elseif os(macOS)
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(role: .cancel) {
+                        dismiss()
+                    } label: {
+                        Text("Cancel")
+                    }
+                }
+                #endif
+                    
                 ToolbarItem {
                     Button(action: addItem) {
                         Text("Save")
@@ -70,7 +83,9 @@ struct DeviceAddView: View {
                 }
             }
             .navigationTitle("New Device")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
         }
     }
     
@@ -86,6 +101,7 @@ struct DeviceAddView: View {
             return false
         }
         
+        #if os(iOS)
         if let url = NSURL(string: address) {
             if (UIApplication.shared.canOpenURL(url as URL)) {
                 return true
@@ -94,6 +110,16 @@ struct DeviceAddView: View {
         if let url = NSURL(string: "http://\(address)") {
             return UIApplication.shared.canOpenURL(url as URL)
         }
+        #elseif os(macOS)
+        if let url = NSURL(string: address) {
+            if NSWorkspace.shared.urlForApplication(toOpen: url as URL) != nil {
+                return true
+            }
+        }
+        if let url = NSURL(string: "http://\(address)") {
+            return NSWorkspace.shared.urlForApplication(toOpen: url as URL) != nil
+        }
+        #endif
         return false
     }
     

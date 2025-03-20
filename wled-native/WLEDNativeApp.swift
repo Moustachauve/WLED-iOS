@@ -1,20 +1,68 @@
 
 import SwiftUI
 
+enum WindowIds: String {
+    case main = "WLEDNativeApp-main"
+}
+
+enum WLED:String {
+    case showHiddenDevices = "WLED.showHiddenDevices"
+    case showOfflineDevices = "WLED.showOfflineDevices"
+}
+
 @main
 struct WLEDNativeApp: App {
+    
+    
+    @State private var showMenuBarExtra:Bool = true
+    @State private var addDeviceButtonActive: Bool = false
+    
+    
     static let dateLastUpdateKey = "lastUpdateReleasesDate"
     
     let persistenceController = PersistenceController.shared
     
     var body: some Scene {
-        WindowGroup {
-            DeviceListViewFabric.make()
+        #if os(macOS)
+        //  The Menu Bar for macOS
+        MenuBarExtra(
+            "WLED",
+            systemImage: "lamp.table.fill",
+            isInserted: $showMenuBarExtra
+        ) {
+            MenuBar()
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .frame(height: 300)
+        }
+            .menuBarExtraStyle(.window)
+        
+        Window("WLED", id: WindowIds.main.rawValue) {
+            DeviceListViewFabric.makeWindow()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .onAppear() {
                     refreshVersionsSync()
                 }
+                .sheet(isPresented: $addDeviceButtonActive, content: DeviceAddView.init)
+                .toolbar{ Toolbar(
+                    showMenuBarExtra: $showMenuBarExtra,
+                    addDeviceButtonActive: $addDeviceButtonActive
+                ) }
         }
+        WindowGroup {}
+        #elseif os(iOS)
+        WindowGroup {
+            DeviceListViewFabric.makeWindow()
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .onAppear() {
+                    refreshVersionsSync()
+                }
+                .sheet(isPresented: $addDeviceButtonActive, content: DeviceAddView.init)
+                .toolbar{ Toolbar(
+                    showMenuBarExtra: $showMenuBarExtra,
+                    addDeviceButtonActive: $addDeviceButtonActive
+                ) }
+        }
+        #endif
     }
     
     

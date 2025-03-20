@@ -1,26 +1,21 @@
 import Foundation
+import Combine
 import CoreData
 
-class WLEDJsonApiHandler : WLEDRequestHandler {
+final class WLEDJsonApiHandler: WLEDRequestHandler {
+    
     let device: Device
-    var urlSession: URLSession?
-    
-    init(device: Device) {
-        self.device = device
-    }
-    
-    func getUrlSession() -> URLSession {
-        if (urlSession != nil) {
-            return urlSession!
-        }
-        
+    let urlSession: URLSession = {
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = 8
         sessionConfig.timeoutIntervalForResource = 18
         sessionConfig.waitsForConnectivity = true
         sessionConfig.httpMaximumConnectionsPerHost = 1
-        urlSession = URLSession(configuration: sessionConfig)
-        return urlSession!
+        return URLSession(configuration: sessionConfig)
+    }()
+    
+    init(device: Device) {
+        self.device = device
     }
     
     func processRequest(_ request: WLEDRequest) async {
@@ -45,23 +40,23 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
         print("Reading api at: \(url)")
         
         do {
-            let (data, response) = try await getUrlSession().data(from: url)
+            let (data, response) = try await urlSession.data(from: url)
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 print("Invalid httpResponse in update")
-                self.updateDeviceOnError(context: request.context)
+                self.updateDeviceOnError()
                 return
             }
             guard (200...299).contains(httpResponse.statusCode) else {
                 print("Error with the response in update, unexpected status code: \(httpResponse)")
-                self.updateDeviceOnError(context: request.context)
+                self.updateDeviceOnError()
                 return
             }
             
-            self.onResultFetchDataSuccess(context: request.context, data: data)
+            await self.onResultFetchDataSuccess(data: data)
         } catch {
             print("Error with fetching device: \(error)")
-            self.updateDeviceOnError(context: request.context)
+            self.updateDeviceOnError()
             return
         }
     }
@@ -70,7 +65,7 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
         let url = getJsonApiUrl(path: "json/state")
         guard let url else {
             print("Can't post to device, url nil")
-            self.updateDeviceOnError(context: request.context)
+            self.updateDeviceOnError()
             return
         }
         print("Posting api at: \(url)")
@@ -83,28 +78,28 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
             urlRequest.httpBody = jsonData
             
             do {
-                let (data, response) = try await getUrlSession().data(for: urlRequest)
+                let (data, response) = try await urlSession.data(for: urlRequest)
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
                     print("Invalid httpResponse in post")
-                    self.updateDeviceOnError(context: request.context)
+                    self.updateDeviceOnError()
                     return
                 }
                 guard (200...299).contains(httpResponse.statusCode) else {
                     print("Error with the response in post, unexpected status code: \(httpResponse)")
-                    self.updateDeviceOnError(context: request.context)
+                    self.updateDeviceOnError()
                     return
                 }
                 
-                self.onSuccessPostJson(context: request.context, data: data)
+                self.onSuccessPostJson(data: data)
             } catch {
                 print("Error with fetching device after post: \(error)")
-                self.updateDeviceOnError(context: request.context)
+                self.updateDeviceOnError()
                 return
             }
         } catch {
             print(error)
-            self.updateDeviceOnError(context: request.context)
+            self.updateDeviceOnError()
         }
     }
     
@@ -130,7 +125,7 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
             try body.append(Data(contentsOf: request.binaryFile))
         } catch {
             print("Error with reading binary file: \(error)")
-            self.updateDeviceOnError(context: request.context)
+            self.updateDeviceOnError()
             return
         }
         body.append("\r\n".data(using: .utf8)!)
@@ -145,26 +140,30 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 print("Invalid httpResponse in post for update install")
-                request.onFailure()
+                await request.onFailure()
                 return
             }
             guard (200...299).contains(httpResponse.statusCode) else {
                 print("Error with the response in update install, unexpected status code: \(httpResponse)")
-                request.onFailure()
+                await request.onFailure()
                 return
             }
             
-            request.onCompletion()
+            await request.onCompletion()
         } catch {
             print("Error with installing device update: \(error)")
-            request.onFailure()
+            await request.onFailure()
             return
         }
     }
 
     
-    private func updateDeviceOnError(context: NSManagedObjectContext) {
+    private func updateDeviceOnError() {
+        
         print("Device \(device.address ?? "unknown") could not be updated. Marking as offline.")
+        guard let context = device.managedObjectContext else {
+            return
+        }
         
         context.performAndWait {
             device.isOnline = false
@@ -190,8 +189,15 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
         return URL(string: urlString)
     }
     
-    private func onResultFetchDataSuccess(context: NSManagedObjectContext, data: Data?) {
-        guard let data else { return }
+    @MainActor
+    private func onResultFetchDataSuccess(data: Data?) {
+        guard let context = device.managedObjectContext else {
+            return
+        }
+        guard let data else {
+            return
+        }
+        
         context.performAndWait {
             do {
                 let deviceStateInfo = try JSONDecoder().decode(DeviceStateInfo.self, from: data)
@@ -232,12 +238,16 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
                 }
             } catch {
                 print(error)
-                updateDeviceOnError(context: context)
+                updateDeviceOnError()
             }
         }
     }
     
-    private func onSuccessPostJson(context: NSManagedObjectContext, data: Data?) {
+    private func onSuccessPostJson(data: Data?) {
+        guard let context = device.managedObjectContext else {
+            return
+        }
+        
         guard let data else { return }
         context.performAndWait {
             do {
@@ -256,7 +266,7 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
                 }
             } catch {
                 print(error)
-                updateDeviceOnError(context: context)
+                updateDeviceOnError()
             }
         }
     }
