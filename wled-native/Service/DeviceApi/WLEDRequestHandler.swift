@@ -1,7 +1,6 @@
 
 import Foundation
 
-protocol WLEDRequestHandler {
-    var device: Device { get }
+protocol WLEDRequestHandler: Sendable {
     func processRequest(_ request: WLEDRequest) async
 }

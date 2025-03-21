@@ -2,9 +2,9 @@ import Foundation
 import CoreData
 
 class GithubApi {
-    static var urlSession: URLSession?
+    @MainActor static var urlSession: URLSession?
     
-    static func getUrlSession() -> URLSession {
+    @MainActor static func getUrlSession() -> URLSession {
         if (urlSession != nil) {
             return urlSession!
         }

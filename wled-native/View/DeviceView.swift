@@ -12,6 +12,7 @@ struct DeviceView: View {
     
     var body: some View {
         ZStack {
+            #if os(iOS)
             WebView(url: getDeviceAddress(), reload: $shouldWebViewRefresh) { filePathDestination in
                 withAnimation {
                     showDownloadFinished = true
@@ -21,6 +22,10 @@ struct DeviceView: View {
                     }
                 }
             }
+            #else
+            //Add Web View for xos
+            Text("Not Supported")
+            #endif
             if (showDownloadFinished) {
                 VStack {
                     Spacer()
@@ -34,7 +39,9 @@ struct DeviceView: View {
             }
         }
         .navigationTitle(getDeviceName())
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .toolbar { toolbar }
     }
     
@@ -50,13 +57,6 @@ struct DeviceView: View {
             }
             .overlay(alignment: .bottomTrailing) {
                 ToolbarBadge(value: .constant(getToolbarBadgeCount()))
-            }
-        }
-        ToolbarItem(placement: .automatic) {
-            Button {
-                shouldWebViewRefresh = true
-            } label: {
-                Image(systemName: "arrow.clockwise")
             }
         }
     }

@@ -2,14 +2,17 @@
 import Foundation
 import Collections
 
+//  A request manager manages serial access to a device to perform all updates sequentially
 actor WLEDRequestManager {
-    let device: Device
+    
+    var device: Device
+    
     let requestHandler: WLEDRequestHandler
     var requestQueue: Deque<WLEDRequest> = []
-    private var locked = false
     
     init(device: Device) {
         self.device = device
+        
         // TODO: Add websocket support
         requestHandler = WLEDJsonApiHandler(device: device)
     }
@@ -23,7 +26,7 @@ actor WLEDRequestManager {
     func processAllRequests() {
         Task {
             var canProcessMore = true
-            while (!requestQueue.isEmpty && canProcessMore) {
+            while (!self.requestQueue.isEmpty && canProcessMore) {
                 print("Processing request")
                 canProcessMore = await processRequests()
                 print("Request done, processing next? \(canProcessMore)")
@@ -32,17 +35,10 @@ actor WLEDRequestManager {
     }
     
     private func processRequests() async -> Bool {
-        guard locked == false else {
-            return false
-        }
-        locked = true
-        defer {
-            locked = false
-        }
         guard let request = requestQueue.popFirst() else {
             return false
         }
-        await requestHandler.processRequest(request)
+        await self.requestHandler.processRequest(request)
         return true
     }
 }

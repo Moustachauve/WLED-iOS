@@ -1,7 +1,7 @@
 import Foundation
 import CoreData
 
-class DeviceUpdateService {
+class DeviceUpdateService: @unchecked Sendable {
     
     let supportedPlatforms = [
         "esp01",
@@ -62,7 +62,8 @@ class DeviceUpdateService {
         return FileManager.default.fileExists(atPath: binaryPath.path)
     }
     
-    func downloadBinary(onCompletion: @escaping (DeviceUpdateService) -> ()) {
+    
+    func downloadBinary(onCompletion: @MainActor @escaping (DeviceUpdateService) -> ()) {
         guard let assetUrl = URL(string: asset?.downloadUrl ?? "") else {
             // TODO: Handle errors
             return
@@ -84,7 +85,9 @@ class DeviceUpdateService {
                 
                 do {
                     try FileManager.default.copyItem(at: tempLocalUrl, to: localUrl)
-                    onCompletion(self)
+                    Task {
+                        await onCompletion(self)
+                    }
                 } catch (let writeError) {
                     print("error writing file \(localUrl) : \(writeError)")
                 }
@@ -97,19 +100,20 @@ class DeviceUpdateService {
         task.resume()
     }
     
-    func installUpdate(onCompletion: @escaping () -> (), onFailure: @escaping () -> ()) {
+    func installUpdate(onCompletion: @MainActor @escaping () -> (), onFailure: @MainActor @escaping () -> ()) async {
         guard let binaryPath = getPathForAsset() else {
             // TODO: Handle errors
             return
         }
-        Task {
-            await device.requestManager.addRequest(WLEDSoftwareUpdateRequest(
-                context: context,
-                binaryFile: binaryPath,
-                onCompletion: onCompletion,
-                onFailure: onFailure
-            ))
-        }
+        await device
+            .getRequestManager()
+            .addRequest(
+                WLEDSoftwareUpdateRequest(
+                    binaryFile: binaryPath,
+                    onCompletion: onCompletion,
+                    onFailure: onFailure
+                )
+            )
     }
     
     func getPathForAsset() -> URL? {

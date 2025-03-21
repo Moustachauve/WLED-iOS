@@ -1,11 +1,14 @@
 
 import Foundation
 
-extension Device {
-    var requestManager: WLEDRequestManager {
-        get {
-            return DeviceStateFactory.shared.getStateForDevice(self).getRequestManager(device: self)
-        }
+extension Device: @unchecked Sendable {
+    
+    func refresh() async {
+        await self.getRequestManager().addRequest(WLEDRefreshRequest())
+    }
+    
+    func getRequestManager() async -> WLEDRequestManager {
+        await WLEDRequestManagerProvider.shared.getRequestManager(device: self)
     }
     
     func getColor(state: WledState) -> Int64 {
