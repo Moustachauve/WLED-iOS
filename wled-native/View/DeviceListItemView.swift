@@ -1,6 +1,28 @@
 
 import SwiftUI
 
+struct DeviceGroupBoxStyle: GroupBoxStyle {
+    var deviceColor: Color
+    
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            configuration.label
+            configuration.content
+        }
+        .padding()
+        .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(deviceColor.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+        .padding(.vertical, 4)
+        .padding(.horizontal, 8)
+    }
+}
+
+extension GroupBoxStyle where Self == DeviceGroupBoxStyle {
+    static func device(color: Color) -> DeviceGroupBoxStyle {
+        .init(deviceColor: color)
+    }
+}
+
 struct DeviceListItemView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) var colorScheme
@@ -10,90 +32,91 @@ struct DeviceListItemView: View {
     @State private var brightness: Double = 0.0
     
     var body: some View {
-        HStack {
-            VStack {
-                HStack {
-                    VStack(alignment: .leading, spacing: 0) {
-                        HStack {
-                            Text(getDeviceDisplayName())
-                                .font(.headline.leading(.tight))
-                            if (hasUpdateAvailable()) {
-                                Image(systemName: getUpdateIconName())
-                            }
+        GroupBox {
+            HStack {
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack {
+                        Text(getDeviceDisplayName())
+                            .font(.headline.leading(.tight))
+                            .lineLimit(2)
+                        if (hasUpdateAvailable()) {
+                            Image(systemName: getUpdateIconName())
                         }
-                        HStack {
-                            Text(device.address ?? "")
+                    }
+                    HStack {
+                        Text(device.address ?? "")
+                            .lineLimit(1)
+                            .fixedSize()
+                            .font(.subheadline.leading(.tight))
+                            .lineSpacing(0)
+                        Image(uiImage: getSignalImage(isOnline: device.isOnline, signalStrength: Int(device.networkRssi)))
+                            .resizable()
+                            .renderingMode(.template)
+                            .foregroundColor(.primary)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxHeight: 12)
+                        if (!device.isOnline) {
+                            Text("(Offline)")
                                 .lineLimit(1)
-                                .fixedSize()
                                 .font(.subheadline.leading(.tight))
+                                .foregroundStyle(.secondary)
                                 .lineSpacing(0)
-                            Image(uiImage: getSignalImage(isOnline: device.isOnline, signalStrength: Int(device.networkRssi)))
+                        }
+                        if (device.isHidden) {
+                            Image(systemName: "eye.slash")
                                 .resizable()
                                 .renderingMode(.template)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.secondary)
                                 .aspectRatio(contentMode: .fit)
                                 .frame(maxHeight: 12)
-                            if (!device.isOnline) {
-                                Text("(Offline)")
-                                    .lineLimit(1)
-                                    .font(.subheadline.leading(.tight))
-                                    .foregroundStyle(.secondary)
-                                    .lineSpacing(0)
-                            }
-                            if (device.isHidden) {
-                                Image(systemName: "eye.slash")
-                                    .resizable()
-                                    .renderingMode(.template)
-                                    .foregroundColor(.secondary)
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(maxHeight: 12)
-                                Text("(Hidden)")
-                                    .lineLimit(1)
-                                    .font(.subheadline.leading(.tight))
-                                    .foregroundStyle(.secondary)
-                                    .lineSpacing(0)
-                                    .truncationMode(.tail)
-                            }
-                            if (device.isRefreshing) {
-                                ProgressView()
-                                    .controlSize(.mini)
-                                    .frame(maxHeight: 12, alignment: .trailing)
-                                    .padding(.leading, 1)
-                                    .padding(.trailing, 1)
-                            }
+                            Text("(Hidden)")
+                                .lineLimit(1)
+                                .font(.subheadline.leading(.tight))
+                                .foregroundStyle(.secondary)
+                                .lineSpacing(0)
+                                .truncationMode(.tail)
                         }
-                        
+                        if (device.isRefreshing) {
+                            ProgressView()
+                                .controlSize(.mini)
+                                .frame(maxHeight: 12, alignment: .trailing)
+                                .padding(.leading, 1)
+                                .padding(.trailing, 1)
+                        }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
                 }
-                Slider(
-                    value: $brightness,
-                    in: 0...255,
-                    onEditingChanged: { editing in
-                        print("device \(device.address ?? "?") brightness is changing: \(editing) - \(brightness)")
-                        if (!editing) {
-                            let postParam = WLEDStateChange(brightness: Int64(brightness))
-                            Task {
-                                await device.requestManager.addRequest(WLEDChangeStateRequest(state: postParam, context: viewContext))
-                            }
-                        }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Toggle("Turn On/Off", isOn: Binding(get: {device.isPoweredOn}, set: {
+                    device.isPoweredOn = $0
+                    let postParam = WLEDStateChange(isOn: $0)
+                    print("device \(device.address ?? "?") toggled \(postParam)")
+                    Task {
+                        await device.requestManager.addRequest(WLEDChangeStateRequest(state: postParam, context: viewContext))
                     }
-                )
+                }))
+                .labelsHidden()
+                .frame(alignment: .trailing)
                 .tint(colorFromHex(rgbValue: Int(device.color)))
             }
             
-            Toggle("Turn On/Off", isOn: Binding(get: {device.isPoweredOn}, set: {
-                device.isPoweredOn = $0
-                let postParam = WLEDStateChange(isOn: $0)
-                print("device \(device.address ?? "?") toggled \(postParam)")
-                Task {
-                    await device.requestManager.addRequest(WLEDChangeStateRequest(state: postParam, context: viewContext))
+            Slider(
+                value: $brightness,
+                in: 0...255,
+                onEditingChanged: { editing in
+                    print("device \(device.address ?? "?") brightness is changing: \(editing) - \(brightness)")
+                    if (!editing) {
+                        let postParam = WLEDStateChange(brightness: Int64(brightness))
+                        Task {
+                            await device.requestManager.addRequest(WLEDChangeStateRequest(state: postParam, context: viewContext))
+                        }
+                    }
                 }
-            }))
-            .labelsHidden()
-            .frame(alignment: .trailing)
+            )
             .tint(colorFromHex(rgbValue: Int(device.color)))
         }
+        .groupBoxStyle(.device(color: colorFromHex(rgbValue: Int(device.color))))
         .onAppear() {
             brightness = Double(device.brightness)
         }
