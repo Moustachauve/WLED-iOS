@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1600"
+   LastUpgradeVersion = "1640"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C9A9E5BC2918D1C3005B5C22"
-               BuildableName = "wled-native.app"
-               BlueprintName = "wled-native"
+               BuildableName = "WLED.app"
+               BlueprintName = "WLED"
                ReferencedContainer = "container:wled-native.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C9A9E5BC2918D1C3005B5C22"
-            BuildableName = "wled-native.app"
-            BlueprintName = "wled-native"
+            BuildableName = "WLED.app"
+            BlueprintName = "WLED"
             ReferencedContainer = "container:wled-native.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C9A9E5BC2918D1C3005B5C22"
-            BuildableName = "wled-native.app"
-            BlueprintName = "wled-native"
+            BuildableName = "WLED.app"
+            BlueprintName = "WLED"
             ReferencedContainer = "container:wled-native.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

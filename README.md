@@ -1,7 +1,7 @@
 [View on the App Store](https://apps.apple.com/us/app/wled-native/id6446207239)
 
-# WLED-Native-iOS
-A brand new app for iPhone and iPad rewritten from scratch for discovering and controlling your WLED devices easily!
+# WLED for iOS
+An app for iPhone and iPad for discovering and controlling your WLED devices easily!  
 This aims to replace the previous WLED app [found here](https://github.com/Aircoookie/WLED-App).
 
 ### Features
