@@ -1,7 +1,7 @@
 
 import SwiftUI
 
-struct DeviceGroupBoxStyle: GroupBoxStyle {
+private struct DeviceGroupBoxStyle: GroupBoxStyle {
     var deviceColor: Color
     
     func makeBody(configuration: Configuration) -> some View {
