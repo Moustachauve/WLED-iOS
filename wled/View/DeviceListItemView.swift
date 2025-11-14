@@ -12,8 +12,6 @@ struct DeviceGroupBoxStyle: GroupBoxStyle {
         .padding()
         .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 12))
         .background(deviceColor.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
-        .padding(.vertical, 4)
-        .padding(.horizontal, 8)
     }
 }
 
@@ -117,6 +115,7 @@ struct DeviceListItemView: View {
             .tint(colorFromHex(rgbValue: Int(device.color)))
         }
         .groupBoxStyle(.device(color: colorFromHex(rgbValue: Int(device.color))))
+        .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
         .onAppear() {
             brightness = Double(device.brightness)
         }
