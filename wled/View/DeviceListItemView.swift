@@ -15,7 +15,7 @@ private struct DeviceGroupBoxStyle: GroupBoxStyle {
     }
 }
 
-extension GroupBoxStyle where Self == DeviceGroupBoxStyle {
+private extension GroupBoxStyle where Self == DeviceGroupBoxStyle {
     static func device(color: Color) -> DeviceGroupBoxStyle {
         .init(deviceColor: color)
     }
