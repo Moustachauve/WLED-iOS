@@ -89,7 +89,7 @@ struct DeviceListItemView: View {
                 Toggle("Turn On/Off", isOn: Binding(get: {device.isPoweredOn}, set: {
                     device.isPoweredOn = $0
                     let postParam = WLEDStateChange(isOn: $0)
-                    print("device \(device.address ?? "?") toggled \(postParam)")
+
                     Task {
                         await device.requestManager.addRequest(WLEDChangeStateRequest(state: postParam, context: viewContext))
                     }
