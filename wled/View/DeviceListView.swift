@@ -65,15 +65,19 @@ struct DeviceListView: View {
                 }
             }
         }
-            .listStyle(PlainListStyle())
+        .listStyle(.plain)
             .refreshable(action: refreshList)
     }
     
     private func sublist(devices: FetchedResults<Device>) -> some View {
         ForEach(devices) { device in
-            NavigationLink(value: device) {
-                DeviceListItemView()
-            }
+            DeviceListItemView()
+                .overlay(
+                    NavigationLink("", value: device).opacity(0)
+                )
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .buttonStyle(PlainButtonStyle())
                 .environmentObject(device)
                 .swipeActions(allowsFullSwipe: true) {
                     Button(role: .destructive) {
