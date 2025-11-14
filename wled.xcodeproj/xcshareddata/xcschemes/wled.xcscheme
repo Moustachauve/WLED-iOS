@@ -17,7 +17,7 @@
                BlueprintIdentifier = "C9A9E5BC2918D1C3005B5C22"
                BuildableName = "WLED.app"
                BlueprintName = "WLED"
-               ReferencedContainer = "container:wled-native.xcodeproj">
+               ReferencedContainer = "container:wled.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -47,7 +47,7 @@
             BlueprintIdentifier = "C9A9E5BC2918D1C3005B5C22"
             BuildableName = "WLED.app"
             BlueprintName = "WLED"
-            ReferencedContainer = "container:wled-native.xcodeproj">
+            ReferencedContainer = "container:wled.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -64,7 +64,7 @@
             BlueprintIdentifier = "C9A9E5BC2918D1C3005B5C22"
             BuildableName = "WLED.app"
             BlueprintName = "WLED"
-            ReferencedContainer = "container:wled-native.xcodeproj">
+            ReferencedContainer = "container:wled.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

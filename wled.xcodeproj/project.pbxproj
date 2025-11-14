@@ -119,11 +119,11 @@
 		C9D43A8029BAE3F8005A71C2 /* fr-CA */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr-CA"; path = "fr-CA.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C9F82F2329BBD0E100B8A5EE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C9F82F2529BBD0E300B8A5EE /* fr-CA */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr-CA"; path = "fr-CA.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		C9FCC384293DB69F00DEDDEA /* WledState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WledState.swift; path = "wled-native/Model/DeviceApi/Response/WledState.swift"; sourceTree = SOURCE_ROOT; };
-		C9FCC388293DB86900DEDDEA /* FileSystem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileSystem.swift; path = "wled-native/Model/DeviceApi/Response/FileSystem.swift"; sourceTree = SOURCE_ROOT; };
-		C9FCC38A293DB8A000DEDDEA /* WLEDRequestState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WLEDRequestState.swift; path = "wled-native/Model/DeviceApi/Request/WLEDRequestState.swift"; sourceTree = SOURCE_ROOT; };
-		C9FCC390293DB95500DEDDEA /* Wifi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Wifi.swift; path = "wled-native/Model/DeviceApi/Response/Wifi.swift"; sourceTree = SOURCE_ROOT; };
-		C9FCC392293DB9A500DEDDEA /* Nightlight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Nightlight.swift; path = "wled-native/Model/DeviceApi/Response/Nightlight.swift"; sourceTree = SOURCE_ROOT; };
+		C9FCC384293DB69F00DEDDEA /* WledState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WledState.swift; path = "wled/Model/DeviceApi/Response/WledState.swift"; sourceTree = SOURCE_ROOT; };
+		C9FCC388293DB86900DEDDEA /* FileSystem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileSystem.swift; path = "wled/Model/DeviceApi/Response/FileSystem.swift"; sourceTree = SOURCE_ROOT; };
+		C9FCC38A293DB8A000DEDDEA /* WLEDRequestState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WLEDRequestState.swift; path = "wled/Model/DeviceApi/Request/WLEDRequestState.swift"; sourceTree = SOURCE_ROOT; };
+		C9FCC390293DB95500DEDDEA /* Wifi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Wifi.swift; path = "wled/Model/DeviceApi/Response/Wifi.swift"; sourceTree = SOURCE_ROOT; };
+		C9FCC392293DB9A500DEDDEA /* Nightlight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Nightlight.swift; path = "wled/Model/DeviceApi/Response/Nightlight.swift"; sourceTree = SOURCE_ROOT; };
 		C9FCC396293DBD1800DEDDEA /* DeviceStateInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStateInfo.swift; sourceTree = "<group>"; };
 		C9FCC398293DBD2200DEDDEA /* Segment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Segment.swift; sourceTree = "<group>"; };
 		C9FCC39C293DBD2200DEDDEA /* Leds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Leds.swift; sourceTree = "<group>"; };
@@ -235,7 +235,7 @@
 		C9A9E5B42918D1C3005B5C22 = {
 			isa = PBXGroup;
 			children = (
-				C9A9E5BF2918D1C3005B5C22 /* wled-native */,
+				C9A9E5BF2918D1C3005B5C22 /* wled */,
 				C9A9E5BE2918D1C3005B5C22 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -248,7 +248,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C9A9E5BF2918D1C3005B5C22 /* wled-native */ = {
+		C9A9E5BF2918D1C3005B5C22 /* wled */ = {
 			isa = PBXGroup;
 			children = (
 				C9865AF42AEF18E7000B2714 /* View */,
@@ -269,7 +269,7 @@
 				C906561F2BBA5B9500D4ADAF /* PrivacyInfo.xcprivacy */,
 				C9C4B47E2AC0050500791D20 /* README.md */,
 			);
-			path = "wled-native";
+			path = "wled";
 			sourceTree = "<group>";
 		};
 		C9FCC37E293DAF8300DEDDEA /* Service */ = {
@@ -318,7 +318,7 @@
 				C946FB872B68C53600D5B00D /* DequeModule */,
 				C946FB892B68C53600D5B00D /* OrderedCollections */,
 			);
-			productName = "wled-native";
+			productName = "wled";
 			productReference = C9A9E5BD2918D1C3005B5C22 /* WLED.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -337,7 +337,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C9A9E5B82918D1C3005B5C22 /* Build configuration list for PBXProject "wled-native" */;
+			buildConfigurationList = C9A9E5B82918D1C3005B5C22 /* Build configuration list for PBXProject "wled" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -587,7 +587,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "wled-native/Info.plist";
+				INFOPLIST_FILE = "wled/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WLED uses the local network to connect to WLED devices around you.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -617,7 +617,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "wled-native/Info.plist";
+				INFOPLIST_FILE = "wled/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WLED uses the local network to connect to WLED devices around you.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -642,7 +642,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C9A9E5B82918D1C3005B5C22 /* Build configuration list for PBXProject "wled-native" */ = {
+		C9A9E5B82918D1C3005B5C22 /* Build configuration list for PBXProject "wled" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C9A9E5CF2918D1C4005B5C22 /* Debug */,
