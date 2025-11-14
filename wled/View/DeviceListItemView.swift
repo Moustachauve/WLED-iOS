@@ -103,8 +103,8 @@ struct DeviceListItemView: View {
                 value: $brightness,
                 in: 0...255,
                 onEditingChanged: { editing in
-                    print("device \(device.address ?? "?") brightness is changing: \(editing) - \(brightness)")
-                    if (!editing) {
+
+                    if !editing {
                         let postParam = WLEDStateChange(brightness: Int64(brightness))
                         Task {
                             await device.requestManager.addRequest(WLEDChangeStateRequest(state: postParam, context: viewContext))
