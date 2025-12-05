@@ -99,7 +99,7 @@ class DeviceUpdateService {
     
     func installUpdate(onCompletion: @escaping () -> (), onFailure: @escaping () -> ()) {
         guard let binaryPath = getPathForAsset() else {
-            // TODO: Handle errors
+            onFailure()
             return
         }
         Task {
