@@ -37,7 +37,7 @@ struct DeviceListItemView: View {
                         Text(getDeviceDisplayName())
                             .font(.headline.leading(.tight))
                             .lineLimit(2)
-                        if (hasUpdateAvailable()) {
+if hasUpdateAvailable() {
                             Image(systemName: getUpdateIconName())
                         }
                     }
