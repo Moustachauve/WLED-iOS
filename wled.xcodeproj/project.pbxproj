@@ -117,8 +117,10 @@
 		C9C4B47E2AC0050500791D20 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		C9D43A7C29BAE3BA005A71C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C9D43A8029BAE3F8005A71C2 /* fr-CA */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr-CA"; path = "fr-CA.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		99E2313B2EE5E2B200D14C3E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C9F82F2329BBD0E100B8A5EE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C9F82F2529BBD0E300B8A5EE /* fr-CA */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr-CA"; path = "fr-CA.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		99E2313C2EE5E2B200D14C3E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		C9FCC384293DB69F00DEDDEA /* WledState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WledState.swift; path = wled/Model/DeviceApi/Response/WledState.swift; sourceTree = SOURCE_ROOT; };
 		C9FCC388293DB86900DEDDEA /* FileSystem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileSystem.swift; path = wled/Model/DeviceApi/Response/FileSystem.swift; sourceTree = SOURCE_ROOT; };
 		C9FCC38A293DB8A000DEDDEA /* WLEDRequestState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WLEDRequestState.swift; path = wled/Model/DeviceApi/Request/WLEDRequestState.swift; sourceTree = SOURCE_ROOT; };
@@ -345,6 +347,7 @@
 				en,
 				Base,
 				"fr-CA",
+				"zh-Hans",
 			);
 			mainGroup = C9A9E5B42918D1C3005B5C22;
 			packageReferences = (
@@ -441,6 +444,7 @@
 			children = (
 				C9D43A7C29BAE3BA005A71C2 /* en */,
 				C9D43A8029BAE3F8005A71C2 /* fr-CA */,
+				99E2313B2EE5E2B200D14C3E /* zh-Hans */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -450,6 +454,7 @@
 			children = (
 				C9F82F2329BBD0E100B8A5EE /* en */,
 				C9F82F2529BBD0E300B8A5EE /* fr-CA */,
+				99E2313C2EE5E2B200D14C3E /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
