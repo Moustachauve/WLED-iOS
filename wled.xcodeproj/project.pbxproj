@@ -32,6 +32,7 @@
 		C96440E82AF095B500C51204 /* DeviceListItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96440E72AF095B500C51204 /* DeviceListItemView.swift */; };
 		C96827212B01AF5900A5DDEC /* errorPage.css in Resources */ = {isa = PBXBuildFile; fileRef = C96827202B01AF5900A5DDEC /* errorPage.css */; };
 		C96827232B01AFB900A5DDEC /* errorPage.fr.html in Resources */ = {isa = PBXBuildFile; fileRef = C96827222B01AFB900A5DDEC /* errorPage.fr.html */; };
+        99ECEB982EE66C2F00C24FD6 /* errorPage.zh.html in Resources */ = {isa = PBXBuildFile; fileRef = 99ECEB972EE66C2F00C24FD6 /* errorPage.zh.html */; };
 		C9767DDE2AF9F435002F3EA9 /* DeviceAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9767DDD2AF9F435002F3EA9 /* DeviceAddView.swift */; };
 		C9767DE02AFA04E0002F3EA9 /* DeviceEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9767DDF2AFA04E0002F3EA9 /* DeviceEditView.swift */; };
 		C9767DE32AFAE65C002F3EA9 /* FetchedObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9767DE22AFAE65C002F3EA9 /* FetchedObjects.swift */; };
@@ -90,6 +91,7 @@
 		C96440E72AF095B500C51204 /* DeviceListItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceListItemView.swift; sourceTree = "<group>"; };
 		C96827202B01AF5900A5DDEC /* errorPage.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = errorPage.css; sourceTree = "<group>"; };
 		C96827222B01AFB900A5DDEC /* errorPage.fr.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = errorPage.fr.html; sourceTree = "<group>"; };
+        99ECEB972EE66C2F00C24FD6 /* errorPage.zh.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = errorPage.zh.html; sourceTree = "<group>"; };
 		C9767DDD2AF9F435002F3EA9 /* DeviceAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAddView.swift; sourceTree = "<group>"; };
 		C9767DDF2AFA04E0002F3EA9 /* DeviceEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceEditView.swift; sourceTree = "<group>"; };
 		C9767DE22AFAE65C002F3EA9 /* FetchedObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchedObjects.swift; sourceTree = "<group>"; };
@@ -117,10 +119,10 @@
 		C9C4B47E2AC0050500791D20 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		C9D43A7C29BAE3BA005A71C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C9D43A8029BAE3F8005A71C2 /* fr-CA */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr-CA"; path = "fr-CA.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		99E2313B2EE5E2B200D14C3E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+        99E2313B2EE5E2B200D14C3E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C9F82F2329BBD0E100B8A5EE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C9F82F2529BBD0E300B8A5EE /* fr-CA */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr-CA"; path = "fr-CA.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		99E2313C2EE5E2B200D14C3E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+        99E2313C2EE5E2B200D14C3E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		C9FCC384293DB69F00DEDDEA /* WledState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WledState.swift; path = wled/Model/DeviceApi/Response/WledState.swift; sourceTree = SOURCE_ROOT; };
 		C9FCC388293DB86900DEDDEA /* FileSystem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileSystem.swift; path = wled/Model/DeviceApi/Response/FileSystem.swift; sourceTree = SOURCE_ROOT; };
 		C9FCC38A293DB8A000DEDDEA /* WLEDRequestState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WLEDRequestState.swift; path = wled/Model/DeviceApi/Request/WLEDRequestState.swift; sourceTree = SOURCE_ROOT; };
@@ -265,6 +267,7 @@
 				C93470AD29D905BD0085D9D5 /* 012_rip.png */,
 				C93470AB29D904C20085D9D5 /* errorPage.en.html */,
 				C96827222B01AFB900A5DDEC /* errorPage.fr.html */,
+				99ECEB972EE66C2F00C24FD6 /* errorPage.zh.html */,
 				C96827202B01AF5900A5DDEC /* errorPage.css */,
 				C9A9E5CE2918D1C4005B5C22 /* Info.plist */,
 				C9AF215A2AFDCF7500E03749 /* Launch Screen.storyboard */,
@@ -369,6 +372,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C96827232B01AFB900A5DDEC /* errorPage.fr.html in Resources */,
+				99ECEB982EE66C2F00C24FD6 /* errorPage.zh.html in Resources */,
 				C93470AC29D904C20085D9D5 /* errorPage.en.html in Resources */,
 				C9D43A7B29BAE3BA005A71C2 /* Localizable.strings in Resources */,
 				C93470AE29D905BD0085D9D5 /* 012_rip.png in Resources */,
