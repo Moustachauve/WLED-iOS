@@ -1,18 +1,9 @@
-@media (prefers-color-scheme: light) {
-    :root {
-        --text-color: #111;
-        --background-color: #fff;
-        --surface-color: #EEE;
-    }
+:root {
+    --text-color: #DADADA;
+    --background-color: #000;
+    --surface-color: #181818;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --text-color: #DADADA;
-        --background-color: #000;
-        --surface-color: #181818;
-    }
-}
 
 body {
     background-color: var(--background-color);

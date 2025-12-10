@@ -107,7 +107,7 @@ struct DeviceUpdateInstalling: View {
     }
     
     private func startUpdate() {
-        let updateService = DeviceUpdateService(device: device, version: version, context: viewContext)
+        let updateService = IllumidelUpdateService(device: device, version: version, context: viewContext)
         updateService.determineAsset()
         versionName = updateService.getVersionWithPlatformName()
         if (!updateService.couldDetermineAsset) {
@@ -122,13 +122,27 @@ struct DeviceUpdateInstalling: View {
             return
         }
         statusString = String(localized: "Downloading Version")
-        updateService.downloadBinary(onCompletion: onDownloadCompleted)
+        Task {
+            let downloadCompleted = await updateService.downloadBinary()
+            if (downloadCompleted) {
+                onDownloadCompleted(updateService)
+            } else {
+                onDownloadFailed()
+            }
+        }
     }
     
     private func onDownloadCompleted(_ updateService: DeviceUpdateService) {
         print("Download is done.")
         statusString = String(localized: "Installing Update")
         updateService.installUpdate(onCompletion: onInstallCompleted, onFailure: onInstallFailed)
+    }
+    
+    private func onDownloadFailed() {
+        print("Download failed.")
+        status = .failed
+        statusString = String(localized: "Update Failed")
+        statusDetailsString = String(localized: "update_download_failed_details")
     }
     
     private func onInstallCompleted() {

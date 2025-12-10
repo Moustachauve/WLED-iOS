@@ -3,6 +3,7 @@ import SwiftUI
 
 struct DeviceView: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var device: Device
     
     @State var showDownloadFinished = false
@@ -36,14 +37,30 @@ struct DeviceView: View {
         .navigationTitle(getDeviceName())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: Button {
+            dismiss()
+        } label: {
+            Image(systemName: "chevron.left")
+            Image(systemName: "house")
+        })
     }
     
     
     @ToolbarContentBuilder
     var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .navigation) {
+        ToolbarItem(placement: .principal) {
+            VStack {
+                Image(.wledLogoAkemi)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(2)
+            }
+            .frame(maxWidth: 100)
+        }
+        ToolbarItem(placement: .primaryAction) {
             NavigationLink {
-                DeviceEditView()
+                DeviceEditView(reloadParent: $shouldWebViewRefresh)
                     .environmentObject(device)
             } label: {
                 Image(systemName: "gear")

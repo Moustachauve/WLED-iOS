@@ -17,9 +17,17 @@ struct DeviceEditView: View {
     @State private var isFormValid: Bool = true
     @State private var isCheckingForUpdates: Bool = false
     @FocusState var isNameFieldFocused: Bool
+    @State var showInstallingDialog = false
+    @Binding var reloadParent: Bool
+
+    @StateObject var versionViewModel = VersionViewModel()
     
     let unknownVersion = String(localized: "unknown_version")
     var branchOptions = ["Stable", "Beta"]
+    
+    init(reloadParent: Binding<Bool>) {
+        _reloadParent = reloadParent
+    }
     
     var body: some View {
         ScrollView {
@@ -76,12 +84,11 @@ struct DeviceEditView: View {
                     if newBranch == device.branchValue {
                         return
                     }
+                    print("language changed! \(newBranch)")
                     device.branchValue = newBranch
-                    device.latestUpdateVersionTagAvailable = ""
+                    device.latestUpdateVersionTagAvailable = device.version
                     saveDevice()
-                    Task {
-                        await checkForUpdate()
-                    }
+                    installVersion()
                 }
             }
             .padding(.bottom)
@@ -141,6 +148,38 @@ struct DeviceEditView: View {
             hideDevice = device.isHidden
             branch = device.branchValue == Branch.beta ? "Beta" : "Stable"
         }
+        .fullScreenCover(isPresented: $showInstallingDialog) {
+            if let version = versionViewModel.version {
+                DeviceUpdateInstalling(version: version)
+                    .background(BackgroundBlurView())
+                    .onDisappear {
+                        reloadParent = true
+                    }
+            } else {
+                ZStack {
+                    Color(.clear)
+                    VStack {
+                        ProgressView()
+                            .frame(maxHeight: 18, alignment: .trailing)
+                        Text("Loading...")
+                            .padding(.bottom, 2)
+
+                        Button {
+                            showInstallingDialog = false
+                        } label: {
+                            Text("Cancel")
+                                .buttonStyle(.plain)
+                        }
+                    }
+                    .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+                    .padding()
+                    .background(Color(UIColor.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(radius: 20)
+                }
+                .background(BackgroundBlurView())
+            }
+        }
     }
     
     private func saveDevice() {
@@ -179,6 +218,12 @@ struct DeviceEditView: View {
             return "arrow.down.circle"
         }
     }
+    
+    func installVersion() {
+        print("Opening install dialog")
+        showInstallingDialog = true
+        versionViewModel.loadVersion(device.latestUpdateVersionTagAvailable ?? "", context: viewContext)
+    }
 }
 
 struct DeviceEditView_Previews: PreviewProvider {
@@ -194,7 +239,7 @@ struct DeviceEditView_Previews: PreviewProvider {
         device.latestUpdateVersionTagAvailable = "v1.2.4"
         
         
-        return DeviceEditView()
+        return DeviceEditView(reloadParent: .constant(false))
             .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
             .environmentObject(device)
     }

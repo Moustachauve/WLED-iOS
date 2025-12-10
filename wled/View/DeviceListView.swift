@@ -111,7 +111,7 @@ struct DeviceListView: View {
                     .scaledToFit()
                     .padding(2)
             }
-            .frame(maxWidth: 200)
+            .frame(maxWidth: 200, maxHeight: 70)
         }
         ToolbarItem {
             Menu {
@@ -123,7 +123,10 @@ struct DeviceListView: View {
                     hideOfflineButton
                 }
                 Section {
-                    Link(destination: URL(string: "https://kno.wled.ge/")!) {
+                    Link(destination: URL(string: "https://illumidel.com/")!) {
+                        Label("Illumidel", systemImage: "link")
+                    }
+                    Link(destination: URL(string: "https://illumidel.com/videos/")!) {
                         Label("WLED Documentation", systemImage: "questionmark.circle")
                     }
                 }

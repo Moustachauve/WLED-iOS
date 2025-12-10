@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8813CCB72EE7FA1700B0A987 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8813CCB62EE7FA1700B0A987 /* Secrets.xcconfig */; };
+		8813CCBE2EE7FC8100B0A987 /* illumidel_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 8813CCBD2EE7FC8100B0A987 /* illumidel_logo.png */; };
+		8813CCBF2EE7FC8100B0A987 /* illumidel_logo_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 8813CCBC2EE7FC8100B0A987 /* illumidel_logo_dark.png */; };
+		8813CCC12EE7FEFA00B0A987 /* IllumidelUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8813CCC02EE7FEF300B0A987 /* IllumidelUpdateService.swift */; };
+		8813CCC32EE7FF5400B0A987 /* IllumidelRepoApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8813CCC22EE7FF5000B0A987 /* IllumidelRepoApi.swift */; };
+		8813CCC52EE90EF100B0A987 /* VersionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8813CCC42EE90EEC00B0A987 /* VersionViewModel.swift */; };
 		C90656202BBA5B9500D4ADAF /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C906561F2BBA5B9500D4ADAF /* PrivacyInfo.xcprivacy */; };
 		C93470AC29D904C20085D9D5 /* errorPage.en.html in Resources */ = {isa = PBXBuildFile; fileRef = C93470AB29D904C20085D9D5 /* errorPage.en.html */; };
 		C93470AE29D905BD0085D9D5 /* 012_rip.png in Resources */ = {isa = PBXBuildFile; fileRef = C93470AD29D905BD0085D9D5 /* 012_rip.png */; };
@@ -69,6 +75,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8813CCB62EE7FA1700B0A987 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
+		8813CCBC2EE7FC8100B0A987 /* illumidel_logo_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = illumidel_logo_dark.png; sourceTree = "<group>"; };
+		8813CCBD2EE7FC8100B0A987 /* illumidel_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = illumidel_logo.png; sourceTree = "<group>"; };
+		8813CCC02EE7FEF300B0A987 /* IllumidelUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IllumidelUpdateService.swift; sourceTree = "<group>"; };
+		8813CCC22EE7FF5000B0A987 /* IllumidelRepoApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IllumidelRepoApi.swift; sourceTree = "<group>"; };
+		8813CCC42EE90EEC00B0A987 /* VersionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionViewModel.swift; sourceTree = "<group>"; };
 		C906561F2BBA5B9500D4ADAF /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C93470AB29D904C20085D9D5 /* errorPage.en.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = errorPage.en.html; sourceTree = "<group>"; };
 		C93470AD29D905BD0085D9D5 /* 012_rip.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 012_rip.png; sourceTree = "<group>"; };
@@ -108,7 +120,7 @@
 		C99BEF542AF49513001AD80A /* DiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryService.swift; sourceTree = "<group>"; };
 		C99BEF562AF8B926001AD80A /* DeviceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceView.swift; sourceTree = "<group>"; };
 		C99BEF582AF8BA79001AD80A /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
-		C9A9E5BD2918D1C3005B5C22 /* WLED.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WLED.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9A9E5BD2918D1C3005B5C22 /* Illumidel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Illumidel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9A9E5C02918D1C3005B5C22 /* WLEDNativeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDNativeApp.swift; sourceTree = "<group>"; };
 		C9A9E5C92918D1C4005B5C22 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C9A9E5CE2918D1C4005B5C22 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -197,6 +209,7 @@
 		C9767DE12AFAE64A002F3EA9 /* Tool */ = {
 			isa = PBXGroup;
 			children = (
+				8813CCC42EE90EEC00B0A987 /* VersionViewModel.swift */,
 				C9767DE22AFAE65C002F3EA9 /* FetchedObjects.swift */,
 				C95B4A822B3E3F540081F4C5 /* BackgroundBlurView.swift */,
 				C99BAC2D2B735875009BC476 /* ToolbarBadge.swift */,
@@ -243,7 +256,7 @@
 		C9A9E5BE2918D1C3005B5C22 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C9A9E5BD2918D1C3005B5C22 /* WLED.app */,
+				C9A9E5BD2918D1C3005B5C22 /* Illumidel.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -264,8 +277,11 @@
 				C93470AB29D904C20085D9D5 /* errorPage.en.html */,
 				C96827222B01AFB900A5DDEC /* errorPage.fr.html */,
 				C96827202B01AF5900A5DDEC /* errorPage.css */,
+				8813CCBC2EE7FC8100B0A987 /* illumidel_logo_dark.png */,
+				8813CCBD2EE7FC8100B0A987 /* illumidel_logo.png */,
 				C9A9E5CE2918D1C4005B5C22 /* Info.plist */,
 				C9AF215A2AFDCF7500E03749 /* Launch Screen.storyboard */,
+				8813CCB62EE7FA1700B0A987 /* Secrets.xcconfig */,
 				C906561F2BBA5B9500D4ADAF /* PrivacyInfo.xcprivacy */,
 				C9C4B47E2AC0050500791D20 /* README.md */,
 			);
@@ -279,8 +295,10 @@
 				C99BEF542AF49513001AD80A /* DiscoveryService.swift */,
 				C97CD4A62B30107800420E93 /* GithubApi.swift */,
 				C97CD4A82B30165900420E93 /* WLEDRepoApi.swift */,
+				8813CCC22EE7FF5000B0A987 /* IllumidelRepoApi.swift */,
 				C97CD4AA2B30175400420E93 /* ReleaseService.swift */,
 				C9B9FB3D2B3FB7280003E6F9 /* DeviceUpdateService.swift */,
+				8813CCC02EE7FEF300B0A987 /* IllumidelUpdateService.swift */,
 				C946FB9D2B6E0FE000D5B00D /* DeviceState.swift */,
 				C946FB9F2B6E103600D5B00D /* DeviceStateFactory.swift */,
 			);
@@ -319,7 +337,7 @@
 				C946FB892B68C53600D5B00D /* OrderedCollections */,
 			);
 			productName = wled;
-			productReference = C9A9E5BD2918D1C3005B5C22 /* WLED.app */;
+			productReference = C9A9E5BD2918D1C3005B5C22 /* Illumidel.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -367,9 +385,12 @@
 			files = (
 				C96827232B01AFB900A5DDEC /* errorPage.fr.html in Resources */,
 				C93470AC29D904C20085D9D5 /* errorPage.en.html in Resources */,
+				8813CCB72EE7FA1700B0A987 /* Secrets.xcconfig in Resources */,
 				C9D43A7B29BAE3BA005A71C2 /* Localizable.strings in Resources */,
 				C93470AE29D905BD0085D9D5 /* 012_rip.png in Resources */,
 				C96827212B01AF5900A5DDEC /* errorPage.css in Resources */,
+				8813CCBE2EE7FC8100B0A987 /* illumidel_logo.png in Resources */,
+				8813CCBF2EE7FC8100B0A987 /* illumidel_logo_dark.png in Resources */,
 				C9A9E5CA2918D1C4005B5C22 /* Assets.xcassets in Resources */,
 				C9C4B47F2AC0050500791D20 /* README.md in Resources */,
 				C9F82F2229BBD0E100B8A5EE /* InfoPlist.strings in Resources */,
@@ -393,6 +414,7 @@
 				C97CD4A12B269F8B00420E93 /* Reactions.swift in Sources */,
 				C9FCC391293DB95500DEDDEA /* Wifi.swift in Sources */,
 				C9FCC385293DB69F00DEDDEA /* WledState.swift in Sources */,
+				8813CCC12EE7FEFA00B0A987 /* IllumidelUpdateService.swift in Sources */,
 				C9767DE02AFA04E0002F3EA9 /* DeviceEditView.swift in Sources */,
 				C9767DE32AFAE65C002F3EA9 /* FetchedObjects.swift in Sources */,
 				C97CD4A92B30165900420E93 /* WLEDRepoApi.swift in Sources */,
@@ -403,6 +425,7 @@
 				C97CD4982B25000300420E93 /* wled_native_data.xcdatamodeld in Sources */,
 				C946FB9C2B6E032800D5B00D /* WLEDChangeStateRequest.swift in Sources */,
 				C9FCC3A4293DBD2200DEDDEA /* Leds.swift in Sources */,
+				8813CCC52EE90EF100B0A987 /* VersionViewModel.swift in Sources */,
 				C97CD49F2B269F6800420E93 /* Author.swift in Sources */,
 				C948F4952B3D1C480092C4B1 /* DeviceUpdateDetails.swift in Sources */,
 				C946FB832B68C3B700D5B00D /* WLEDRequestManager.swift in Sources */,
@@ -419,6 +442,7 @@
 				C946FB942B6C93F000D5B00D /* WLEDRequestHandler.swift in Sources */,
 				C9FCC3A5293DBD2200DEDDEA /* Segment.swift in Sources */,
 				C9767DDE2AF9F435002F3EA9 /* DeviceAddView.swift in Sources */,
+				8813CCC32EE7FF5400B0A987 /* IllumidelRepoApi.swift in Sources */,
 				C9A9E5C12918D1C3005B5C22 /* WLEDNativeApp.swift in Sources */,
 				C946FBA02B6E103600D5B00D /* DeviceStateFactory.swift in Sources */,
 				C946FB8E2B6C8E8800D5B00D /* WLEDRequest.swift in Sources */,
@@ -493,7 +517,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = RWLNCUSDCJ;
+				DEVELOPMENT_TEAM = 49VYFAQHCG;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -557,7 +581,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = RWLNCUSDCJ;
+				DEVELOPMENT_TEAM = 49VYFAQHCG;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -589,7 +613,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = wled/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WLED uses the local network to connect to WLED devices around you.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Illumidel uses the local network to connect to WLED devices around you.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -600,8 +624,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 6.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "ca.cgagnier.wled-native";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = ca.cgagnier.illumidel;
+				PRODUCT_NAME = Illumidel;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -619,7 +643,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = wled/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WLED uses the local network to connect to WLED devices around you.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Illumidel uses the local network to connect to WLED devices around you.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -630,8 +654,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 6.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "ca.cgagnier.wled-native";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = ca.cgagnier.illumidel;
+				PRODUCT_NAME = Illumidel;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

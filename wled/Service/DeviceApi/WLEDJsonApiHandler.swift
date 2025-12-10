@@ -16,8 +16,8 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
         
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = 8
-        sessionConfig.timeoutIntervalForResource = 18
-        sessionConfig.waitsForConnectivity = true
+        sessionConfig.timeoutIntervalForResource = 20
+        sessionConfig.waitsForConnectivity = false
         sessionConfig.httpMaximumConnectionsPerHost = 1
         urlSession = URLSession(configuration: sessionConfig)
         return urlSession!
@@ -124,7 +124,7 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
         var body = Data()
 
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"update\"; filename=\"wled.bin\"\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"update\"; filename=\"software.bin\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: application/octet-stream\r\n\r\n".data(using: .utf8)!)
         do {
             try body.append(Data(contentsOf: request.binaryFile))

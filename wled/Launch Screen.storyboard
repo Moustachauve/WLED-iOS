@@ -39,7 +39,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="wled_logo_akemi" width="614" height="192"/>
+        <image name="wled_logo_akemi" width="646" height="321"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

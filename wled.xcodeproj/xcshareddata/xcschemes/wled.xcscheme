@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C9A9E5BC2918D1C3005B5C22"
-               BuildableName = "WLED.app"
+               BuildableName = "Illumidel.app"
                BlueprintName = "WLED"
                ReferencedContainer = "container:wled.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C9A9E5BC2918D1C3005B5C22"
-            BuildableName = "WLED.app"
+            BuildableName = "Illumidel.app"
             BlueprintName = "WLED"
             ReferencedContainer = "container:wled.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C9A9E5BC2918D1C3005B5C22"
-            BuildableName = "WLED.app"
+            BuildableName = "Illumidel.app"
             BlueprintName = "WLED"
             ReferencedContainer = "container:wled.xcodeproj">
          </BuildableReference>

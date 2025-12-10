@@ -61,7 +61,7 @@ class ReleaseService {
 
     
     func refreshVersions() async {
-        let allReleases = await WLEDRepoApi().getAllReleases()
+        let allReleases = await IllumidelRepoApi().getAllReleases()
         
         guard !allReleases.isEmpty else {
             print("Did not find any releases")
