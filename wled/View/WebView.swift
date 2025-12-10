@@ -237,7 +237,7 @@ struct WebView: UIViewRepresentable {
             }
             return controller
         }
-
+        
     }
     
     func makeCoordinator() -> Coordinator {

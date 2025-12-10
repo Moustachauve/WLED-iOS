@@ -37,7 +37,7 @@ struct DeviceListItemView: View {
                         Text(getDeviceDisplayName())
                             .font(.headline.leading(.tight))
                             .lineLimit(2)
-if hasUpdateAvailable() {
+                        if hasUpdateAvailable() {
                             Image(systemName: getUpdateIconName())
                         }
                     }
@@ -89,7 +89,7 @@ if hasUpdateAvailable() {
                 Toggle("Turn On/Off", isOn: Binding(get: {device.isPoweredOn}, set: {
                     device.isPoweredOn = $0
                     let postParam = WLEDStateChange(isOn: $0)
-
+                    
                     Task {
                         await device.requestManager.addRequest(WLEDChangeStateRequest(state: postParam, context: viewContext))
                     }
@@ -103,7 +103,7 @@ if hasUpdateAvailable() {
                 value: $brightness,
                 in: 0...255,
                 onEditingChanged: { editing in
-
+                    
                     if !editing {
                         let postParam = WLEDStateChange(brightness: Int64(brightness))
                         Task {
