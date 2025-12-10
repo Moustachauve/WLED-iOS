@@ -64,7 +64,7 @@ struct DeviceEditView: View {
                 .onChange(of: hideDevice) { newValue in
                     device.isHidden = newValue
                     saveDevice()
-            }
+                }
                 .padding(.trailing, 2)
                 .padding(.bottom)
             
