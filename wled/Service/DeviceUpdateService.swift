@@ -16,11 +16,19 @@ class DeviceUpdateService {
     
     private(set) var couldDetermineAsset = false
     private var asset: Asset? = nil
+    var githubApi: GithubApi?
     
     init(device: Device, version: Version, context: NSManagedObjectContext) {
         self.device = device
         self.version = version
         self.context = context
+    }
+    
+    func getGithubApi() -> GithubApi {
+        if (githubApi == nil) {
+            githubApi = WLEDRepoApi()
+        }
+        return githubApi!
     }
     
     func getVersionWithPlatformName() -> String {
@@ -62,39 +70,15 @@ class DeviceUpdateService {
         return FileManager.default.fileExists(atPath: binaryPath.path)
     }
     
-    func downloadBinary(onCompletion: @escaping (DeviceUpdateService) -> ()) {
-        guard let assetUrl = URL(string: asset?.downloadUrl ?? "") else {
-            // TODO: Handle errors
-            return
+    func downloadBinary() async -> Bool {
+        guard let asset = asset else {
+            return false
         }
         guard let localUrl = getPathForAsset() else {
-            // TODO: Handle errors
-            return
+            return false
         }
 
-        let sessionConfig = URLSessionConfiguration.default
-        let session = URLSession(configuration: sessionConfig)
-        let request = URLRequest(url: assetUrl)
-        
-        let task = session.downloadTask(with: request) { (tempLocalUrl, response, error) in
-            if let tempLocalUrl = tempLocalUrl, error == nil {
-                if let statusCode = (response as? HTTPURLResponse)?.statusCode {
-                    print("Success: \(statusCode)")
-                }
-                
-                do {
-                    try FileManager.default.copyItem(at: tempLocalUrl, to: localUrl)
-                    onCompletion(self)
-                } catch (let writeError) {
-                    print("error writing file \(localUrl) : \(writeError)")
-                }
-                
-            } else {
-                print("Failure: \(error?.localizedDescription ?? "[Unknown]")");
-            }
-        }
-        
-        task.resume()
+        return await getGithubApi().downloadReleaseBinary(asset: asset, targetFile: localUrl)
     }
     
     func installUpdate(onCompletion: @escaping () -> (), onFailure: @escaping () -> ()) {
