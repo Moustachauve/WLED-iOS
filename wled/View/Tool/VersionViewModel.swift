@@ -7,7 +7,7 @@ class VersionViewModel: ObservableObject {
 
     func loadVersion(_ versionTagParam: String, context: NSManagedObjectContext) {
         var versionTag = versionTagParam
-        if (versionTag[versionTag.startIndex] != "v") {
+        if !versionTag.isEmpty && !versionTag.hasPrefix("v") {
             versionTag = "v\(versionTag)"
         }
         let fetchRequest = Version.fetchRequest()

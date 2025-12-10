@@ -28,10 +28,12 @@ class DeviceUpdateService {
     }
     
     func getGithubApi() -> GithubApi {
-        if (githubApi == nil) {
-            githubApi = WLEDRepoApi()
+        if let githubApi = self.githubApi {
+            return githubApi
         }
-        return githubApi!
+        let newApi = WLEDRepoApi()
+        self.githubApi = newApi
+        return newApi
     }
     
     func getVersionWithPlatformName() -> String {
