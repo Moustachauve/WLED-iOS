@@ -94,8 +94,8 @@ struct DeviceListView: View {
         if let device = selection {
             NavigationStack {
                 DeviceView()
+                    .environmentObject(device)
             }
-            .environmentObject(device)
         } else {
             Text("Select A Device")
                 .font(.title2)
