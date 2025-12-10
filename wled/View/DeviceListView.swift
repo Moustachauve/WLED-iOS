@@ -56,9 +56,7 @@ struct DeviceListView: View {
     
     var list: some View {
         List(selection: $selection) {
-            Section(header: Text("Online Devices")) {
-                sublist(devices: devices)
-            }
+            sublist(devices: devices)
             if !devicesOffline.isEmpty && showOfflineDevices {
                 Section(header: Text("Offline Devices")) {
                     sublist(devices: devicesOffline)
