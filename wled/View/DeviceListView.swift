@@ -65,6 +65,18 @@ struct DeviceListView: View {
         }
         .listStyle(.plain)
         .refreshable(action: refreshList)
+        .scrollContentBackground(.hidden)
+        .background(
+            LinearGradient(
+                colors: [
+                    Color(red: 11/255, green: 15/255, blue: 25/255), // Deep Blue-Grey (#0B0F19)
+                    Color(red: 0, green: 55/255, blue: 101/255), // Blue (#003765)
+                    Color(uiColor: .systemBackground)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
     
     private func sublist(devices: FetchedResults<Device>) -> some View {
@@ -84,6 +96,7 @@ struct DeviceListView: View {
                         Label("Delete", systemImage: "trash.fill")
                     }
                 }
+                .listRowBackground(Color.clear)
         }
     }
     
