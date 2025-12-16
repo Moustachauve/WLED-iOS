@@ -11,25 +11,12 @@ struct DeviceUpdateDetails: View {
     @State var showWarningDialog = false
     @State var showInstallingDialog = false
     
-    var version : Version? {
-        let fetchRequest = Version.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "tagName == %@", device.latestUpdateVersionTagAvailable ?? "")
-        
-        
-        do {
-            return try viewContext.fetch(fetchRequest).first
-        } catch {
-            print("Unexpected error when loading version: \(error)")
-            return nil
-        }
-        
-    }
-    
+    @StateObject var versionViewModel = VersionViewModel()
     
     var body: some View {
         ZStack {
             ScrollView {
-                Markdown(version?.versionDescription ?? "[Unknown Error]")
+                Markdown(versionViewModel.version?.versionDescription ?? "[Unknown Error]")
                     .padding()
             }
         }
@@ -58,15 +45,18 @@ struct DeviceUpdateDetails: View {
             .padding()
             .background(.bar)
         }
-        .navigationTitle("Version \(version?.tagName ?? "")")
+        .navigationTitle("Version \(versionViewModel.version?.tagName ?? "")")
         .fullScreenCover(isPresented: $showInstallingDialog) {
-            if let version = version {
+            if let version = versionViewModel.version {
                 DeviceUpdateInstalling(version: version)
                     .background(BackgroundBlurView())
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .didCompleteUpdateInstall)) {_ in
             dismiss()
+        }
+        .onAppear() {
+            versionViewModel.loadVersion(device.latestUpdateVersionTagAvailable ?? "", context: viewContext)
         }
     }
     

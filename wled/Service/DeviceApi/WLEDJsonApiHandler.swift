@@ -16,8 +16,8 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
         
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = 8
-        sessionConfig.timeoutIntervalForResource = 18
-        sessionConfig.waitsForConnectivity = true
+        sessionConfig.timeoutIntervalForResource = 20
+        sessionConfig.waitsForConnectivity = false
         sessionConfig.httpMaximumConnectionsPerHost = 1
         urlSession = URLSession(configuration: sessionConfig)
         return urlSession!

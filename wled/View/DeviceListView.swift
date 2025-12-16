@@ -48,17 +48,15 @@ struct DeviceListView: View {
         } detail: {
             detailView
         }
-            .onAppear(perform: appearAction)
-            .onDisappear(perform: disappearAction)
-            .onChange(of: showHiddenDevices) { _ in updateFilter() }
-            .onChange(of: showOfflineDevices) { _ in updateFilter() }
+        .onAppear(perform: appearAction)
+        .onDisappear(perform: disappearAction)
+        .onChange(of: showHiddenDevices) { _ in updateFilter() }
+        .onChange(of: showOfflineDevices) { _ in updateFilter() }
     }
     
     var list: some View {
         List(selection: $selection) {
-            Section(header: Text("Online Devices")) {
-                sublist(devices: devices)
-            }
+            sublist(devices: devices)
             if !devicesOffline.isEmpty && showOfflineDevices {
                 Section(header: Text("Offline Devices")) {
                     sublist(devices: devicesOffline)
@@ -66,7 +64,7 @@ struct DeviceListView: View {
             }
         }
         .listStyle(.plain)
-            .refreshable(action: refreshList)
+        .refreshable(action: refreshList)
     }
     
     private func sublist(devices: FetchedResults<Device>) -> some View {
@@ -94,8 +92,8 @@ struct DeviceListView: View {
         if let device = selection {
             NavigationStack {
                 DeviceView()
+                    .environmentObject(device)
             }
-                .environmentObject(device)
         } else {
             Text("Select A Device")
                 .font(.title2)
@@ -249,5 +247,5 @@ struct DeviceListView: View {
 @available(iOS 16.0, macOS 13, tvOS 16.0, watchOS 9.0, *)
 #Preview("iOS 16") {
     DeviceListView()
-            .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }

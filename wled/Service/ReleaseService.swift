@@ -2,7 +2,7 @@ import Foundation
 import CoreData
 
 class ReleaseService {
-
+    
     let context: NSManagedObjectContext
     
     init(context: NSManagedObjectContext) {
@@ -33,12 +33,12 @@ class ReleaseService {
         if (branch == .stable && versionName.contains("-b")) {
             return latestTagName
         }
-
+        
         let versionCompare = latestTagName.dropFirst().compare(versionName, options: .numeric)
         return versionCompare == .orderedDescending ? latestTagName : ""
     }
-        
-        
+    
+    
     func getLatestVersion(branch: Branch) -> Version? {
         let fetchRequest = Version.fetchRequest()
         fetchRequest.fetchLimit = 1
@@ -58,7 +58,7 @@ class ReleaseService {
             fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
         }
     }
-
+    
     
     func refreshVersions() async {
         let allReleases = await WLEDRepoApi().getAllReleases()
@@ -92,7 +92,7 @@ class ReleaseService {
         }
     }
     
-   
+    
     
     private func createVersion(release: Release) -> Version {
         let version = Version(context: context)

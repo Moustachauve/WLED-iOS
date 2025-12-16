@@ -35,7 +35,9 @@ struct WebView: UIViewRepresentable {
         webView.underPageBackgroundColor = .systemBackground
         if (reload) {
             webView.reload()
-            reload = false
+            DispatchQueue.main.async {
+                reload = false
+            }
         }
     }
     
@@ -239,7 +241,7 @@ struct WebView: UIViewRepresentable {
             }
             return controller
         }
-
+        
     }
     
     func makeCoordinator() -> Coordinator {
