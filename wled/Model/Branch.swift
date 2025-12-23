@@ -1,10 +1,20 @@
 
 import Foundation
 
-enum Branch: String {
+enum Branch: String, CaseIterable, Identifiable {
     case unknown = ""
-    case beta = "beta"
     case stable = "stable"
+    case beta = "beta"
+
+    var id: Self { self }
+
+    var nameKey: String {
+        switch self {
+        case .beta: return "Beta"
+        case .stable: return "Stable"
+        default: return "Unknown"
+        }
+    }
 }
 
 extension Device {
