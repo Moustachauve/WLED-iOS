@@ -79,7 +79,6 @@ class DeviceEditViewModel: ObservableObject {
                     self.device.device.branchValue = newBranch
                     self.device.device.skipUpdateTag = ""
                     self.saveDevice()
-                    self.device.objectWillChange.send()
                 }
             }
             .store(in: &cancellables)

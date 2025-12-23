@@ -4,18 +4,10 @@ import SwiftUI
 struct DeviceEditView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-    enum Field {
-        case name
-    }
-
     @StateObject private var viewModel: DeviceEditViewModel
     @ObservedObject private var device: DeviceWithState
 
-    @State private var isFormValid: Bool = true
-    @FocusState var isNameFieldFocused: Bool
-
     let unknownVersion = String(localized: "unknown_version")
-    var branchOptions = ["Stable", "Beta"]
 
     init(device: DeviceWithState) {
         let context = device.device.managedObjectContext ?? PersistenceController.shared.container.viewContext
@@ -38,7 +30,6 @@ struct DeviceEditView: View {
             VStack(alignment: .leading) {
                 Text("Custom Name")
                 TextField("Custom Name", text: $viewModel.customName)
-                    .focused($isNameFieldFocused)
                     .submitLabel(.done)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
             }
