@@ -23,7 +23,8 @@ enum WebsocketStatus {
 
 @MainActor
 class DeviceWithState: ObservableObject, Identifiable {
-    
+    private var cancellables = Set<AnyCancellable>()
+
     @Published var device: Device
     @Published var stateInfo: DeviceStateInfo? = nil
     @Published var websocketStatus: WebsocketStatus = .disconnected
@@ -36,6 +37,16 @@ class DeviceWithState: ObservableObject, Identifiable {
         self.id = initialDevice.macAddress ?? initialDevice.objectID.uriRepresentation().absoluteString
 
         setupUpdatePipeline()
+        setDeviceWillChange()
+    }
+
+    private func setDeviceWillChange() {
+        // Forward changes from the inner Core Data Device to this wrapper
+        device.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Calculated properties
