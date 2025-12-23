@@ -2,11 +2,11 @@ import SwiftUI
 
 struct DeviceUpdateInstalling: View {
     @Environment(\.presentationMode) var presentationMode
-    
-    @ObservedObject var viewModel = DeviceUpdateInstallingViewModel()
+
+    @StateObject var viewModel = DeviceUpdateInstallingViewModel()
     @ObservedObject var device: DeviceWithState
     @ObservedObject var version: Version
-    
+
     var body: some View {
         ZStack {
             Color(.clear)
@@ -17,7 +17,7 @@ struct DeviceUpdateInstalling: View {
                     .padding(.top)
                     .padding(.trailing)
                     .padding(.leading)
-                
+
                 switch viewModel.status {
                 case .idle:
                     IndeterminateView(statusString: String(localized: "Starting Up"))
@@ -35,9 +35,9 @@ struct DeviceUpdateInstalling: View {
                     SuccessView()
                 case .failed(let error, let versionName):
                     FailureView(errorMessage: error, versionName: versionName)
-                    
+
                 }
-                
+
                 Button {
                     NotificationCenter.default.post(
                         name: .didCompleteUpdateInstall,
@@ -62,7 +62,7 @@ struct DeviceUpdateInstalling: View {
             }
         }
     }
-    
+
     var canDismiss: Bool {
         switch (viewModel.status) {
         case .completed, .failed:
@@ -71,7 +71,7 @@ struct DeviceUpdateInstalling: View {
             return false
         }
     }
-    
+
     var dismissButtonText: LocalizedStringKey {
         switch (viewModel.status) {
         case .completed, .failed:
@@ -87,21 +87,21 @@ struct DeviceUpdateInstalling: View {
 struct IndeterminateView: View {
     let statusString: String
     var versionName: String = ""
-    
+
     var body: some View {
         ProgressView()
             .controlSize(.large)
             .padding(.bottom, 5)
-        
+
         Text(statusString)
             .font(.title3)
             .bold()
-        
+
         if !versionName.isEmpty {
             Text(versionName)
                 .font(.callout)
         }
-        
+
         Text("Please do not close the app or turn off the device.")
             .multilineTextAlignment(.center)
             .padding()
@@ -117,8 +117,8 @@ struct SuccessView: View {
             .foregroundColor(.green)
             .frame(width: 32.0, height: 32.0)
             .padding(.bottom, 5)
-        
-        
+
+
         Text("Update Completed!")
             .font(.title3)
             .bold()
@@ -130,23 +130,23 @@ struct SuccessView: View {
 struct FailureView: View {
     let errorMessage: String
     var versionName: String = ""
-    
+
     var body: some View {
         Image(systemName: "exclamationmark.octagon.fill")
             .resizable()
             .foregroundColor(.red)
             .frame(width: 32.0, height: 32.0)
             .padding(.bottom, 5)
-        
+
         Text("Update Failed")
             .font(.title3)
             .bold()
-        
+
         if !versionName.isEmpty {
             Text(versionName)
                 .font(.callout)
         }
-        
+
         Text(errorMessage)
             .multilineTextAlignment(.center)
             .padding()
@@ -166,7 +166,7 @@ struct DeviceUpdateInstalling_Previews: PreviewProvider {
             context: PersistenceController.preview.container.viewContext
         )
     )
-    
+
     static var previews: some View {
         device.device.macAddress = UUID().uuidString
         // TODO: #statelessDevice migration fix preview
@@ -174,10 +174,10 @@ struct DeviceUpdateInstalling_Previews: PreviewProvider {
         // device.latestUpdateVersionTagAvailable = "v0.14.0"
         // device.isEthernet = false
         // device.platformName = "esp32"
-        
+
         let version = Version(context: PersistenceController.preview.container.viewContext)
         version.tagName = "v0.14.0"
-        
+
         return DeviceUpdateInstalling(device: device, version: version)
             .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }

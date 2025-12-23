@@ -54,7 +54,7 @@ struct DeviceAddView: View {
 
 struct DeviceAddStep1FormView: View {
 
-    @ObservedObject var viewModel: DeviceAddViewModel
+    @StateObject var viewModel: DeviceAddViewModel
 
     let errorMessage: String
     let state = DeviceAddViewModel.Step.self
