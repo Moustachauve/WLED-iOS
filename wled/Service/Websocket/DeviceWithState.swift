@@ -127,6 +127,37 @@ class DeviceWithState: ObservableObject, Identifiable {
         return deviceWithState
     }
 
+    // MARK: Color handling
+
+    var currentColor: Color {
+        let colorInt = device.getColor(state: stateInfo?.state)
+        let activeColor = colorFromHex(rgbValue: Int(colorInt))
+
+        if isOnline {
+            return activeColor
+        }
+
+        // Convert to UIColor to easily extract HSB values
+        let uiColor = UIColor(activeColor)
+        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        uiColor.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+
+        // Return a new Color with 0 saturation (Gray), preserving brightness
+        return Color(hue: h, saturation: 0, brightness: b, opacity: Double(a))
+    }
+
+    private func colorFromHex(rgbValue: Int, alpha: Double? = 1.0) -> Color {
+        // &  binary AND operator to zero out other color values
+        // >>  bitwise right shift operator
+        // Divide by 0xFF because UIColor takes CGFloats between 0.0 and 1.0
+
+        let red =   CGFloat((rgbValue & 0xFF0000) >> 16) / 0xFF
+        let green = CGFloat((rgbValue & 0x00FF00) >> 8) / 0xFF
+        let blue =  CGFloat(rgbValue & 0x0000FF) / 0xFF
+        let alpha = CGFloat(alpha ?? 1.0)
+
+        return Color(UIColor(red: red, green: green, blue: blue, alpha: alpha))
+    }
 }
 
 // MARK: - Hashable & Equatable Conformance

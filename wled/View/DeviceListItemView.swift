@@ -1,7 +1,7 @@
 
 import SwiftUI
 
-private struct DeviceGroupBoxStyle: GroupBoxStyle {
+struct DeviceGroupBoxStyle: GroupBoxStyle {
     var deviceColor: Color
 
     func makeBody(configuration: Configuration) -> some View {
@@ -15,7 +15,7 @@ private struct DeviceGroupBoxStyle: GroupBoxStyle {
     }
 }
 
-private extension GroupBoxStyle where Self == DeviceGroupBoxStyle {
+extension GroupBoxStyle where Self == DeviceGroupBoxStyle {
     static func device(color: Color) -> DeviceGroupBoxStyle {
         .init(deviceColor: color)
     }
@@ -34,7 +34,10 @@ struct DeviceListItemView: View {
 
     @State private var brightness: Double = 0.0
 
+
     var body: some View {
+        let fixedDeviceColor = fixColor(device.currentColor)
+
         GroupBox {
             HStack {
                 DeviceInfoTwoRows(device: device)
@@ -42,7 +45,7 @@ struct DeviceListItemView: View {
                 Toggle("Turn On/Off", isOn: isOnBinding)
                     .labelsHidden()
                     .frame(alignment: .trailing)
-                    .tint(currentDeviceColor)
+                    .tint(fixedDeviceColor)
             }
 
             Slider(
@@ -55,9 +58,9 @@ struct DeviceListItemView: View {
                     }
                 }
             )
-            .tint(currentDeviceColor)
+            .tint(fixedDeviceColor)
         }
-        .groupBoxStyle(.device(color: currentDeviceColor))
+        .groupBoxStyle(.device(color: fixedDeviceColor))
         .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
         .onAppear() {
             brightness = Double(device.stateInfo?.state.brightness ?? 0)
@@ -75,41 +78,11 @@ struct DeviceListItemView: View {
         })
     }
 
-    private var currentDeviceColor: Color {
-        // Depending on your getColor signature, you might need to handle the optional state explicitly
-        let colorInt = device.device.getColor(state: device.stateInfo?.state)
-        let activeColor = colorFromHex(rgbValue: Int(colorInt))
-
-        if device.isOnline {
-            return activeColor
-        }
-
-        // Convert to UIColor to easily extract HSB values
-        let uiColor = UIColor(activeColor)
-        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        uiColor.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
-
-        // Return a new Color with 0 saturation (Gray), preserving brightness
-        return Color(hue: h, saturation: 0, brightness: b, opacity: Double(a))
-    }
-
-    func colorFromHex(rgbValue: Int, alpha: Double? = 1.0) -> Color {
-        // &  binary AND operator to zero out other color values
-        // >>  bitwise right shift operator
-        // Divide by 0xFF because UIColor takes CGFloats between 0.0 and 1.0
-
-        let red =   CGFloat((rgbValue & 0xFF0000) >> 16) / 0xFF
-        let green = CGFloat((rgbValue & 0x00FF00) >> 8) / 0xFF
-        let blue =  CGFloat(rgbValue & 0x0000FF) / 0xFF
-        let alpha = CGFloat(alpha ?? 1.0)
-
-        return fixColor(color: UIColor(red: red, green: green, blue: blue, alpha: alpha))
-    }
-
     // Fixes the color if it is too dark or too bright depending of the dark/light theme
-    func fixColor(color: UIColor) -> Color {
+    private func fixColor(_ color: Color) -> Color {
+        let uiColor = UIColor(color)
         var h = CGFloat(0), s = CGFloat(0), b = CGFloat(0), a = CGFloat(0)
-        color.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+        uiColor.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
         b = colorScheme == .dark ? fmax(b, 0.2) : fmin(b, 0.75)
         return Color(UIColor(hue: h, saturation: s, brightness: b, alpha: a))
     }
