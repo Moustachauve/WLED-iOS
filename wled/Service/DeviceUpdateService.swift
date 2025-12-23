@@ -5,6 +5,7 @@ enum UpdateError: LocalizedError {
     case assetNotDetermined
     case fileNotFound
     case invalidURL
+    case invalidResponse
     case uploadFailed(Int)
     case networkError(Error)
 
@@ -13,6 +14,7 @@ enum UpdateError: LocalizedError {
         case .assetNotDetermined: return "Could not determine the correct firmware for this device."
         case .fileNotFound: return "Firmware file not found on disk."
         case .invalidURL: return "The device URL is invalid."
+        case .invalidResponse: return "Received an invalid response from the device."
         case .uploadFailed(let code): return "Update failed with status code: \(code)"
         case .networkError(let error): return error.localizedDescription
         }
@@ -217,7 +219,7 @@ class DeviceUpdateService : ObservableObject {
         do {
             let (data, response) = try await URLSession.shared.upload(for: request, from: bodyData)
 
-            guard let httpResponse = response as? HTTPURLResponse else { throw UpdateError.networkError(NSError()) }
+            guard let httpResponse = response as? HTTPURLResponse else { throw UpdateError.invalidResponse }
             guard (200...299).contains(httpResponse.statusCode) else {
                 throw UpdateError.uploadFailed(httpResponse.statusCode)
             }
