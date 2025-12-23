@@ -235,11 +235,11 @@ class DeviceUpdateService : ObservableObject {
         let mimeType = "application/octet-stream"
 
         var data = Data()
-        data.append("--\(boundary)\r\n".data(using: .utf8)!)
-        data.append("Content-Disposition: form-data; name=\"update\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
-        data.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+        data.append(Data("--\(boundary)\r\n".utf8))
+        data.append(Data("Content-Disposition: form-data; name=\"update\"; filename=\"\(fileName)\"\r\n".utf8))
+        data.append(Data("Content-Type: \(mimeType)\r\n\r\n".utf8))
         data.append(try Data(contentsOf: fileURL)) // Still loads into RAM, see optimization note below
-        data.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        data.append(Data("\r\n--\(boundary)--\r\n".utf8))
 
         return data
     }
