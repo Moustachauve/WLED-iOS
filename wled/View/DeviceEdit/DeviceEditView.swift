@@ -18,7 +18,7 @@ struct DeviceEditView: View {
     var branchOptions = ["Stable", "Beta"]
 
     init(device: DeviceWithState) {
-        let context = PersistenceController.shared.container.viewContext
+        let context = device.device.managedObjectContext ?? PersistenceController.shared.container.viewContext
         _viewModel = StateObject(wrappedValue: DeviceEditViewModel(device: device, context: context))
 
         self.device = device
