@@ -207,6 +207,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
             print("[ListVM] No active client for \(deviceWrapper.device.macAddress ?? "nil")")
             return
         }
+        deviceWrapper.stateInfo?.state.brightness = Int64(brightness)
         wrapper.client.sendState(WledState(brightness: Int64(brightness)))
     }
     
@@ -216,6 +217,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
             print("[ListVM] No active client for \(deviceWrapper.device.macAddress ?? "nil")")
             return
         }
+        deviceWrapper.stateInfo?.state.isOn = isOn
         wrapper.client.sendState(WledState(isOn: isOn))
     }
     

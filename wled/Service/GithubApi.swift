@@ -10,9 +10,8 @@ class GithubApi {
         }
         
         let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.timeoutIntervalForRequest = 8
-        sessionConfig.timeoutIntervalForResource = 18
-        sessionConfig.waitsForConnectivity = false
+        sessionConfig.timeoutIntervalForRequest = 30
+        sessionConfig.timeoutIntervalForResource = 60
         urlSession = URLSession(configuration: sessionConfig)
         return urlSession!
     }

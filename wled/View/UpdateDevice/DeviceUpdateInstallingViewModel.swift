@@ -43,9 +43,14 @@ class DeviceUpdateInstallingViewModel: ObservableObject {
             status = .installing(versionName: updateService.getAssetName())
             try await updateService.installUpdate()
 
+            if let rawTag = version.tagName {
+                let cleanedTag = rawTag.hasPrefix("v") ? String(rawTag.dropFirst()) : rawTag
+                device.stateInfo?.info.version = cleanedTag
+            }
             status = .completed
         } catch {
             status = .failed(versionName: updateService.getAssetName(), error: error.localizedDescription)
         }
     }
 }
+

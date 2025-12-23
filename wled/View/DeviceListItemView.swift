@@ -71,7 +71,6 @@ struct DeviceListItemView: View {
         Binding(get: {
             device.stateInfo?.state.isOn ?? false
         }, set: { isOn in
-            device.stateInfo?.state.isOn = isOn
             onTogglePower(isOn)
         })
     }
