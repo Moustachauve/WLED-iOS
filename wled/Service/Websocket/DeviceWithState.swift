@@ -81,7 +81,6 @@ class DeviceWithState: ObservableObject, Identifiable {
             .receive(on: DispatchQueue.main) // Perform logic on Main Thread (safe for Core Data)
             .map { [weak self] (deviceInputs, stateInfo) -> String? in
                 guard let self = self else { return nil }
-                //return "v0.15.2"
                 let (branchRaw, skipTag, device) = deviceInputs
 
                 // Extract necessary info, fail fast if missing

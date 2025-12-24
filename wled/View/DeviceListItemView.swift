@@ -45,7 +45,6 @@ struct DeviceListItemView: View {
                 Toggle("Turn On/Off", isOn: isOnBinding)
                     .labelsHidden()
                     .frame(alignment: .trailing)
-                    .tint(fixedDeviceColor)
             }
 
             Slider(
@@ -58,9 +57,10 @@ struct DeviceListItemView: View {
                     }
                 }
             )
-            .tint(fixedDeviceColor)
         }
         .groupBoxStyle(.device(color: fixedDeviceColor))
+        .tint(fixedDeviceColor)
+        .accentColor(fixedDeviceColor)
         .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
         .onAppear() {
             brightness = Double(device.stateInfo?.state.brightness ?? 0)

@@ -18,18 +18,20 @@ struct DeviceInfoTwoRows: View {
                 Text(device.device.displayName)
                     .font(.headline.leading(.tight))
                     .lineLimit(2)
-                // TODO: #statelessDevice migration implement proper Websocket status indicator
-                Text(device.websocketStatus.toString())
                 if device.hasUpdateAvailable {
                     Image(systemName: getUpdateIconName())
                 }
             }
             HStack {
-                Text(device.device.address ?? "")
-                    .lineLimit(1)
-                    .fixedSize()
-                    .font(.subheadline.leading(.tight))
-                    .lineSpacing(0)
+                // Inner stack to keep the indicator and address tighter
+                HStack(spacing: 4) {
+                    WebsocketStatusIndicator(currentStatus: device.websocketStatus)
+                    Text(device.device.address ?? "")
+                        .lineLimit(1)
+                        .fixedSize()
+                        .font(.subheadline.leading(.tight))
+                        .lineSpacing(0)
+                }
                 Image(uiImage: getSignalImage(isOnline: device.isOnline, signalStrength: Int(device.stateInfo?.info.wifi.signal ?? 0)))
                     .resizable()
                     .renderingMode(.template)
