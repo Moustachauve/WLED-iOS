@@ -40,7 +40,7 @@ struct WebsocketStatusIndicator: View {
                     RoundedRectangle(cornerRadius: cornerRadius)
                         .rotationEffect(.degrees(45))
                 }
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
                 .rotationEffect(Angle(degrees: isRotating ? 360 : 0))
                 .scaleEffect(opticalScale)
                 .accessibilityLabel("Status: Connecting")
