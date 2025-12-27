@@ -161,25 +161,11 @@ extension Notification.Name {
 
 
 struct DeviceUpdateInstalling_Previews: PreviewProvider {
-    static let device = DeviceWithState(
-        initialDevice: Device(
-            context: PersistenceController.preview.container.viewContext
-        )
-    )
-
     static var previews: some View {
-        device.device.macAddress = UUID().uuidString
-        // TODO: #statelessDevice migration fix preview
-        // device.version = "0.13.0"
-        // device.latestUpdateVersionTagAvailable = "v0.14.0"
-        // device.isEthernet = false
-        // device.platformName = "esp32"
-
-        let version = Version(context: PersistenceController.preview.container.viewContext)
-        version.tagName = "v0.14.0"
+        let device = PreviewData.deviceWithUpdate
+        let version = Version(context: PreviewData.viewContext)
 
         return DeviceUpdateInstalling(device: device, version: version)
-            .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
 }
 

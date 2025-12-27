@@ -152,21 +152,9 @@ struct DeviceUpdateAvailable: View {
 }
 
 struct DeviceEditView_Previews: PreviewProvider {
-    static let device = DeviceWithState(
-        initialDevice: Device(
-            context: PersistenceController.preview.container.viewContext
-        )
-    )
-
     static var previews: some View {
-        device.device.macAddress = UUID().uuidString
-        device.device.originalName = "Original name"
-        device.device.customName = "A custom name"
-        device.device.address = "192.168.11.101"
-        device.device.isHidden = true
-
-
-        return DeviceEditView(device: device)
-            .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        NavigationView {
+            DeviceEditView(device: PreviewData.onlineDevice)
+        }
     }
 }

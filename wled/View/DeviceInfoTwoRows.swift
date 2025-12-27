@@ -156,42 +156,34 @@ struct OfflineSinceText: View {
 
 // MARK: - Previews
 
+// MARK: DeviceInfoTwoRows preview
+
 struct DeviceInfoTwoRows_Previews: PreviewProvider {
-    static let device = DeviceWithState(
-        initialDevice: Device(
-            context: PersistenceController.preview.container.viewContext
-        )
-    )
-
     static var previews: some View {
-        device.device.macAddress = UUID().uuidString
-        device.device.originalName = ""
-        device.device.address = "192.168.11.101"
-        device.device.isHidden = false
-        // TODO: #statelessDevice fix device preview
-        //        device.isOnline = true
-        //        device.networkRssi = -80
-        //        device.color = 6244567779
-        //        device.brightness = 125
-        //        device.isRefreshing = true
-        //        device.isHidden = true
-
-
-        return DeviceInfoTwoRows(device: device)
+        VStack(spacing: 20) {
+            DeviceInfoTwoRows(device: PreviewData.onlineDevice)
+            DeviceInfoTwoRows(device: PreviewData.offlineDevice)
+            DeviceInfoTwoRows(device: PreviewData.deviceWithUpdate)
+            DeviceInfoTwoRows(device: PreviewData.hiddenDevice)
+        }
+        .padding()
+        .previewLayout(.sizeThatFits)
     }
 }
+
+// MARK: OfflineSinceText preview
 
 struct OfflineSinceText_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             // English (Default)
             previewList
-                .previewDisplayName("English")
+                .previewDisplayName("Offline Since (English)")
 
             // French (Explicit)
             previewList
                 .environment(\.locale, Locale(identifier: "fr-CA"))
-                .previewDisplayName("French")
+                .previewDisplayName("Offline Since (French)")
         }
         .previewLayout(.sizeThatFits)
     }

@@ -89,63 +89,9 @@ struct DeviceListItemView: View {
 }
 
 struct DeviceListItemView_Previews: PreviewProvider {
-    static let device = DeviceWithState(
-        initialDevice: Device(
-            context: PersistenceController.preview.container.viewContext
-        )
-    )
-
     static var previews: some View {
-        // TODO: Improve the creation of fake DeviceWithState for previews
-        device.device.macAddress = UUID().uuidString
-        device.device.originalName = ""
-        device.device.address = "192.168.11.101"
-        device.device.isHidden = false
-        device.websocketStatus = .connected
-
-        // Create Mock StateInfo using JSON
-        // This is much easier than calling the memberwise initializer for Info/Leds/Wifi
-        let json = """
-        {
-            "state": {
-                "on": true,
-                "bri": 128,
-                "seg": [
-                    {
-                        "id": 0, 
-                        "col": [
-                            [0, 255, 255], 
-                            [0, 0, 0], 
-                            [0, 0, 0]
-                        ]
-                    }
-                ]
-            },
-            "info": {
-                "name": "Living Room",
-                "ver": "0.14.0",
-                "leds": {
-                    "count": 30,
-                    "pwr": 0,
-                    "fps": 0,
-                    "maxpwr": 0,
-                    "maxseg": 0
-                },
-                "wifi": {
-                    "signal": -60
-                }
-            }
-        }
-        """
-
-        // Decode and assign the mock info
-        if let data = json.data(using: .utf8),
-           let mockState = try? JSONDecoder().decode(DeviceStateInfo.self, from: data) {
-            device.stateInfo = mockState
-        }
-
-        return DeviceListItemView(
-            device: device,
+        DeviceListItemView(
+            device: PreviewData.onlineDevice,
             onTogglePower: { isOn in
                 print("Preview: Power toggled to \(isOn)")
             },
@@ -153,6 +99,7 @@ struct DeviceListItemView_Previews: PreviewProvider {
                 print("Preview: Brightness changed to \(val)")
             }
         )
-            .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        .padding()
+        .previewLayout(.sizeThatFits)
     }
 }

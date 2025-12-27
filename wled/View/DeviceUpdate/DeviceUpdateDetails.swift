@@ -88,23 +88,11 @@ struct DeviceUpdateDetails: View {
 }
 
 struct DeviceUpdateDetails_Previews: PreviewProvider {
-    static let device = DeviceWithState(
-        initialDevice: Device(
-            context: PersistenceController.preview.container.viewContext
-        )
-    )
-
     static var previews: some View {
-        // TODO: #statelessDevice migration fix preview
-        device.device.macAddress = UUID().uuidString
-        //device.version = "0.13.0"
-        //device.latestUpdateVersionTagAvailable = "v0.14.0"
-        //device.isOnline = true
-
-        
-        return NavigationView{
-            DeviceUpdateDetails(device: device)
-                .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        NavigationView {
+            DeviceUpdateDetails(device: PreviewData.deviceWithUpdate)
         }
+        // This line is required to provide the Core Data context to the view
+        .environment(\.managedObjectContext, PreviewData.viewContext)
     }
 }
