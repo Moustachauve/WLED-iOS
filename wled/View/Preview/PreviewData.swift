@@ -19,11 +19,11 @@ struct PreviewData {
     // MARK: - Devices
 
     static var onlineDevice: DeviceWithState {
-        createDevice(name: "WLED Beam", ip: "10.0.1.12", version: "0.14.0")
+        createDevice(name: "WLED Beam", ip: "10.0.1.12")
     }
 
     static var offlineDevice: DeviceWithState {
-        let device = createDevice(name: "WLED Strip", ip: "10.0.1.13", version: "0.14.0")
+        let device = createDevice(name: "WLED Strip", ip: "10.0.1.13")
         device.websocketStatus = .disconnected
         // Set last seen to 2 hours ago
         device.device.lastSeen = Int64(Date().addingTimeInterval(-7200).timeIntervalSince1970 * 1000)
@@ -33,30 +33,60 @@ struct PreviewData {
     static var deviceWithUpdate: DeviceWithState {
         // Device is on 0.13.0, Update 0.14.0 is available in DB
         ensureVersionsExist()
-        let device = createDevice(name: "Old WLED", ip: "10.0.1.14", version: "0.13.0")
+        let device = createDevice(name: "Old WLED", ip: "10.0.1.14", version: "0.13.0", color: [50, 50, 255])
         // Force the available update version for preview purposes since the Combine pipeline might be async
         device.availableUpdateVersion = "0.14.0"
         return device
     }
 
     static var hiddenDevice: DeviceWithState {
-        let device = createDevice(name: "Hidden Light", ip: "10.0.1.15", version: "0.14.0")
+        let device = createDevice(name: "Hidden Light", ip: "10.0.1.15", color: [200, 0, 255])
         device.device.isHidden = true
         return device
     }
 
     // MARK: - Helpers
 
-    private static func createDevice(name: String, ip: String, version: String) -> DeviceWithState {
-        let device = Device(context: viewContext)
-        device.macAddress = UUID().uuidString
+    private static func createDevice(
+        name: String,
+        ip: String,
+        version: String = "0.14.0",
+        color: [Int] = [255, 160, 0]
+    ) -> DeviceWithState {
+        let macAddress = "mock:mac:\(ip)"
+        let request: NSFetchRequest<Device> = Device.fetchRequest()
+        request.predicate = NSPredicate(format: "macAddress == %@", macAddress)
+
+        var device: Device!
+
+        // 1. Try to find existing device
+        if let results = try? viewContext.fetch(request), let existing = results.first {
+            device = existing
+        } else {
+            // 2. Create new if not found
+            device = Device(context: viewContext)
+            device.macAddress = macAddress
+        }
+
+        // 3. Always update properties (so code changes reflect immediately in preview)
         device.originalName = name
         device.address = ip
-        device.isHidden = false
+        // Only set isHidden to false here; specific getters can override it (like hiddenDevice above)
+        // Check if we are resetting a previously hidden device?
+        // Ideally we just set it to false defaults, and let the caller override if needed.
+        if device.isHidden && name != "Hidden Light" {
+            device.isHidden = false
+        }
 
         let deviceWithState = DeviceWithState(initialDevice: device)
         deviceWithState.websocketStatus = .connected
-        deviceWithState.stateInfo = .mock(name: name, version: version)
+        deviceWithState.stateInfo = .mock(name: name, version: version, color: color)
+
+        // Save to ensure ID is stable
+        if viewContext.hasChanges {
+            try? viewContext.save()
+        }
+
         return deviceWithState
     }
 
@@ -81,14 +111,18 @@ struct PreviewData {
 // MARK: - Mock Data Extensions
 
 extension DeviceStateInfo {
-    static func mock(name: String, version: String) -> DeviceStateInfo {
+    static func mock(name: String, version: String, color: [Int]) -> DeviceStateInfo {
+        let r = color.indices.contains(0) ? color[0] : 255
+        let g = color.indices.contains(1) ? color[1] : 160
+        let b = color.indices.contains(2) ? color[2] : 0
+
         let json = """
         {
             "state": {
                 "on": true,
                 "bri": 128,
                 "seg": [
-                    {"id": 0, "col": [[255, 160, 0], [0, 0, 0], [0, 0, 0]]}
+                    {"id": 0, "col": [[\(r), \(g), \(b)], [0, 0, 0], [0, 0, 0]]}
                 ]
             },
             "info": {

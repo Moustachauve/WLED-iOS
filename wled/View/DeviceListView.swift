@@ -23,8 +23,15 @@ struct DeviceListView: View {
     // MARK: - init
 
     // Allow injecting a specific context (defaulting to shared for the actual app)
-    init(context: NSManagedObjectContext = PersistenceController.shared.container.viewContext) {
-        _viewModel = StateObject(wrappedValue: DeviceWebsocketListViewModel(context: context))
+    init(
+        context: NSManagedObjectContext = PersistenceController.shared.container.viewContext,
+        clientFactory: ((Device) -> WebsocketClient)? = nil
+    ) {
+        let viewModel = DeviceWebsocketListViewModel(context: context)
+        if let clientFactory = clientFactory {
+            viewModel.makeClient = clientFactory
+        }
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     // MARK: - Computed Data
@@ -247,6 +254,14 @@ struct DeviceListView: View {
     // Ensure some data exists in the preview context
     let _ = PreviewData.onlineDevice
     let _ = PreviewData.offlineDevice
-    
-    DeviceListView(context: PreviewData.viewContext)
+    let _ = PreviewData.deviceWithUpdate
+    let _ = PreviewData.hiddenDevice
+
+    DeviceListView(
+        context: PreviewData.viewContext,
+        clientFactory: { device in
+            MockWebsocketClient(device: device)
+        }
+    )
+    .environment(\.managedObjectContext, PreviewData.viewContext)
 }
