@@ -71,21 +71,8 @@ struct DeviceView: View {
     }
 }
 
-struct DeviceView_Previews: PreviewProvider {
-    static let device = DeviceWithState(
-        initialDevice: Device(
-            context: PersistenceController.preview.container.viewContext
-        )
-    )
-
-    static var previews: some View {
-        device.device.macAddress = UUID().uuidString
-        device.device.originalName = "A fancy device"
-        device.device.address = "google.com"
-        // TODO: #statelessDevice fix this preview after the migration
-        return NavigationView{
-            DeviceView(device: device)
-                .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-        }
+#Preview {
+    NavigationView {
+        DeviceView(device: PreviewData.onlineDevice)
     }
 }

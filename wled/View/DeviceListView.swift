@@ -6,8 +6,8 @@ import CoreData
 struct DeviceListView: View {
 
     // MARK: - Properties
-    @StateObject private var viewModel = DeviceWebsocketListViewModel(context: PersistenceController.shared.container.viewContext)
-
+    @StateObject private var viewModel: DeviceWebsocketListViewModel
+    
     @Environment(\.scenePhase) private var scenePhase
     @State private var selection: DeviceWithState? = nil
     @State private var addDeviceButtonActive: Bool = false
@@ -19,6 +19,13 @@ struct DeviceListView: View {
     /// Amount of time after a device becomes offline before it is considered offline.
     private let offlineGracePeriod: TimeInterval = 60
     private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
+
+    // MARK: - init
+
+    // Allow injecting a specific context (defaulting to shared for the actual app)
+    init(context: NSManagedObjectContext = PersistenceController.shared.container.viewContext) {
+        _viewModel = StateObject(wrappedValue: DeviceWebsocketListViewModel(context: context))
+    }
 
     // MARK: - Computed Data
 
@@ -236,12 +243,10 @@ struct DeviceListView: View {
 }
 
 
-struct DeviceListView_Previews: PreviewProvider {
-    static var previews: some View {
-        DeviceListView()
-        // In preview, the persistence controller singleton is used by default in init,
-        // but for previews we often want the in-memory version.
-        // Since we use Singleton access in init(), we ensure shared is set up for previews
-        // or mock it if needed. The provided PersistenceController has a static preview.
-    }
+#Preview {
+    // Ensure some data exists in the preview context
+    let _ = PreviewData.onlineDevice
+    let _ = PreviewData.offlineDevice
+    
+    DeviceListView(context: PreviewData.viewContext)
 }

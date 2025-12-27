@@ -10,7 +10,7 @@ struct DeviceUpdateDetails: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) var dismiss
     @ObservedObject var device: DeviceWithState
-
+    
     @State var showWarningDialog = false
     @State var showInstallingDialog = false
     
@@ -79,7 +79,7 @@ struct DeviceUpdateDetails: View {
         }
         dismiss()
     }
-
+    
     func installVersion() {
         showInstallingDialog = true
     }
@@ -87,12 +87,11 @@ struct DeviceUpdateDetails: View {
     
 }
 
-struct DeviceUpdateDetails_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            DeviceUpdateDetails(device: PreviewData.deviceWithUpdate)
-        }
-        // This line is required to provide the Core Data context to the view
-        .environment(\.managedObjectContext, PreviewData.viewContext)
+#Preview {
+    NavigationView {
+        DeviceUpdateDetails(device: PreviewData.deviceWithUpdate)
     }
+    // This line is required to provide the Core Data context to the view
+    .environment(\.managedObjectContext, PreviewData.viewContext)
 }
+

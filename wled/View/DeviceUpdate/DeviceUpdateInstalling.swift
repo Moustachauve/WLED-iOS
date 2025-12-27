@@ -160,12 +160,10 @@ extension Notification.Name {
 }
 
 
-struct DeviceUpdateInstalling_Previews: PreviewProvider {
-    static var previews: some View {
-        let device = PreviewData.deviceWithUpdate
-        let version = Version(context: PreviewData.viewContext)
-
-        return DeviceUpdateInstalling(device: device, version: version)
-    }
+#Preview {
+    let device = PreviewData.deviceWithUpdate
+    let version = Version(context: PreviewData.viewContext)
+    
+    return DeviceUpdateInstalling(device: device, version: version)
 }
 
