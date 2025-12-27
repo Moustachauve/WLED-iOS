@@ -40,9 +40,7 @@ struct PreviewData {
     }
 
     static var hiddenDevice: DeviceWithState {
-        let device = createDevice(name: "Hidden Light", ip: "10.0.1.15", color: [200, 0, 255])
-        device.device.isHidden = true
-        return device
+        createDevice(name: "Hidden Light", ip: "10.0.1.15", isHidden: true, color: [200, 0, 255])
     }
 
     // MARK: - Helpers
@@ -51,6 +49,7 @@ struct PreviewData {
         name: String,
         ip: String,
         version: String = "0.14.0",
+        isHidden: Bool = false,
         color: [Int] = [255, 160, 0]
     ) -> DeviceWithState {
         let macAddress = "mock:mac:\(ip)"
@@ -63,20 +62,14 @@ struct PreviewData {
         if let results = try? viewContext.fetch(request), let existing = results.first {
             device = existing
         } else {
-            // 2. Create new if not found
             device = Device(context: viewContext)
             device.macAddress = macAddress
         }
 
-        // 3. Always update properties (so code changes reflect immediately in preview)
+        // Always update properties (so code changes reflect immediately in preview)
         device.originalName = name
         device.address = ip
-        // Only set isHidden to false here; specific getters can override it (like hiddenDevice above)
-        // Check if we are resetting a previously hidden device?
-        // Ideally we just set it to false defaults, and let the caller override if needed.
-        if device.isHidden && name != "Hidden Light" {
-            device.isHidden = false
-        }
+        device.isHidden = isHidden
 
         let deviceWithState = DeviceWithState(initialDevice: device)
         deviceWithState.websocketStatus = .connected
