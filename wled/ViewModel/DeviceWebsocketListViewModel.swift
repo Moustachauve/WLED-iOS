@@ -15,7 +15,11 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     // Preferences (You can wrap these in AppStorage or standard UserDefaults in the View)
     @Published var showOfflineDevicesLast: Bool = false
     @Published var showHiddenDevices: Bool = false
-    
+
+    var makeClient: (Device) -> WebsocketClient = { device in
+        WebsocketClient(device: device)
+    }
+
     // MARK: - Private Properties
 
     private var discoveryService: DiscoveryService?
@@ -126,7 +130,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     }
     
     private func createAndAddClient(for device: Device, mac: String) {
-        let newClient = WebsocketClient(device: device)
+        let newClient = makeClient(device)
 
         newClient.onDeviceStateUpdated = { [weak self] info in
             self?.handleDeviceUpdate(deviceID: device.objectID, info: info)
