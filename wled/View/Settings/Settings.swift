@@ -10,10 +10,10 @@ import SwiftUI
 struct Settings: View {
     @Binding var showHiddenDevices: Bool
     @Binding var showOfflineDevices: Bool
-    
+
     // Environment to dismiss the sheet
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationStack {
             Form {
@@ -21,30 +21,29 @@ struct Settings: View {
                     Toggle(isOn: $showHiddenDevices) {
                         Label("Show Hidden Devices", systemImage: "eye")
                     }
-                    
+
                     Toggle(isOn: $showOfflineDevices) {
                         Label("Show Offline Devices", systemImage: "wifi.slash")
                     }
                 }
-                
+
                 Section {
                     Link(destination: URL(string: "https://kno.wled.ge/")!) {
                         Label("WLED Documentation", systemImage: "questionmark.circle")
                     }
                 } header: {
                     Text("About")
+                } footer: {
+                    VStack(alignment: .center) {
+                        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+                        let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1.0"
+
+                        Text("Made by Moustachauve")
+                        Text("Version \(version) (\(bundleVersion))")
+                    }
+                    .frame(maxWidth: .infinity)
                 }
-                
-                VStack(alignment: .center) {
-                    let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-                    let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1.0"
-                    
-                    Text("Made by Moustachauve")
-                    Text("Version \(version) (\(bundleVersion))")
-                }
-                .frame(maxWidth: .infinity)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
