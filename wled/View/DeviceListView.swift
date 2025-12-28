@@ -10,11 +10,14 @@ struct DeviceListView: View {
     
     @Environment(\.scenePhase) private var scenePhase
     @State private var selection: DeviceWithState? = nil
+
     @State private var addDeviceButtonActive: Bool = false
+    @State private var showSettingsSheet: Bool = false
+
     @State private var currentTime = Date()
 
-    @SceneStorage("DeviceListView.showHiddenDevices") private var showHiddenDevices: Bool = false
-    @SceneStorage("DeviceListView.showOfflineDevices") private var showOfflineDevices: Bool = true
+    @AppStorage("DeviceListView.showHiddenDevices") private var showHiddenDevices: Bool = false
+    @AppStorage("DeviceListView.showOfflineDevices") private var showOfflineDevices: Bool = true
 
     /// Amount of time after a device becomes offline before it is considered offline.
     private let offlineGracePeriod: TimeInterval = 60
@@ -72,7 +75,12 @@ struct DeviceListView: View {
                 .toolbar{ toolbar }
                 .sheet(isPresented: $addDeviceButtonActive) {
                     DeviceAddView()
-                        .presentationBackground(.thinMaterial)
+                }
+                .sheet(isPresented: $showSettingsSheet) {
+                    Settings(
+                        showHiddenDevices: $showHiddenDevices,
+                        showOfflineDevices: $showOfflineDevices
+                    )
                 }
                 .navigationBarTitleDisplayMode(.inline)
         } detail: {
@@ -164,31 +172,25 @@ struct DeviceListView: View {
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .principal) {
-            VStack {
-                Image(.wledLogoAkemi)
-                    .resizable()
-                    .scaledToFit()
-                    .padding(2)
-            }
-            .frame(maxWidth: 200)
+            Image(.wledLogoAkemi)
+                .resizable()
+                .scaledToFit()
+                .padding(3)
+                .frame(height: 50)
         }
-        // TODO: Move the main ellipsis menu to a bottomSheet like the Fitness app
-        ToolbarItem {
-            Menu {
-                Section {
-                    addButton
-                }
-                Section {
-                    visibilityButton
-                    hideOfflineButton
-                }
-                Section {
-                    Link(destination: URL(string: "https://kno.wled.ge/")!) {
-                        Label("WLED Documentation", systemImage: "questionmark.circle")
-                    }
-                }
+        ToolbarItemGroup(placement: .primaryAction) {
+            // 1. Add Button (Direct Access)
+            Button {
+                addDeviceButtonActive.toggle()
             } label: {
-                Label("Menu", systemImage: "ellipsis.circle")
+                Label("Add Device", systemImage: "plus")
+            }
+
+            // 2. Settings Button
+            Button {
+                showSettingsSheet.toggle()
+            } label: {
+                Label("Settings", systemImage: "ellipsis.circle")
             }
         }
     }

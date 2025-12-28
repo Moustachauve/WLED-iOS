@@ -43,6 +43,7 @@ struct DeviceAddView: View {
             .navigationTitle("New Device")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .presentationDetents([.medium])
     }
 }
 
@@ -51,6 +52,7 @@ struct DeviceAddView: View {
 struct DeviceAddStep1FormView: View {
 
     @ObservedObject var viewModel: DeviceAddViewModel
+    @FocusState private var focusedField: Field?
 
     let errorMessage: String
     let state = DeviceAddViewModel.Step.self
@@ -61,7 +63,8 @@ struct DeviceAddStep1FormView: View {
             TextField("IP Address or URL", text: $viewModel.address)
                 .keyboardType(.URL)
                 .submitLabel(.done)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .textFieldStyle(.roundedBorder)
+                .focused($focusedField, equals: .username)
                 .overlay(
                     RoundedRectangle(cornerRadius: 4)
                         .stroke(
@@ -79,6 +82,13 @@ struct DeviceAddStep1FormView: View {
                     .font(Font.caption.bold())
             }
         }
+        .onAppear {
+            focusedField = .username
+        }
+    }
+
+    enum Field: Hashable {
+        case username
     }
 }
 
