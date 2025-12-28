@@ -64,7 +64,7 @@ struct DeviceAddStep1FormView: View {
                 .keyboardType(.URL)
                 .submitLabel(.done)
                 .textFieldStyle(.roundedBorder)
-                .focused($focusedField, equals: .username)
+                .focused($focusedField, equals: .address)
                 .overlay(
                     RoundedRectangle(cornerRadius: 4)
                         .stroke(
@@ -83,12 +83,12 @@ struct DeviceAddStep1FormView: View {
             }
         }
         .onAppear {
-            focusedField = .username
+            focusedField = .address
         }
     }
 
     enum Field: Hashable {
-        case username
+        case address
     }
 }
 
