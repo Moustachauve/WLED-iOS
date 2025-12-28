@@ -28,8 +28,10 @@ struct Settings: View {
                 }
 
                 Section {
-                    Link(destination: URL(string: "https://kno.wled.ge/")!) {
-                        Label("WLED Documentation", systemImage: "questionmark.circle")
+                    if let url = URL(string: "https://kno.wled.ge/") {
+                        Link(destination: url) {
+                            Label("WLED Documentation", systemImage: "questionmark.circle")
+                        }
                     }
                 } header: {
                     Text("About")
