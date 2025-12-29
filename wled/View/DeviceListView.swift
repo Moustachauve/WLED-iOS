@@ -203,7 +203,6 @@ struct DeviceListView: View {
                 }
             }
         }
-        .accentColor(.clear)
     }
 
     @ViewBuilder
