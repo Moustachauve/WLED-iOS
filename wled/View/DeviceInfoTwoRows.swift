@@ -14,54 +14,52 @@ struct DeviceInfoTwoRows: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
+            HStack(spacing: 4) {
                 Text(device.device.displayName)
                     .font(.headline.leading(.tight))
                     .lineLimit(2)
                 if device.hasUpdateAvailable {
-                    Image(systemName: getUpdateIconName())
+                    Label("Update available", systemImage: getUpdateIconName())
+                        .labelStyle(.iconOnly)
+                        .font(.subheadline.leading(.tight))
                 }
             }
-            HStack {
-                // Inner stack to keep the indicator and address tighter
-                HStack(spacing: 4) {
-                    WebsocketStatusIndicator(currentStatus: device.websocketStatus)
-                    Text(device.device.address ?? "")
-                        .lineLimit(1)
-                        .fixedSize()
-                        .font(.subheadline.leading(.tight))
-                        .lineSpacing(0)
+            HStack(spacing: 4) {
+                WebsocketStatusIndicator(currentStatus: device.websocketStatus)
+                Text(device.device.address ?? "")
+                    .lineLimit(1)
+                    .fixedSize()
+                    .lineSpacing(0)
+                let signalStrength = Int(device.stateInfo?.info.wifi.signal ?? 0)
+                Label {
+                    Text(
+                        device.isOnline ? "Signal Strength: \(signalStrength)" : "Offline"
+                    )
+                } icon: {
+                    getSignalIcon(
+                        isOnline: device.isOnline,
+                        signalStrength: signalStrength
+                    )
                 }
-                Image(uiImage: getSignalImage(isOnline: device.isOnline, signalStrength: Int(device.stateInfo?.info.wifi.signal ?? 0)))
-                    .resizable()
-                    .renderingMode(.template)
-                    .foregroundColor(.primary)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: 12)
+                .labelStyle(.iconOnly)
                 if (!device.isOnline) {
                     OfflineSinceText(device: device)
                         .lineLimit(1)
                         .allowsTightening(true)
-                        .font(.subheadline.leading(.tight))
                         .foregroundStyle(.secondary)
                         .lineSpacing(0)
                         .minimumScaleFactor(0.6)
                 }
                 if (device.device.isHidden) {
-                    Image(systemName: "eye.slash")
-                        .resizable()
-                        .renderingMode(.template)
-                        .foregroundColor(.secondary)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxHeight: 12)
-                    Text("(Hidden)")
+                    Label("(Hidden)", systemImage: "eye.slash")
                         .lineLimit(1)
-                        .font(.subheadline.leading(.tight))
                         .foregroundStyle(.secondary)
                         .lineSpacing(0)
                         .truncationMode(.tail)
+                        .font(.caption2)
                 }
             }
+            .font(.subheadline.leading(.tight))
 
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -75,21 +73,13 @@ struct DeviceInfoTwoRows: View {
         }
     }
 
-    func getSignalImage(isOnline: Bool, signalStrength: Int?) -> UIImage {
+    @ViewBuilder
+    func getSignalIcon(isOnline: Bool, signalStrength: Int?) -> some View {
         let icon = !isOnline || signalStrength == nil || signalStrength == 0 ? "wifi.slash" : "wifi"
-        var image: UIImage;
-        if #available(iOS 16.0, *) {
-            image = UIImage(
-                systemName: icon,
-                variableValue: getSignalValue(signalStrength: signalStrength)
-            )!
-        } else {
-            image = UIImage(
-                systemName: icon
-            )!
-        }
-        image.applyingSymbolConfiguration(UIImage.SymbolConfiguration(hierarchicalColor: .systemBlue))
-        return image
+
+        Image(systemName: icon, variableValue: getSignalValue(signalStrength: signalStrength))
+            .symbolRenderingMode(.hierarchical)
+            .font(.caption2)
     }
 
     func getSignalValue(signalStrength: Int?) -> Double {
@@ -159,12 +149,20 @@ struct OfflineSinceText: View {
 // MARK: DeviceInfoTwoRows preview
 
 struct DeviceInfoTwoRows_Previews: PreviewProvider {
+
+    // Let's display a device with only one bar of signal
+    static var hiddenDevice: DeviceWithState = {
+        let device = PreviewData.hiddenDevice
+        device.stateInfo?.info.wifi.signal = -86
+        return device
+    }()
+
     static var previews: some View {
         VStack(spacing: 20) {
             DeviceInfoTwoRows(device: PreviewData.onlineDevice)
             DeviceInfoTwoRows(device: PreviewData.offlineDevice)
             DeviceInfoTwoRows(device: PreviewData.deviceWithUpdate)
-            DeviceInfoTwoRows(device: PreviewData.hiddenDevice)
+            DeviceInfoTwoRows(device: DeviceInfoTwoRows_Previews.hiddenDevice)
         }
         .padding()
         .previewLayout(.sizeThatFits)
