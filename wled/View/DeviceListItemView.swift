@@ -97,7 +97,7 @@ struct DeviceSelectionStyle: ViewModifier {
 
     func body(content: Content) -> some View {
         // Calculate background opacity based on selection
-        let backgroundColor = isSelected ? color.opacity(1.0) : color.opacity(0.4)
+        let backgroundColor = isSelected ? color.opacity(Style.selectedOpacity) : color.opacity(Style.unselectedOpacity)
 
         content
             .groupBoxStyle(DeviceGroupBoxStyle(deviceColor: backgroundColor))
@@ -111,18 +111,32 @@ struct DeviceSelectionStyle: ViewModifier {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
                         isSelected ? color : .clear,
-                        lineWidth: isSelected ? 2 : 0
+                        lineWidth: isSelected ? Style.selectedBorderWidth : Style.unselectedBorderWidth
                     )
             )
         // Glow effect
             .shadow(
                 color: isSelected
-                ? (colorScheme == .dark ? color.opacity(0.6) : color.opacity(0.4))
+                ? (
+                    colorScheme == .dark ? color
+                        .opacity(Style.darkGlowOpacity) : color
+                        .opacity(Style.lightGlowOpacity)
+                )
                 : .clear,
-                radius: 5,
+                radius: Style.glowRadius,
                 x: 0,
                 y: 0
             )
+    }
+
+    private enum Style {
+        static let selectedOpacity: Double = 1.0
+        static let unselectedOpacity: Double = 0.4
+        static let selectedBorderWidth: CGFloat = 2.0
+        static let unselectedBorderWidth: CGFloat = 0.0
+        static let glowRadius: CGFloat = 5.0
+        static let darkGlowOpacity: Double = 0.6
+        static let lightGlowOpacity: Double = 0.4
     }
 }
 
