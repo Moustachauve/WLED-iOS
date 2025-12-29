@@ -250,7 +250,7 @@ class WebsocketClient: NSObject, ObservableObject, URLSessionWebSocketDelegate {
 }
 
 // Helper to break the strong reference cycle between URLSession and WebsocketClient
-class WeakSessionDelegate: NSObject, URLSessionWebSocketDelegate {
+final class WeakSessionDelegate: NSObject, URLSessionWebSocketDelegate {
     weak var delegate: URLSessionWebSocketDelegate?
 
     init(_ delegate: URLSessionWebSocketDelegate? = nil) {

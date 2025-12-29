@@ -67,7 +67,7 @@ class ReleaseService {
 
 
     func refreshVersions() async {
-        let allReleases = await WLEDRepoApi().getAllReleases()
+        let allReleases = await GithubApi().getAllReleases()
 
         guard !allReleases.isEmpty else {
             print("Did not find any releases")

@@ -48,6 +48,7 @@ struct WebView: UIViewRepresentable {
         downloadCompleted(filePathDestination)
     }
 
+    @MainActor
     class Coordinator: NSObject, WKUIDelegate, WKNavigationDelegate, WKDownloadDelegate {
         var parent: WebView
         var lastLoadedUrl: URL?
@@ -72,7 +73,7 @@ struct WebView: UIViewRepresentable {
             webView.loadFileURL(htmlUrl, allowingReadAccessTo: htmlUrl)
         }
 
-        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping @MainActor (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
             if navigationAction.shouldPerformDownload {
                 decisionHandler(.download, preferences)
             } else {
@@ -80,7 +81,7 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping @MainActor (WKNavigationResponsePolicy) -> Void) {
             if navigationResponse.canShowMIMEType {
                 decisionHandler(.allow)
             } else {
@@ -88,9 +89,11 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+        func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping @MainActor @Sendable (URL?) -> Void) {
             filePathDestination = getDownloadPath(suggestedFilename as NSString)
-            completionHandler(filePathDestination)
+            Task { @MainActor in
+                completionHandler(filePathDestination)
+            }
         }
 
         func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
@@ -101,7 +104,7 @@ struct WebView: UIViewRepresentable {
             download.delegate = self
         }
 
-        func download(didFailWithError: Error, resumeData: Data?) {
+        func download(_ download: WKDownload, didFailWithError: Error, resumeData: Data?) {
             print("Failed to download: \(didFailWithError)")
         }
 
@@ -151,8 +154,7 @@ struct WebView: UIViewRepresentable {
             filePathDestination = nil
         }
 
-        func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo,
-                     completionHandler: @escaping () -> Void) {
+        func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping @MainActor () -> Void) {
             var alertStyle = UIAlertController.Style.actionSheet
             if (UIDevice.current.userInterfaceIdiom == .pad) {
                 alertStyle = UIAlertController.Style.alert
@@ -166,7 +168,7 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+        func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping @MainActor (Bool) -> Void) {
             var alertStyle = UIAlertController.Style.actionSheet
             if (UIDevice.current.userInterfaceIdiom == .pad) {
                 alertStyle = UIAlertController.Style.alert
@@ -184,8 +186,7 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo,
-                     completionHandler: @escaping (String?) -> Void) {
+        func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping @MainActor (String?) -> Void) {
             var alertStyle = UIAlertController.Style.actionSheet
             if (UIDevice.current.userInterfaceIdiom == .pad) {
                 alertStyle = UIAlertController.Style.alert

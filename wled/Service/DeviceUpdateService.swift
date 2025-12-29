@@ -79,7 +79,7 @@ class DeviceUpdateService : ObservableObject {
         if let githubApi = self.githubApi {
             return githubApi
         }
-        let newApi = WLEDRepoApi()
+        let newApi = GithubApi()
         self.githubApi = newApi
         return newApi
     }

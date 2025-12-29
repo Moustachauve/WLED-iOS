@@ -6,6 +6,7 @@ import Network
 import SwiftUI
 
 // TODO: Check if this needs a start/stop like on Android
+@MainActor
 class DiscoveryService: NSObject, Identifiable {
 
     let onDeviceDiscovered: (_ address: String, _ macAddress: String?) -> Void
@@ -25,11 +26,13 @@ class DiscoveryService: NSObject, Identifiable {
         bonjourParms.allowFastOpen = true
         
         browser = NWBrowser(for: bonjourTCP, using: bonjourParms)
-        browser.stateUpdateHandler = {newState in
+        browser.stateUpdateHandler = { [weak self] newState in
             switch newState {
             case .failed(let error):
                 print("NW Browser: now in Error state: \(error)")
-                self.browser.cancel()
+                Task { @MainActor in
+                    self?.browser.cancel()
+                }
             case .ready:
                 print("NW Browser: new bonjour discovery - ready")
             case .setup:
@@ -38,7 +41,7 @@ class DiscoveryService: NSObject, Identifiable {
                 break
             }
         }
-        browser.browseResultsChangedHandler = { ( results, changes ) in
+        browser.browseResultsChangedHandler = { [weak self] ( results, changes ) in
             print("NW Browser: Scan results found:")
             for result in results {
                 print(result.endpoint.debugDescription)
@@ -54,14 +57,16 @@ class DiscoveryService: NSObject, Identifiable {
                     if case .service(let name, _, _, _) = result.endpoint {
                         print("Connecting to \(name), MAC: \(macAddress?.description ?? "nil")")
                         let connection = NWConnection(to: result.endpoint, using: .tcp)
-                        connection.stateUpdateHandler = { state in
+                        connection.stateUpdateHandler = { [weak self] state in
                             switch state {
                             case .ready:
                                 if let innerEndpoint = connection.currentPath?.remoteEndpoint,
                                    case .hostPort(let host, let port) = innerEndpoint {
                                     let remoteHost = "\(host)".split(separator: "%")[0]
                                     print("Connected to \(name) at", "\(remoteHost):\(port)")
-                                    self.onDeviceDiscovered("\(remoteHost)", macAddress)
+                                    Task { @MainActor in
+                                        self?.onDeviceDiscovered("\(remoteHost)", macAddress)
+                                    }
                                 }
                             default:
                                 break

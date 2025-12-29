@@ -195,7 +195,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     
     nonisolated func controllerDidChangeContent(_ controller: NSFetchedResultsController<any NSFetchRequestResult>) {
         Task { @MainActor in
-            guard let devices = controller.fetchedObjects as? [Device] else { return }
+            guard let devices = self.frc.fetchedObjects else { return }
             self.updateClients(with: devices)
         }
     }

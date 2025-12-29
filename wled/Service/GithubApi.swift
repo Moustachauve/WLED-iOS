@@ -1,29 +1,21 @@
 import Foundation
 import CoreData
 
-class GithubApi {
-    static var urlSession: URLSession?
-    
-    static func getUrlSession() -> URLSession {
-        if (urlSession != nil) {
-            return urlSession!
-        }
-        
+final class GithubApi: Sendable {
+    static let urlSession: URLSession = {
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = 30
         sessionConfig.timeoutIntervalForResource = 60
-        urlSession = URLSession(configuration: sessionConfig)
-        return urlSession!
+        return URLSession(configuration: sessionConfig)
+    }()
+
+    static func getUrlSession() -> URLSession {
+        return urlSession
     }
-    
+
     let githubBaseUrl = "https://api.github.com"
-    let repoOwner: String
-    let repoName: String
-    
-    init(repoOwner: String, repoName: String) {
-        self.repoOwner = repoOwner
-        self.repoName = repoName
-    }
+    let repoOwner: String = "WLED"
+    let repoName: String = "WLED"
     
     private func getApiUrl(path: String) -> URL? {
         let urlString = "\(githubBaseUrl)/\(path)"

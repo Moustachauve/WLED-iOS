@@ -76,6 +76,7 @@ actor DeviceFirstContactService {
 
         // Ensure the address provided by mDNS is clean before saving
         let cleanAddress = sanitize(address: address)
+        let logger = self.logger
 
         return await persistenceController.container.performBackgroundTask { context in
             let request: NSFetchRequest<Device> = Device.fetchRequest()
@@ -87,13 +88,13 @@ actor DeviceFirstContactService {
             }
 
             if existingDevice.address != address {
-                self.logger.info("Fast update: IP changed for \(existingDevice.originalName ?? "Unknown") (\(macAddress))")
+                logger.info("Fast update: IP changed for \(existingDevice.originalName ?? "Unknown") (\(macAddress))")
                 existingDevice.address = cleanAddress
 
                 do {
                     try context.save()
                 } catch {
-                    self.logger.error("Failed to save fast update: \(error.localizedDescription)")
+                    logger.error("Failed to save fast update: \(error.localizedDescription)")
                 }
             }
             return true
@@ -142,6 +143,7 @@ actor DeviceFirstContactService {
 
     /// Handles the Core Data logic to find, update, or create the device.
     private func upsertDevice(macAddress: String, hostname: String, name: String?) async throws -> NSManagedObjectID {
+        let logger = self.logger
         return try await persistenceController.container.performBackgroundTask { context in
             context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
 
@@ -154,16 +156,16 @@ actor DeviceFirstContactService {
             if let existingDevice = try? context.fetch(request).first {
                 // Check if updates are actually needed to minimize Core Data thrashing
                 if existingDevice.address == hostname && existingDevice.originalName == name {
-                    self.logger.debug("Device exists and is up to date: \(macAddress)")
+                    logger.debug("Device exists and is up to date: \(macAddress)")
                     device = existingDevice
                 } else {
-                    self.logger.debug("Updating existing device: \(macAddress)")
+                    logger.debug("Updating existing device: \(macAddress)")
                     existingDevice.address = hostname
                     existingDevice.originalName = name
                     device = existingDevice
                 }
             } else {
-                self.logger.info("Creating new device: \(macAddress)")
+                logger.info("Creating new device: \(macAddress)")
                 device = Device(context: context)
                 device.macAddress = macAddress
                 device.address = hostname
