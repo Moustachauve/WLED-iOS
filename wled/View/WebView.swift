@@ -32,7 +32,7 @@ struct WebView: UIViewRepresentable {
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
-        print("WebView updateUIView")
+        print("WebView updateUIView, current url: \(url, default: "[unknown]")")
         webView.underPageBackgroundColor = .systemBackground
         if (reload) {
             webView.reload()

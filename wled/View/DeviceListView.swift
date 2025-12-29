@@ -11,6 +11,7 @@ struct DeviceListView: View {
     // MARK: - Properties
     @StateObject private var viewModel: DeviceWebsocketListViewModel
     
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.scenePhase) private var scenePhase
     @State private var selection: DeviceWithState? = nil
 
@@ -134,6 +135,7 @@ struct DeviceListView: View {
         ForEach(devices) { device in
             DeviceListItemView(
                 device: device,
+                isSelected: selection == device,
                 onTogglePower: { isOn in
                     viewModel.setDevicePower(for: device, isOn: isOn)
                 },
@@ -141,13 +143,32 @@ struct DeviceListView: View {
                     viewModel.setBrightness(for: device, brightness: brightness)
                 }
             )
-            .overlay(
-                // Invisible NavigationLink to handle selection while preserving custom row interactions
-                NavigationLink("", value: device).opacity(0)
+            .background(
+                Group {
+                    if horizontalSizeClass == .compact {
+                        // iPhone: Use a real NavigationLink to trigger the "Push" animation.
+                        // We link directly to DeviceView since we are bypassing the split-view selection logic.
+                        NavigationLink(destination: DeviceView(device: device)) {
+                            EmptyView()
+                        }
+                        .opacity(0)
+                    }
+                    // iPad: No NavigationLink (prevents blue ring/system styling).
+                }
             )
+            .onTapGesture {
+                // Both: Update the selection state.
+                // On iPad: This is the ONLY trigger for the detail view.
+                // On iPhone: This runs simultaneously with the NavigationLink to keep state in sync.
+                withAnimation {
+                    selection = device
+                }
+            }
+            .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets())
             .listRowSeparator(.hidden)
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
+            .disableFocusEffect()
             .swipeActions(allowsFullSwipe: true) {
                 Button(role: .destructive) {
                     deleteItems(device: device.device)
@@ -156,6 +177,7 @@ struct DeviceListView: View {
                 }
             }
         }
+        .accentColor(.clear)
     }
     
     @ViewBuilder
@@ -255,6 +277,16 @@ struct DeviceListView: View {
     }
 }
 
+extension View {
+    @ViewBuilder
+    func disableFocusEffect() -> some View {
+        if #available(iOS 17.0, *) {
+            self.focusEffectDisabled()
+        } else {
+            self
+        }
+    }
+}
 
 #Preview {
     // Ensure some data exists in the preview context

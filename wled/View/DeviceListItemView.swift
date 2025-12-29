@@ -1,39 +1,19 @@
 
 import SwiftUI
 
-struct DeviceGroupBoxStyle: GroupBoxStyle {
-    var deviceColor: Color
 
-    func makeBody(configuration: Configuration) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            configuration.label
-            configuration.content
-        }
-        .padding()
-        .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 12))
-        .background(deviceColor.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
-    }
-}
-
-extension GroupBoxStyle where Self == DeviceGroupBoxStyle {
-    static func device(color: Color) -> DeviceGroupBoxStyle {
-        .init(deviceColor: color)
-    }
-}
-
-
-// TODO: Fix device selected appearance on tablet
 struct DeviceListItemView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var device: DeviceWithState
+
+    var isSelected: Bool = false
 
     // MARK: - Actions
     var onTogglePower: (Bool) -> Void
     var onChangeBrightness: (Int) -> Void
 
     @State private var brightness: Double = 0.0
-
 
     var body: some View {
         let fixedDeviceColor = fixColor(device.currentColor)
@@ -58,9 +38,7 @@ struct DeviceListItemView: View {
                 }
             )
         }
-        .groupBoxStyle(.device(color: fixedDeviceColor))
-        .tint(fixedDeviceColor)
-        .accentColor(fixedDeviceColor)
+        .applyDeviceSelectionStyle(isSelected: isSelected, color: fixedDeviceColor)
         .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
         .onAppear() {
             brightness = Double(device.stateInfo?.state.brightness ?? 0)
@@ -88,17 +66,111 @@ struct DeviceListItemView: View {
     }
 }
 
+// MARK: - DeviceGroupBoxStyle
+
+struct DeviceGroupBoxStyle: GroupBoxStyle {
+    var deviceColor: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            configuration.label
+            configuration.content
+        }
+        .padding()
+        .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(deviceColor, in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+extension GroupBoxStyle where Self == DeviceGroupBoxStyle {
+    static func device(color: Color) -> DeviceGroupBoxStyle {
+        .init(deviceColor: color)
+    }
+}
+
+// MARK: - DeviceSelectionStyle
+
+struct DeviceSelectionStyle: ViewModifier {
+    var isSelected: Bool
+    var color: Color
+    @Environment(\.colorScheme) var colorScheme
+
+    func body(content: Content) -> some View {
+        // Calculate background opacity based on selection
+        let backgroundColor = isSelected ? color.opacity(1.0) : color.opacity(0.4)
+
+        content
+            .groupBoxStyle(DeviceGroupBoxStyle(deviceColor: backgroundColor))
+        // Prevent system from turning text white on selection
+            .foregroundStyle(.primary)
+        // Apply Tint/Accent for sliders/toggles
+            .tint(color)
+            .accentColor(color)
+        // Border
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        isSelected ? color : .clear,
+                        lineWidth: isSelected ? 2 : 0
+                    )
+            )
+        // Glow effect
+            .shadow(
+                color: isSelected
+                ? (colorScheme == .dark ? color.opacity(0.6) : color.opacity(0.4))
+                : .clear,
+                radius: 5,
+                x: 0,
+                y: 0
+            )
+    }
+}
+
+extension View {
+    func applyDeviceSelectionStyle(isSelected: Bool, color: Color) -> some View {
+        self.modifier(DeviceSelectionStyle(isSelected: isSelected, color: color))
+    }
+}
+
+
+
+
+
+
+
+
+
+
 struct DeviceListItemView_Previews: PreviewProvider {
     static var previews: some View {
-        DeviceListItemView(
-            device: PreviewData.onlineDevice,
-            onTogglePower: { isOn in
-                print("Preview: Power toggled to \(isOn)")
-            },
-            onChangeBrightness: { val in
-                print("Preview: Brightness changed to \(val)")
-            }
-        )
+        let device = PreviewData.onlineDevice
+
+        VStack(alignment: .leading) {
+            Text("1st Selected, 2nd unselected")
+            DeviceListItemView(
+                device: device,
+                isSelected: true,
+                onTogglePower: { isOn in
+                    print("Preview: Power toggled to \(isOn)")
+                    device.stateInfo?.state.isOn = isOn
+                },
+                onChangeBrightness: { val in
+                    print("Preview: Brightness changed to \(val)")
+                    device.stateInfo?.state.brightness = Int64(val)
+                }
+            )
+            DeviceListItemView(
+                device: device,
+                onTogglePower: { isOn in
+                    print("Preview: Power toggled to \(isOn)")
+                    device.stateInfo?.state.isOn = isOn
+                },
+                onChangeBrightness: { val in
+                    print("Preview: Brightness changed to \(val)")
+                    device.stateInfo?.state.brightness = Int64(val)
+                }
+            )
+        }
         .padding()
         .previewLayout(.sizeThatFits)
     }
