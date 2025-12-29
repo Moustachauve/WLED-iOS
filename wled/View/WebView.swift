@@ -22,18 +22,19 @@ struct WebView: UIViewRepresentable {
         webView.backgroundColor = UIColor.clear
         webView.uiDelegate = context.coordinator
         webView.navigationDelegate = context.coordinator
-
-        guard let url = url else {
-            return webView
-        }
-        let request = URLRequest(url: url)
-        webView.load(request)
         return webView
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
         print("WebView updateUIView, current url: \(url, default: "[unknown]")")
         webView.underPageBackgroundColor = .systemBackground
+
+        if let url = self.url, url != context.coordinator.lastLoadedUrl {
+            context.coordinator.lastLoadedUrl = url
+            let request = URLRequest(url: url)
+            webView.load(request)
+        }
+
         if (reload) {
             webView.reload()
             DispatchQueue.main.async {
@@ -48,6 +49,7 @@ struct WebView: UIViewRepresentable {
 
     class Coordinator: NSObject, WKUIDelegate, WKNavigationDelegate, WKDownloadDelegate {
         var parent: WebView
+        var lastLoadedUrl: URL?
         private var filePathDestination: URL?
 
         init(_ parent: WebView) {
