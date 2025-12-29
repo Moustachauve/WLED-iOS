@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		884FA9392F027B6100097D56 /* wled_native_data.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 884FA9082F027B6100097D56 /* wled_native_data.xcdatamodeld */; };
 		C946FB862B68C53600D5B00D /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = C946FB852B68C53600D5B00D /* Collections */; };
 		C946FB882B68C53600D5B00D /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = C946FB872B68C53600D5B00D /* DequeModule */; };
 		C946FB8A2B68C53600D5B00D /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C946FB892B68C53600D5B00D /* OrderedCollections */; };
@@ -15,6 +16,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		884FA90A2F027B6100097D56 /* v2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = v2.xcdatamodel; sourceTree = "<group>"; };
+		884FA90B2F027B6100097D56 /* wled_native_data.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = wled_native_data.xcdatamodel; sourceTree = "<group>"; };
 		C9A9E5BD2918D1C3005B5C22 /* WLED.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WLED.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9C4B47E2AC0050500791D20 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -48,9 +51,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		884FA9472F02811C00097D56 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				884FA9082F027B6100097D56 /* wled_native_data.xcdatamodeld */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
 		C9A9E5B42918D1C3005B5C22 = {
 			isa = PBXGroup;
 			children = (
+				884FA9472F02811C00097D56 /* Data */,
 				C9C4B47E2AC0050500791D20 /* README.md */,
 				8813CE002EE9178D00B0A987 /* wled */,
 				C9A9E5BE2918D1C3005B5C22 /* Products */,
@@ -148,6 +160,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				884FA9392F027B6100097D56 /* wled_native_data.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -404,6 +417,20 @@
 			productName = MarkdownUI;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		884FA9082F027B6100097D56 /* wled_native_data.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				884FA90A2F027B6100097D56 /* v2.xcdatamodel */,
+				884FA90B2F027B6100097D56 /* wled_native_data.xcdatamodel */,
+			);
+			currentVersion = 884FA90A2F027B6100097D56 /* v2.xcdatamodel */;
+			path = wled_native_data.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = C9A9E5B52918D1C3005B5C22 /* Project object */;
 }
