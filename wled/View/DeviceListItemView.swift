@@ -96,11 +96,8 @@ struct DeviceSelectionStyle: ViewModifier {
     @Environment(\.colorScheme) var colorScheme
 
     func body(content: Content) -> some View {
-        // Calculate background opacity based on selection
-        let backgroundColor = isSelected ? color.opacity(Style.selectedOpacity) : color.opacity(Style.unselectedOpacity)
-
         content
-            .groupBoxStyle(DeviceGroupBoxStyle(deviceColor: backgroundColor))
+            .groupBoxStyle(DeviceGroupBoxStyle(deviceColor: color))
         // Prevent system from turning text white on selection
             .foregroundStyle(.primary)
         // Apply Tint/Accent for sliders/toggles
@@ -130,8 +127,6 @@ struct DeviceSelectionStyle: ViewModifier {
     }
 
     private enum Style {
-        static let selectedOpacity: Double = 1.0
-        static let unselectedOpacity: Double = 0.4
         static let selectedBorderWidth: CGFloat = 2.0
         static let unselectedBorderWidth: CGFloat = 0.0
         static let glowRadius: CGFloat = 5.0
@@ -145,14 +140,6 @@ extension View {
         self.modifier(DeviceSelectionStyle(isSelected: isSelected, color: color))
     }
 }
-
-
-
-
-
-
-
-
 
 
 struct DeviceListItemView_Previews: PreviewProvider {
