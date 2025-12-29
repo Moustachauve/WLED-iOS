@@ -10,7 +10,7 @@ struct DeviceListView: View {
 
     // MARK: - Properties
     @StateObject private var viewModel: DeviceWebsocketListViewModel
-    
+
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.scenePhase) private var scenePhase
     @State private var selection: DeviceWithState? = nil
@@ -168,7 +168,6 @@ struct DeviceListView: View {
             .listRowInsets(EdgeInsets())
             .listRowSeparator(.hidden)
             .buttonStyle(.plain)
-            .disableFocusEffect()
             .swipeActions(allowsFullSwipe: true) {
                 Button(role: .destructive) {
                     deleteItems(device: device.device)
@@ -273,17 +272,6 @@ struct DeviceListView: View {
     private func deleteItems(device: Device) {
         withAnimation {
             viewModel.deleteDevice(device)
-        }
-    }
-}
-
-extension View {
-    @ViewBuilder
-    func disableFocusEffect() -> some View {
-        if #available(iOS 17.0, *) {
-            self.focusEffectDisabled()
-        } else {
-            self
         }
     }
 }
