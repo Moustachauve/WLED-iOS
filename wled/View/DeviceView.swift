@@ -44,7 +44,7 @@ struct DeviceView: View {
         ToolbarItem(placement: .principal) {
             DeviceInfoTwoRows(device: device)
         }
-        ToolbarItem(placement: .navigation) {
+        ToolbarItem(placement: .primaryAction) {
             NavigationLink {
                 DeviceEditView(device: device)
             } label: {
@@ -74,7 +74,7 @@ struct DeviceView: View {
 }
 
 #Preview {
-    NavigationView {
+    NavigationStack {
         DeviceView(device: PreviewData.onlineDevice)
     }
 }

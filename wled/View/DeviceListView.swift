@@ -119,7 +119,9 @@ struct DeviceListView: View {
         // Listen for layout changes (e.g. iPad rotation or window resizing)
         // If the user expands the window, we want to fill the empty space immediately.
         .onChange(of: horizontalSizeClass) { newSizeClass in
-            print("changed horizontalSizeClass")
+            print(
+                "changed horizontalSizeClass, \(horizontalSizeClass, default: "unknown") -> \(newSizeClass, default: "unknown")"
+            )
             // newSizeClass needs to be passed because the actual sizeClass is
             // not changed just yet.
             restoreLastSelection(

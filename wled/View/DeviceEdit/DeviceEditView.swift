@@ -155,7 +155,7 @@ struct DeviceUpdateAvailable: View {
 }
 
 #Preview {
-    NavigationView {
+    NavigationStack {
         DeviceEditView(device: PreviewData.onlineDevice)
     }
 }
