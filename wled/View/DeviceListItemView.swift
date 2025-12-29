@@ -112,18 +112,15 @@ struct DeviceSelectionStyle: ViewModifier {
                     )
             )
         // Glow effect
-            .shadow(
-                color: isSelected
-                ? (
-                    colorScheme == .dark ? color
-                        .opacity(Style.darkGlowOpacity) : color
-                        .opacity(Style.lightGlowOpacity)
-                )
-                : .clear,
-                radius: Style.glowRadius,
-                x: 0,
-                y: 0
-            )
+            .shadow(color: glowColor, radius: Style.glowRadius, x: 0, y: 0)
+    }
+
+    // MARK: Helper properties
+
+    private var glowColor: Color {
+        guard isSelected else { return .clear }
+        let opacity = colorScheme == .dark ? Style.darkGlowOpacity : Style.lightGlowOpacity
+        return color.opacity(opacity)
     }
 
     private enum Style {
