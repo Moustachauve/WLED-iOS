@@ -17,11 +17,11 @@ struct DeviceListView: View {
 
     @State private var addDeviceButtonActive: Bool = false
     @State private var showSettingsSheet: Bool = false
-
     @State private var currentTime = Date()
 
     @AppStorage("DeviceListView.showHiddenDevices") private var showHiddenDevices: Bool = false
     @AppStorage("DeviceListView.showOfflineDevices") private var showOfflineDevices: Bool = true
+    @AppStorage("lastSelectedDeviceMac") private var lastSelectedDeviceMac: String = ""
 
     /// Amount of time after a device becomes offline before it is considered offline.
     private let offlineGracePeriod: TimeInterval = 60
@@ -108,8 +108,27 @@ struct DeviceListView: View {
                 break
             }
         }
+        .onChange(of: viewModel.allDevicesWithState) { devices in
+            restoreLastSelection(from: devices)
+        }
+        .onChange(of: selection) { newSelection in
+            if let mac = newSelection?.device.macAddress {
+                lastSelectedDeviceMac = mac
+            }
+        }
+        // Listen for layout changes (e.g. iPad rotation or window resizing)
+        // If the user expands the window, we want to fill the empty space immediately.
+        .onChange(of: horizontalSizeClass) { newSizeClass in
+            print("changed horizontalSizeClass")
+            // newSizeClass needs to be passed because the actual sizeClass is
+            // not changed just yet.
+            restoreLastSelection(
+                from: viewModel.allDevicesWithState,
+                currentSizeClass: newSizeClass
+            )
+        }
     }
-    
+
     var list: some View {
         List(selection: $selection) {
             if !onlineDevices.isEmpty {
@@ -170,7 +189,13 @@ struct DeviceListView: View {
             .buttonStyle(.plain)
             .swipeActions(allowsFullSwipe: true) {
                 Button(role: .destructive) {
-                    deleteItems(device: device.device)
+                    withAnimation {
+                        deleteItems(device: device.device)
+                        let remainingDevices = devices.filter { $0 != device }
+                        // Call restore in case the selected item was deleted, this
+                        // will select another device (most likely the first one)
+                        restoreLastSelection(from: remainingDevices)
+                    }
                 } label: {
                     Label("Delete", systemImage: "trash.fill")
                 }
@@ -178,7 +203,7 @@ struct DeviceListView: View {
         }
         .accentColor(.clear)
     }
-    
+
     @ViewBuilder
     private var detailView: some View {
         if let device = selection {
@@ -218,7 +243,7 @@ struct DeviceListView: View {
             }
         }
     }
-    
+
     var addButton: some View {
         Button {
             addDeviceButtonActive.toggle()
@@ -226,7 +251,7 @@ struct DeviceListView: View {
             Label("Add New Device", systemImage: "plus")
         }
     }
-    
+
     var visibilityButton: some View {
         Button {
             withAnimation {
@@ -240,7 +265,7 @@ struct DeviceListView: View {
             }
         }
     }
-    
+
     var hideOfflineButton: some View {
         Button {
             withAnimation {
@@ -254,9 +279,9 @@ struct DeviceListView: View {
             }
         }
     }
-    
+
     //MARK: - Actions
-    
+
     @Sendable
     private func refreshList() async {
         viewModel.startDiscovery()
@@ -268,10 +293,39 @@ struct DeviceListView: View {
         viewModel.onResume()
         viewModel.startDiscovery()
     }
-    
+
     private func deleteItems(device: Device) {
-        withAnimation {
-            viewModel.deleteDevice(device)
+        if (selection?.device == device) {
+            selection = nil
+        }
+        viewModel.deleteDevice(device)
+    }
+
+    // MARK: - Automatic device selection
+
+    private func restoreLastSelection(
+        from devices: [DeviceWithState],
+        currentSizeClass: UserInterfaceSizeClass? = nil
+    ) {
+        // Use the passed-in class if available, otherwise use the environment value
+        let sizeClass = currentSizeClass ?? horizontalSizeClass
+        // Only run if we are in a wide layout (Split View is active)
+        // This prevents auto-navigation on iPhone or iPad narrow multitasking.
+        guard sizeClass == .regular else { return }
+        // IMPORTANT: Only try to restore if NOTHING is currently selected.
+        // This prevents us from overriding a device the user just clicked on,
+        // while ensuring we fill the "empty" screen if it appears.
+        guard selection == nil else { return }
+        // Ensure there are devices to select
+        guard !devices.isEmpty else { return }
+
+        // Try to find the last selected device by MAC address
+        if let lastDevice = devices.first(where: { $0.device.macAddress == lastSelectedDeviceMac }) {
+            selection = lastDevice
+        }
+        // Fallback: Auto-select the first device
+        else if let firstDevice = devices.first {
+            selection = firstDevice
         }
     }
 }
