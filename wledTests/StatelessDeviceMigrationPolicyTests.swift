@@ -1,6 +1,6 @@
 import XCTest
 import CoreData
-@testable import WLED
+@testable import wled
 
 class StatelessDeviceMigrationPolicyTests: XCTestCase {
 
@@ -53,7 +53,7 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
             XCTAssertEqual(dInstance.value(forKey: "originalName") as? String, "My Light")
 
             // Verify Defaults
-            XCTAssertEqual(dInstance.value(forKey: "branch") as? String, "unknown") // Branch.unknown.rawValue
+            XCTAssertEqual(dInstance.value(forKey: "branch") as? String, Branch.unknown.rawValue)
             XCTAssertEqual(dInstance.value(forKey: "lastSeen") as? Int, 0)
 
             // Verify Association
