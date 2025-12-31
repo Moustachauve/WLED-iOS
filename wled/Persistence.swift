@@ -1,4 +1,3 @@
-
 import CoreData
 
 struct PersistenceController {
@@ -43,8 +42,8 @@ struct PersistenceController {
                     }
 
                     // Append specific migration failure reasons if present
-                    if let sourceURL = nsError.userInfo[NSSourceURLKey] {
-                        extraInfo += "\n\(indent)Source Store: \(sourceURL)"
+                    if let storeURL = nsError.userInfo[NSPersistentStoreURLKey] as? URL {
+                        extraInfo += "\n\(indent)Store URL: \(storeURL.path)"
                     }
 
                     return extraInfo
@@ -69,3 +68,4 @@ struct PersistenceController {
         description?.shouldInferMappingModelAutomatically = true
     }
 }
+
