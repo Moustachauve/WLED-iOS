@@ -22,7 +22,7 @@ class StatelessDeviceMigrationPolicy: NSEntityMigrationPolicy {
             // We have already migrated a device with this MAC.
             // Skipping this instance prevents the uniqueness constraint violation crash.
             // (Optional: You could add logic here to merge data into the existing one if needed)
-            print("Migration warning: Dropping duplicate device with MAC: \(macAddress)")
+            NSLog("Migration warning: Dropping duplicate device with MAC: %@", macAddress)
             return
         }
         migratedMacAddresses.insert(macAddress)
