@@ -6,27 +6,35 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
 
     var sourceModel: NSManagedObjectModel!
     var destinationModel: NSManagedObjectModel!
+    var policy: StatelessDeviceMigrationPolicy!
+    var manager: MockMigrationManager!
+    var mapping: NSEntityMapping!
+    var sourceContext: NSManagedObjectContext!
 
     override func setUp() {
         super.setUp()
         sourceModel = createSourceModel()
         destinationModel = createDestinationModel()
+
+        policy = StatelessDeviceMigrationPolicy()
+        manager = MockMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
+        mapping = NSEntityMapping()
+
+        sourceContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        sourceContext.persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: sourceModel)
     }
 
     override func tearDown() {
+        policy = nil
+        manager = nil
+        mapping = nil
+        sourceContext = nil
         sourceModel = nil
         destinationModel = nil
         super.tearDown()
     }
 
     func testValidMigration() {
-        let policy = StatelessDeviceMigrationPolicy()
-        let manager = MockMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
-        let mapping = NSEntityMapping()
-
-        let sourceContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-        sourceContext.persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: sourceModel)
-
         // Create valid source object
         let sourceEntity = sourceModel.entitiesByName["Device"]!
         let sInstance = NSManagedObject(entity: sourceEntity, insertInto: sourceContext)
@@ -65,13 +73,6 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
     }
 
     func testValidMigrationWithCustomName() {
-        let policy = StatelessDeviceMigrationPolicy()
-        let manager = MockMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
-        let mapping = NSEntityMapping()
-
-        let sourceContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-        sourceContext.persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: sourceModel)
-
         // Create valid source object with custom name
         let sourceEntity = sourceModel.entitiesByName["Device"]!
         let sInstance = NSManagedObject(entity: sourceEntity, insertInto: sourceContext)
@@ -95,13 +96,6 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
     }
 
     func testEmptyMacAddress() {
-        let policy = StatelessDeviceMigrationPolicy()
-        let manager = MockMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
-        let mapping = NSEntityMapping()
-
-        let sourceContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-        sourceContext.persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: sourceModel)
-
         let sInstance = NSManagedObject(entity: sourceModel.entitiesByName["Device"]!, insertInto: sourceContext)
         sInstance.setValue("", forKey: "macAddress")
 
@@ -114,13 +108,6 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
     }
 
     func testUnknownMacAddress() {
-        let policy = StatelessDeviceMigrationPolicy()
-        let manager = MockMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
-        let mapping = NSEntityMapping()
-
-        let sourceContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-        sourceContext.persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: sourceModel)
-
         let sInstance = NSManagedObject(entity: sourceModel.entitiesByName["Device"]!, insertInto: sourceContext)
         sInstance.setValue("__unknown__", forKey: "macAddress")
 
@@ -133,13 +120,6 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
     }
 
     func testMissingMacAddress() {
-         let policy = StatelessDeviceMigrationPolicy()
-         let manager = MockMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
-         let mapping = NSEntityMapping()
-
-         let sourceContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-         sourceContext.persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: sourceModel)
-
          let sInstance = NSManagedObject(entity: sourceModel.entitiesByName["Device"]!, insertInto: sourceContext)
          sInstance.setValue(nil, forKey: "macAddress")
 
@@ -152,13 +132,6 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
      }
 
     func testDuplicateMacAddress() {
-        let policy = StatelessDeviceMigrationPolicy()
-        let manager = MockMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
-        let mapping = NSEntityMapping()
-
-        let sourceContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-        sourceContext.persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: sourceModel)
-
         let mac = "00:11:22:33:44:55"
 
         // First Object
@@ -277,10 +250,7 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
 class MockMigrationManager: NSMigrationManager {
     var associateCalled = false
     var createdDestinations: [NSManagedObject] {
-        // Find inserted objects in destination context
-        // Since we are not saving, we look at registeredObjects or just rely on what we put in.
-        // Actually, NSEntityDescription.insertNewObject puts it into the context.
-        return _destinationContext.insertedObjects.map { $0 }
+        return Array(_destinationContext.insertedObjects)
     }
 
     // We need a context that works.
@@ -295,7 +265,7 @@ class MockMigrationManager: NSMigrationManager {
         do {
             try psc.addPersistentStore(ofType: NSInMemoryStoreType, configurationName: nil, at: nil, options: nil)
         } catch {
-            print("Failed to add in-memory store: \(error)")
+            fatalError("Failed to add in-memory store: \(error)")
         }
         _destinationContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
         _destinationContext.persistentStoreCoordinator = psc
