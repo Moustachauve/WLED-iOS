@@ -43,7 +43,7 @@ struct PersistenceController {
                     }
 
                     // Append specific migration failure reasons if present
-                    if let sourceURL = nsError.userInfo["sourceURL"] {
+                    if let sourceURL = nsError.userInfo[NSSourceURLKey] {
                         extraInfo += "\n\(indent)Source Store: \(sourceURL)"
                     }
 
