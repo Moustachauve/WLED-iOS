@@ -1,6 +1,6 @@
 import XCTest
 import CoreData
-@testable import wled
+@testable import WLED
 
 class StatelessDeviceMigrationPolicyTests: XCTestCase {
 
