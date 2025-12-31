@@ -1,10 +1,14 @@
 import CoreData
 
+@objc(StatelessDeviceMigrationPolicy)
 class StatelessDeviceMigrationPolicy: NSEntityMigrationPolicy {
-    
+
+    // Keep track of MACs we have already processed during this migration
+    var migratedMacAddresses = Set<String>()
+
     override func createDestinationInstances(forSource sInstance: NSManagedObject, in mapping: NSEntityMapping, manager: NSMigrationManager) throws {
-        
-        // 1. Filter out invalid MAC addresses
+
+        // Filter out invalid MAC addresses
         guard let macAddress = sInstance.value(forKey: "macAddress") as? String,
               !macAddress.isEmpty,
               macAddress != "__unknown__" else {
@@ -12,8 +16,18 @@ class StatelessDeviceMigrationPolicy: NSEntityMigrationPolicy {
             // this item is effectively dropped/deleted during migration.
             return
         }
-        
-        // 2. Create the destination object (Device)
+
+        // Check for duplicates
+        if migratedMacAddresses.contains(macAddress) {
+            // We have already migrated a device with this MAC.
+            // Skipping this instance prevents the uniqueness constraint violation crash.
+            // (Optional: You could add logic here to merge data into the existing one if needed)
+            print("Migration warning: Dropping duplicate device with MAC: \(macAddress)")
+            return
+        }
+        migratedMacAddresses.insert(macAddress)
+
+        // Create the destination object (Device)
         let dInstance = NSEntityDescription.insertNewObject(forEntityName: "Device", into: manager.destinationContext)
         
         // 3. Copy direct mappings
@@ -34,7 +48,7 @@ class StatelessDeviceMigrationPolicy: NSEntityMigrationPolicy {
             dInstance.setValue(oldName, forKey: "originalName")
         }
         
-        // 5. Set Defaults
+        // Set Defaults
         dInstance.setValue(Branch.unknown.rawValue, forKey: "branch")
         dInstance.setValue(0, forKey: "lastSeen")
         

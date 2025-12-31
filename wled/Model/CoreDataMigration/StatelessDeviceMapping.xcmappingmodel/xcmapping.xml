@@ -10,9 +10,9 @@
             <plist version="1.0">
                 <dict>
                     <key>NSPersistenceFrameworkVersion</key>
-                    <integer>1522</integer>
+                    <integer>1523</integer>
                     <key>NSPersistenceMaximumFrameworkVersion</key>
-                    <integer>1522</integer>
+                    <integer>1523</integer>
                     <key>NSStoreModelVersionChecksumKey</key>
                     <string>bMpud663vz0bXQE24C6Rh4MvJ5jVnzsD2sI3njZkKbc=</string>
                     <key>NSStoreModelVersionHashes</key>
@@ -152,14 +152,14 @@ cxIAAYagXxAPTlNLZXllZEFyY2hpdmVy0QAIAAlUcm9vdIABrxECgQALAAwAGQA1ADYANwBDAEQARQBG
         <relationship name="entitymapping" type="1/1" destination="XDDEVENTITYMAPPING" idrefs="z117"></relationship>
     </object>
     <object type="XDDEVENTITYMAPPING" id="z122">
-        <attribute name="migrationpolicyclassname" type="string">WLED.StatelessDeviceMigrationPolicy</attribute>
+        <attribute name="migrationpolicyclassname" type="string">StatelessDeviceMigrationPolicy</attribute>
         <attribute name="sourcename" type="string">Device</attribute>
         <attribute name="mappingtypename" type="string">Undefined</attribute>
         <attribute name="mappingnumber" type="int16">2</attribute>
         <attribute name="destinationname" type="string">Device</attribute>
         <attribute name="autogenerateexpression" type="bool">1</attribute>
         <relationship name="mappingmodel" type="1/1" destination="XDDEVMAPPINGMODEL" idrefs="z119"></relationship>
-        <relationship name="attributemappings" type="0/0" destination="XDDEVATTRIBUTEMAPPING" idrefs="z108 z112 z103 z124 z113 z114 z106 z123"></relationship>
+        <relationship name="attributemappings" type="0/0" destination="XDDEVATTRIBUTEMAPPING" idrefs="z112 z113 z103 z124 z106 z114 z108 z123"></relationship>
         <relationship name="relationshipmappings" type="0/0" destination="XDDEVRELATIONSHIPMAPPING"></relationship>
     </object>
     <object type="XDDEVATTRIBUTEMAPPING" id="z123">
