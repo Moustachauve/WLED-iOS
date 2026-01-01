@@ -5,7 +5,7 @@ import MarkdownUI
 import OSLog
 
 struct DeviceUpdateDetails: View {
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.wled", category: "DeviceUpdateDetails")
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.wled", category: "DeviceUpdateDetails")
     // TODO: Pass the version to display instead of only showing the latest one
     // This will allow support for downgrading or chosing a different version
     // in the future.
@@ -74,7 +74,8 @@ struct DeviceUpdateDetails: View {
         do {
             try viewContext.save()
         } catch {
-            logger.error("Unresolved error saving skip version: \(error.localizedDescription)")
+            let nsError = error as NSError
+            Self.logger.error("Unresolved error saving skip version: \(nsError), \(nsError.userInfo)")
         }
         dismiss()
     }
