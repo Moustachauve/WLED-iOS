@@ -1,20 +1,19 @@
-import XCTest
+import Testing
 import CoreData
 @testable import WLED
 
-class StatelessDeviceMigrationPolicyTests: XCTestCase {
+struct StatelessDeviceMigrationPolicyTests {
 
-    var sourceModel: NSManagedObjectModel!
-    var destinationModel: NSManagedObjectModel!
-    var policy: StatelessDeviceMigrationPolicy!
-    var manager: MockMigrationManager!
-    var mapping: NSEntityMapping!
-    var sourceContext: NSManagedObjectContext!
+    let sourceModel: NSManagedObjectModel
+    let destinationModel: NSManagedObjectModel
+    let policy: StatelessDeviceMigrationPolicy
+    let manager: MockMigrationManager
+    let mapping: NSEntityMapping
+    let sourceContext: NSManagedObjectContext
 
-    override func setUp() {
-        super.setUp()
-        sourceModel = createSourceModel()
-        destinationModel = createDestinationModel()
+    init() {
+        sourceModel = Self.createSourceModel()
+        destinationModel = Self.createDestinationModel()
 
         policy = StatelessDeviceMigrationPolicy()
         manager = MockMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
@@ -24,19 +23,10 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
         sourceContext.persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: sourceModel)
     }
 
-    override func tearDown() {
-        policy = nil
-        manager = nil
-        mapping = nil
-        sourceContext = nil
-        sourceModel = nil
-        destinationModel = nil
-        super.tearDown()
-    }
-
-    func testValidMigration() {
+    @Test
+    func validMigration() throws {
         // Create valid source object
-        let sourceEntity = sourceModel.entitiesByName["Device"]!
+        let sourceEntity = try #require(sourceModel.entitiesByName["Device"])
         let sInstance = NSManagedObject(entity: sourceEntity, insertInto: sourceContext)
         sInstance.setValue("00:11:22:33:44:55", forKey: "macAddress")
         sInstance.setValue("192.168.1.100", forKey: "address")
@@ -45,122 +35,104 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
         sInstance.setValue(true, forKey: "isHidden")
         sInstance.setValue("v1.0", forKey: "skipUpdateTag")
 
-        do {
-            try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
+        try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
 
-            XCTAssertEqual(manager.createdDestinations.count, 1)
-            let dInstance = manager.createdDestinations.first!
+        #expect(manager.createdDestinations.count == 1)
+        let dInstance = try #require(manager.createdDestinations.first)
 
-            XCTAssertEqual(dInstance.value(forKey: "macAddress") as? String, "00:11:22:33:44:55")
-            XCTAssertEqual(dInstance.value(forKey: "address") as? String, "192.168.1.100")
-            XCTAssertEqual(dInstance.value(forKey: "isHidden") as? Bool, true)
-            XCTAssertEqual(dInstance.value(forKey: "skipUpdateTag") as? String, "v1.0")
+        #expect(dInstance.value(forKey: "macAddress") as? String == "00:11:22:33:44:55")
+        #expect(dInstance.value(forKey: "address") as? String == "192.168.1.100")
+        #expect(dInstance.value(forKey: "isHidden") as? Bool == true)
+        #expect(dInstance.value(forKey: "skipUpdateTag") as? String == "v1.0")
 
-            // Verify Name Logic for non-custom name
-            XCTAssertNil(dInstance.value(forKey: "customName"))
-            XCTAssertEqual(dInstance.value(forKey: "originalName") as? String, "My Light")
+        // Verify Name Logic for non-custom name
+        #expect(dInstance.value(forKey: "customName") == nil)
+        #expect(dInstance.value(forKey: "originalName") as? String == "My Light")
 
-            // Verify Defaults
-            XCTAssertEqual(dInstance.value(forKey: "branch") as? String, Branch.unknown.rawValue)
-            XCTAssertEqual(dInstance.value(forKey: "lastSeen") as? Int, 0)
+        // Verify Defaults
+        #expect(dInstance.value(forKey: "branch") as? String == Branch.unknown.rawValue)
+        #expect(dInstance.value(forKey: "lastSeen") as? Int == 0)
 
-            // Verify Association
-            XCTAssertTrue(manager.associateCalled)
-
-        } catch {
-            XCTFail("Migration failed with error: \(error)")
-        }
+        // Verify Association
+        #expect(manager.associateCalled)
     }
 
-    func testValidMigrationWithCustomName() {
+    @Test
+    func validMigrationWithCustomName() throws {
         // Create valid source object with custom name
-        let sourceEntity = sourceModel.entitiesByName["Device"]!
+        let sourceEntity = try #require(sourceModel.entitiesByName["Device"])
         let sInstance = NSManagedObject(entity: sourceEntity, insertInto: sourceContext)
         sInstance.setValue("AA:BB:CC:DD:EE:FF", forKey: "macAddress")
         sInstance.setValue(true, forKey: "isCustomName")
         sInstance.setValue("Custom Light", forKey: "name")
 
-        do {
-            try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
+        try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
 
-            XCTAssertEqual(manager.createdDestinations.count, 1)
-            let dInstance = manager.createdDestinations.first!
+        #expect(manager.createdDestinations.count == 1)
+        let dInstance = try #require(manager.createdDestinations.first)
 
-            // Verify Name Logic for custom name
-            XCTAssertEqual(dInstance.value(forKey: "customName") as? String, "Custom Light")
-            XCTAssertNil(dInstance.value(forKey: "originalName"))
-
-        } catch {
-            XCTFail("Migration failed with error: \(error)")
-        }
+        // Verify Name Logic for custom name
+        #expect(dInstance.value(forKey: "customName") as? String == "Custom Light")
+        #expect(dInstance.value(forKey: "originalName") == nil)
     }
 
-    func testEmptyMacAddress() {
-        let sInstance = NSManagedObject(entity: sourceModel.entitiesByName["Device"]!, insertInto: sourceContext)
+    @Test
+    func emptyMacAddress() throws {
+        let sourceEntity = try #require(sourceModel.entitiesByName["Device"])
+        let sInstance = NSManagedObject(entity: sourceEntity, insertInto: sourceContext)
         sInstance.setValue("", forKey: "macAddress")
 
-        do {
-            try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
-            XCTAssertEqual(manager.createdDestinations.count, 0)
-        } catch {
-            XCTFail("Migration failed with error: \(error)")
-        }
+        try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
+        #expect(manager.createdDestinations.count == 0)
     }
 
-    func testUnknownMacAddress() {
-        let sInstance = NSManagedObject(entity: sourceModel.entitiesByName["Device"]!, insertInto: sourceContext)
+    @Test
+    func unknownMacAddress() throws {
+        let sourceEntity = try #require(sourceModel.entitiesByName["Device"])
+        let sInstance = NSManagedObject(entity: sourceEntity, insertInto: sourceContext)
         sInstance.setValue("__unknown__", forKey: "macAddress")
 
-        do {
-            try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
-            XCTAssertEqual(manager.createdDestinations.count, 0)
-        } catch {
-            XCTFail("Migration failed with error: \(error)")
-        }
+        try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
+        #expect(manager.createdDestinations.count == 0)
     }
 
-    func testMissingMacAddress() {
-         let sInstance = NSManagedObject(entity: sourceModel.entitiesByName["Device"]!, insertInto: sourceContext)
+    @Test
+    func missingMacAddress() throws {
+         let sourceEntity = try #require(sourceModel.entitiesByName["Device"])
+         let sInstance = NSManagedObject(entity: sourceEntity, insertInto: sourceContext)
          sInstance.setValue(nil, forKey: "macAddress")
 
-         do {
-             try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
-             XCTAssertEqual(manager.createdDestinations.count, 0)
-         } catch {
-             XCTFail("Migration failed with error: \(error)")
-         }
+         try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
+         #expect(manager.createdDestinations.count == 0)
      }
 
-    func testDuplicateMacAddress() {
+    @Test
+    func duplicateMacAddress() throws {
         let mac = "00:11:22:33:44:55"
+        let sourceEntity = try #require(sourceModel.entitiesByName["Device"])
 
         // First Object
-        let sInstance1 = NSManagedObject(entity: sourceModel.entitiesByName["Device"]!, insertInto: sourceContext)
+        let sInstance1 = NSManagedObject(entity: sourceEntity, insertInto: sourceContext)
         sInstance1.setValue(mac, forKey: "macAddress")
         sInstance1.setValue("Name 1", forKey: "name")
 
         // Second Object (Duplicate)
-        let sInstance2 = NSManagedObject(entity: sourceModel.entitiesByName["Device"]!, insertInto: sourceContext)
+        let sInstance2 = NSManagedObject(entity: sourceEntity, insertInto: sourceContext)
         sInstance2.setValue(mac, forKey: "macAddress")
         sInstance2.setValue("Name 2", forKey: "name")
 
-        do {
-            // Migrate first instance
-            try policy.createDestinationInstances(forSource: sInstance1, in: mapping, manager: manager)
-            XCTAssertEqual(manager.createdDestinations.count, 1)
+        // Migrate first instance
+        try policy.createDestinationInstances(forSource: sInstance1, in: mapping, manager: manager)
+        #expect(manager.createdDestinations.count == 1)
 
-            // Migrate second instance
-            try policy.createDestinationInstances(forSource: sInstance2, in: mapping, manager: manager)
-            XCTAssertEqual(manager.createdDestinations.count, 1, "Should not create a second instance for duplicate MAC")
-
-        } catch {
-            XCTFail("Migration failed with error: \(error)")
-        }
+        // Migrate second instance
+        try policy.createDestinationInstances(forSource: sInstance2, in: mapping, manager: manager)
+        #expect(manager.createdDestinations.count == 1, "Should not create a second instance for duplicate MAC")
     }
 
     // MARK: - Helpers
 
-    func createSourceModel() -> NSManagedObjectModel {
+    static func createSourceModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
 
         // Based on wled_native_data.xcdatamodel (the older one likely, or the one we are migrating FROM)
@@ -200,7 +172,7 @@ class StatelessDeviceMigrationPolicyTests: XCTestCase {
         return model
     }
 
-    func createDestinationModel() -> NSManagedObjectModel {
+    static func createDestinationModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
 
         // Based on v2.xcdatamodel (The target of migration)
