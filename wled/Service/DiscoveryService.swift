@@ -23,19 +23,15 @@ class DiscoveryService: NSObject, Identifiable {
         parameters.allowLocalEndpointReuse = true
         parameters.acceptLocalOnly = true
         parameters.allowFastOpen = true
-        
+
         browser = NWBrowser(for: descriptor, using: parameters)
 
         browser.stateUpdateHandler = { [weak self] state in
-            Task { @MainActor in
-                self?.handleBrowserState(state)
-            }
+            self?.handleBrowserState(state)
         }
 
         browser.browseResultsChangedHandler = { [weak self] results, changes in
-            Task { @MainActor in
-                self?.handleBrowseResults(results, changes)
-            }
+            self?.handleBrowseResults(results, changes)
         }
 
         browser.start(queue: DispatchQueue.main)
