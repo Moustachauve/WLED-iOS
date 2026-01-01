@@ -7,16 +7,16 @@ enum CardStyle {
 
 struct Card<Content: View>: View {
     let style: CardStyle
-    let content: Content
+    @ViewBuilder let content: () -> Content
 
-    init(style: CardStyle = .default, @ViewBuilder content: () -> Content) {
+    init(style: CardStyle = .default, @ViewBuilder content: @escaping () -> Content) {
         self.style = style
-        self.content = content()
+        self.content = content
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            content
+            content()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
