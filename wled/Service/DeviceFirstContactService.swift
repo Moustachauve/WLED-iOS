@@ -15,7 +15,7 @@ actor DeviceFirstContactService {
 
     private let persistenceController: PersistenceController
     private let urlSession: URLSession
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.wled", category: "DeviceFirstContactService")
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "ca.cgagnier.wled-native", category: "DeviceFirstContactService")
 
     enum ServiceError: LocalizedError {
         case invalidURL

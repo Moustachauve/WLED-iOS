@@ -5,7 +5,7 @@ import MarkdownUI
 import OSLog
 
 struct DeviceUpdateDetails: View {
-    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.wled", category: "DeviceUpdateDetails")
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "ca.cgagnier.wled-native", category: "DeviceUpdateDetails")
     // TODO: Pass the version to display instead of only showing the latest one
     // This will allow support for downgrading or chosing a different version
     // in the future.
