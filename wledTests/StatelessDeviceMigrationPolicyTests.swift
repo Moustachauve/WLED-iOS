@@ -4,12 +4,12 @@ import CoreData
 
 struct StatelessDeviceMigrationPolicyTests {
 
-    var sourceModel: NSManagedObjectModel
-    var destinationModel: NSManagedObjectModel
-    var policy: StatelessDeviceMigrationPolicy
-    var manager: MockMigrationManager
-    var mapping: NSEntityMapping
-    var sourceContext: NSManagedObjectContext
+    let sourceModel: NSManagedObjectModel
+    let destinationModel: NSManagedObjectModel
+    let policy: StatelessDeviceMigrationPolicy
+    let manager: MockMigrationManager
+    let mapping: NSEntityMapping
+    let sourceContext: NSManagedObjectContext
 
     init() {
         sourceModel = Self.createSourceModel()
