@@ -38,21 +38,6 @@ struct Card<Content: View>: View {
     }
 }
 
-// MARK: - CardGroupBoxStyle
-
-struct CardGroupBoxStyle: GroupBoxStyle {
-    let style: CardStyle
-
-    func makeBody(configuration: Configuration) -> some View {
-        Card(style: style) {
-            VStack(alignment: .leading, spacing: 8) {
-                configuration.label
-                configuration.content
-            }
-        }
-    }
-}
-
 struct Card_Previews: PreviewProvider {
     static var previews: some View {
         VStack {

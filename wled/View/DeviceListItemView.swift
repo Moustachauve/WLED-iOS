@@ -17,8 +17,11 @@ struct DeviceListItemView: View {
 
     var body: some View {
         let fixedDeviceColor = fixColor(device.currentColor)
+        let backgroundColor = isSelected
+        ? fixedDeviceColor.opacity(DeviceSelectionStyle.Style.selectedOpacity)
+        : fixedDeviceColor.opacity(DeviceSelectionStyle.Style.unselectedOpacity)
 
-        GroupBox {
+        Card(style: .device(color: backgroundColor)) {
             HStack {
                 DeviceInfoTwoRows(device: device)
 
@@ -69,23 +72,6 @@ struct DeviceListItemView: View {
     }
 }
 
-// MARK: - DeviceGroupBoxStyle
-
-struct DeviceGroupBoxStyle: GroupBoxStyle {
-    var deviceColor: Color
-
-    func makeBody(configuration: Configuration) -> some View {
-        CardGroupBoxStyle(style: .device(color: deviceColor))
-            .makeBody(configuration: configuration)
-    }
-}
-
-extension GroupBoxStyle where Self == DeviceGroupBoxStyle {
-    static func device(color: Color) -> DeviceGroupBoxStyle {
-        .init(deviceColor: color)
-    }
-}
-
 // MARK: - DeviceSelectionStyle
 
 struct DeviceSelectionStyle: ViewModifier {
@@ -95,7 +81,6 @@ struct DeviceSelectionStyle: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .groupBoxStyle(DeviceGroupBoxStyle(deviceColor: backgroundColor))
         // Prevent system from turning text white on selection
             .foregroundStyle(.primary)
         // Apply Tint/Accent for sliders/toggles
@@ -121,13 +106,7 @@ struct DeviceSelectionStyle: ViewModifier {
         return color.opacity(opacity)
     }
 
-    private var backgroundColor: Color {
-        isSelected
-        ? color.opacity(Style.selectedOpacity)
-        : color.opacity(Style.unselectedOpacity)
-    }
-
-    private enum Style {
+    enum Style {
         static let selectedOpacity: Double = 1.0
         static let unselectedOpacity: Double = 0.6
         static let selectedBorderWidth: CGFloat = 2.0
