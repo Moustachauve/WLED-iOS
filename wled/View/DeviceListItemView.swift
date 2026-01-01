@@ -75,13 +75,8 @@ struct DeviceGroupBoxStyle: GroupBoxStyle {
     var deviceColor: Color
 
     func makeBody(configuration: Configuration) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            configuration.label
-            configuration.content
-        }
-        .padding()
-        .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 12))
-        .background(deviceColor, in: RoundedRectangle(cornerRadius: 12))
+        CardGroupBoxStyle(style: .device(color: deviceColor))
+            .makeBody(configuration: configuration)
     }
 }
 

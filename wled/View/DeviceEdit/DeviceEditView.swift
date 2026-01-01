@@ -19,10 +19,9 @@ struct DeviceEditView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
-                GroupBox {
+                Card(style: .device(color: device.currentColor)) {
                     DeviceInfoTwoRows(device: device)
                 }
-                .groupBoxStyle(.device(color: device.currentColor))
                 .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
 
                 VStack(alignment: .leading) {
