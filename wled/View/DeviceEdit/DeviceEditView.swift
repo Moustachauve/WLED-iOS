@@ -52,8 +52,7 @@ struct DeviceEditView: View {
                 .padding(.bottom)
 
                 if (device.stateInfo != nil) {
-                    // TODO: extract the appearance of this VStack to be re-useable (Card)
-                    VStack(alignment: .leading) {
+                    Card {
                         if ((device.availableUpdateVersion ?? "").isEmpty) {
                             DeviceNoUpdateAvailable(
                                 device: device,
@@ -65,10 +64,6 @@ struct DeviceEditView: View {
                             DeviceUpdateAvailable(device: device)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(Color(UIColor.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
                     .animation(.default, value: device.availableUpdateVersion)
                     .animation(.default, value: viewModel.isCheckingForUpdates)
                 }
