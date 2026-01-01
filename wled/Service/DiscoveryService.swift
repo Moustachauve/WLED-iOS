@@ -16,7 +16,6 @@ class DiscoveryService: NSObject, Identifiable {
         self.onDeviceDiscovered = onDeviceDiscovered
     }
 
-    // TODO: Check if the `scan` function can be improved (mostly for readability)
     func scan() {
         let descriptor = NWBrowser.Descriptor.bonjourWithTXTRecord(type: "_wled._tcp", domain: "local.")
         let parameters = NWParameters()
@@ -27,11 +26,15 @@ class DiscoveryService: NSObject, Identifiable {
         browser = NWBrowser(for: descriptor, using: parameters)
 
         browser.stateUpdateHandler = { [weak self] state in
-            self?.handleBrowserState(state)
+            Task { @MainActor in
+                self?.handleBrowserState(state)
+            }
         }
 
         browser.browseResultsChangedHandler = { [weak self] results, changes in
-            self?.handleBrowseResults(results, changes)
+            Task { @MainActor in
+                self?.handleBrowseResults(results, changes)
+            }
         }
 
         browser.start(queue: DispatchQueue.main)
@@ -59,6 +62,7 @@ class DiscoveryService: NSObject, Identifiable {
             print(result.endpoint.debugDescription)
         }
 
+        // TODO: Since we get the IP and mac from the first contact, check if we can skip resolving the IP address and use the mDNS address directly for first contact
         for change in changes {
             if case .added(let result) = change {
                 resolveService(for: result)
@@ -76,12 +80,7 @@ class DiscoveryService: NSObject, Identifiable {
         if case .service(let name, _, _, _) = result.endpoint {
             print("Connecting to \(name), MAC: \(macAddress?.description ?? "nil")")
             let connection = NWConnection(to: result.endpoint, using: .tcp)
-
-            // Note: We capture 'connection' strongly in the closure to keep it alive
-            // until we are done (or indefinitely as in the original code).
             connection.stateUpdateHandler = { [weak self] state in
-                // connection.stateUpdateHandler runs on the queue passed to start() (.global())
-                // So we need to hop to MainActor to call handleConnectionState
                 Task { @MainActor in
                     self?.handleConnectionState(state, connection: connection, name: name, macAddress: macAddress)
                 }
@@ -91,7 +90,6 @@ class DiscoveryService: NSObject, Identifiable {
     }
 
     private func handleConnectionState(_ state: NWConnection.State, connection: NWConnection, name: String, macAddress: String?) {
-        // This method is now implicitly @MainActor because the class is.
         switch state {
         case .ready:
             if let innerEndpoint = connection.currentPath?.remoteEndpoint,
@@ -99,7 +97,6 @@ class DiscoveryService: NSObject, Identifiable {
                 let remoteHost = "\(host)".split(separator: "%")[0]
                 print("Connected to \(name) at", "\(remoteHost):\(port)")
 
-                // We are already on MainActor
                 self.onDeviceDiscovered("\(remoteHost)", macAddress)
             }
         default:
