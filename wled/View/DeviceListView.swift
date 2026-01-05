@@ -23,6 +23,10 @@ struct DeviceListView: View {
     private let offlineGracePeriod: TimeInterval = 60
     private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 
+    private var hasHiddenDevices: Bool {
+        viewModel.allDevicesWithState.contains { $0.device.isHidden }
+    }
+
     // MARK: - init
 
     // Allow injecting a specific context (defaulting to shared for the actual app)
@@ -128,24 +132,39 @@ struct DeviceListView: View {
     }
 
     var list: some View {
-        List(selection: $selection) {
-            if !onlineDevices.isEmpty {
-                deviceRows(for: onlineDevices)
-            } else if !showOfflineDevices && offlineDevices.isEmpty {
-                // Empty state hint could go here
-            }
+        ZStack {
+            List(selection: $selection) {
+                if !onlineDevices.isEmpty {
+                    deviceRows(for: onlineDevices)
+                }
 
-            // Offline Devices
-            if !offlineDevices.isEmpty && showOfflineDevices {
-                Section(header: Text("Offline Devices")) {
-                    deviceRows(for: offlineDevices)
+                // Offline Devices
+                if !offlineDevices.isEmpty && showOfflineDevices {
+                    Section(header: Text("Offline Devices")) {
+                        deviceRows(for: offlineDevices)
+                    }
                 }
             }
+            .listStyle(.plain)
+            .refreshable(action: refreshList)
+            
+            
+            if onlineDevices.isEmpty && offlineDevices.isEmpty {
+                EmptyDeviceListView(
+                    addDeviceButtonActive: $addDeviceButtonActive,
+                    showHiddenDevices: $showHiddenDevices,
+                    hasHiddenDevices: hasHiddenDevices
+                )
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+                .transition(.opacity)
+            }
         }
-        .listStyle(.plain)
-        .refreshable(action: refreshList)
+        .animation(.easeInOut, value: showHiddenDevices)
         .navigationTitle("Device List")
     }
+        
 
     @ViewBuilder
     private func deviceRows(for devices: [DeviceWithState]) -> some View {
