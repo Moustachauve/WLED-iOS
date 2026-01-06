@@ -58,10 +58,8 @@ class ReleaseService {
             let versions = try context.fetch(fetchRequest)
             return versions.first
         } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            print("ReleaseService: Failed to fetch latest version. Error: \(error.localizedDescription)")
+            return nil
         }
     }
 
@@ -74,33 +72,38 @@ class ReleaseService {
             return
         }
 
+        // Capture context locally to avoid capturing 'self' in the closure below
+        let context = self.context
         context.performAndWait {
-            // Delete existing versions first
-            let fetchRequest = Version.fetchRequest()
-            let versions = try? context.fetch(fetchRequest)
-            print("Deleting \(versions?.count ?? 0) versions")
-            for version in versions ?? [] {
-                context.delete(version)
-            }
-
-            // Create new versions
-            for release in allReleases {
-                let version = createVersion(release: release)
-                let assets = createAssetsForVersion(version: version, release: release)
-                print("Added version \(version.tagName ?? "[unknown]") with \(assets.count) assets")
-                do {
-                    try context.save()
-                } catch {
-                    let nsError = error as NSError
-                    fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            do {
+                // Delete existing versions first
+                let fetchRequest = Version.fetchRequest()
+                let versions = try context.fetch(fetchRequest)
+                print("Deleting \(versions.count) versions")
+                for version in versions {
+                    context.delete(version)
                 }
+
+                // Create new versions
+                for release in allReleases {
+                    let version = ReleaseService.createVersion(release: release, context: context)
+                    let assets = ReleaseService.createAssetsForVersion(version: version, release: release, context: context)
+                    print("Added version \(version.tagName ?? "[unknown]") with \(assets.count) assets")
+                }
+
+                try context.save()
+            } catch {
+                print("ReleaseService: Failed to refresh versions. Error: \(error.localizedDescription)")
+                // Rollback to clear any invalid state from the context
+                context.rollback()
             }
         }
     }
 
-
-
-    private func createVersion(release: Release) -> Version {
+    // MARK: - Static Helpers
+    // Made static to avoid capturing 'self' inside async/sendable closures
+    
+    private static func createVersion(release: Release, context: NSManagedObjectContext) -> Version {
         let version = Version(context: context)
         // Strip 'v' prefix if present to normalize data with the WLED API
         if release.tagName.hasPrefix("v") {
@@ -112,14 +115,14 @@ class ReleaseService {
         version.versionDescription = release.body
         version.isPrerelease = release.prerelease
         version.htmlUrl = release.htmlUrl
-
+        
         let dateFormatter = ISO8601DateFormatter()
         version.publishedDate = dateFormatter.date(from: release.publishedAt)
-
+        
         return version
     }
-
-    private func createAssetsForVersion(version: Version, release: Release) -> [Asset] {
+    
+    private static func createAssetsForVersion(version: Version, release: Release, context: NSManagedObjectContext) -> [Asset] {
         var assets = [Asset]()
         for releaseAsset in release.assets {
             let asset = Asset(context: context)
