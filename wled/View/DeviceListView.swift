@@ -155,9 +155,6 @@ struct DeviceListView: View {
                     showHiddenDevices: $showHiddenDevices,
                     hasHiddenDevices: hasHiddenDevices
                 )
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
                 .transition(.opacity)
             }
         }
