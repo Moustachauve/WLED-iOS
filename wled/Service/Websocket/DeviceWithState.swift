@@ -80,7 +80,7 @@ class DeviceWithState: ObservableObject, Identifiable {
             .combineLatest($stateInfo)
             .receive(on: DispatchQueue.main) // Perform logic on Main Thread (safe for Core Data)
             .map { [weak self] (deviceInputs, stateInfo) -> String? in
-                guard let self = self else { return nil }
+                guard self != nil else { return nil }
                 let (branchRaw, skipTag, device) = deviceInputs
 
                 // Extract necessary info, fail fast if missing

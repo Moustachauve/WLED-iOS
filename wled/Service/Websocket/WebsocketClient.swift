@@ -249,8 +249,14 @@ class WebsocketClient: NSObject, ObservableObject, URLSessionWebSocketDelegate {
     }
 }
 
+// MARK: - WeakSessionDelegate
+
 // Helper to break the strong reference cycle between URLSession and WebsocketClient
-final class WeakSessionDelegate: NSObject, URLSessionWebSocketDelegate {
+// @unchecked Sendable Justification:
+// 1. Problem: This class inherits `Sendable` conformance from `NSObject` but has a mutable `delegate` property, which triggers a concurrency warning.
+// 2. Safety: We manually verify thread safety because this delegate is exclusively used by a URLSession configured with `OperationQueue.main`.
+// 3. Conclusion: All access to the mutable `delegate` property is guaranteed to occur on the main thread, making the compiler's strict check unnecessary here.
+final class WeakSessionDelegate: NSObject, URLSessionWebSocketDelegate, @unchecked Sendable {
     weak var delegate: URLSessionWebSocketDelegate?
 
     init(_ delegate: URLSessionWebSocketDelegate? = nil) {

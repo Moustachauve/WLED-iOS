@@ -154,63 +154,84 @@ struct WebView: UIViewRepresentable {
             filePathDestination = nil
         }
 
-        func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping @MainActor () -> Void) {
-            var alertStyle = UIAlertController.Style.actionSheet
-            if (UIDevice.current.userInterfaceIdiom == .pad) {
-                alertStyle = UIAlertController.Style.alert
-            }
-            let alertController = UIAlertController(title: nil, message: message, preferredStyle: alertStyle)
-            alertController.addAction(
-                UIAlertAction(title: "OK", style: .default, handler: { (action) in completionHandler() })
-            )
-            if let controller = topMostViewController() {
-                controller.present(alertController, animated: true, completion: nil)
-            }
-        }
+        // MARK: - WKUIDelegate JavaScript Alerts (Async)
 
-        func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping @MainActor (Bool) -> Void) {
-            var alertStyle = UIAlertController.Style.actionSheet
-            if (UIDevice.current.userInterfaceIdiom == .pad) {
-                alertStyle = UIAlertController.Style.alert
-            }
-            let alertController = UIAlertController(title: nil, message: message, preferredStyle: alertStyle)
-            alertController.addAction(
-                UIAlertAction(title: "OK", style: .default, handler: { (action) in completionHandler(true) })
-            )
-            alertController.addAction(
-                UIAlertAction(title: "Cancel", style: .default, handler: { (action) in completionHandler(false) })
-            )
-
-            if let controller = topMostViewController() {
-                controller.present(alertController, animated: true, completion: nil)
-            }
-        }
-
-        func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping @MainActor (String?) -> Void) {
-            var alertStyle = UIAlertController.Style.actionSheet
-            if (UIDevice.current.userInterfaceIdiom == .pad) {
-                alertStyle = UIAlertController.Style.alert
-            }
-            let alertController = UIAlertController(title: nil, message: prompt, preferredStyle: alertStyle)
-
-            alertController.addTextField { (textField) in
-                textField.text = defaultText
-            }
-
-            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action) in
-                if let text = alertController.textFields?.first?.text {
-                    completionHandler(text)
-                } else {
-                    completionHandler(defaultText)
+        func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo) async {
+            await withCheckedContinuation { continuation in
+                var alertStyle = UIAlertController.Style.actionSheet
+                if (UIDevice.current.userInterfaceIdiom == .pad) {
+                    alertStyle = UIAlertController.Style.alert
                 }
-            }))
+                let alertController = UIAlertController(title: nil, message: message, preferredStyle: alertStyle)
+                alertController.addAction(
+                    UIAlertAction(title: "OK", style: .default, handler: { (action) in
+                        continuation.resume()
+                    })
+                )
+                if let controller = self.topMostViewController() {
+                    controller.present(alertController, animated: true, completion: nil)
+                } else {
+                    // Resume if we can't present, to avoid hanging the webview
+                    continuation.resume()
+                }
+            }
+        }
 
-            alertController.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { (action) in
-                completionHandler(nil)
-            }))
+        func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo) async -> Bool {
+            await withCheckedContinuation { continuation in
+                var alertStyle = UIAlertController.Style.actionSheet
+                if (UIDevice.current.userInterfaceIdiom == .pad) {
+                    alertStyle = UIAlertController.Style.alert
+                }
+                let alertController = UIAlertController(title: nil, message: message, preferredStyle: alertStyle)
+                alertController.addAction(
+                    UIAlertAction(title: "OK", style: .default, handler: { (action) in
+                        continuation.resume(returning: true)
+                    })
+                )
+                alertController.addAction(
+                    UIAlertAction(title: "Cancel", style: .default, handler: { (action) in
+                        continuation.resume(returning: false)
+                    })
+                )
 
-            if let controller = topMostViewController() {
-                controller.present(alertController, animated: true, completion: nil)
+                if let controller = self.topMostViewController() {
+                    controller.present(alertController, animated: true, completion: nil)
+                } else {
+                    continuation.resume(returning: false)
+                }
+            }
+        }
+
+        func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo) async -> String? {
+            await withCheckedContinuation { continuation in
+                var alertStyle = UIAlertController.Style.actionSheet
+                if (UIDevice.current.userInterfaceIdiom == .pad) {
+                    alertStyle = UIAlertController.Style.alert
+                }
+                let alertController = UIAlertController(title: nil, message: prompt, preferredStyle: alertStyle)
+
+                alertController.addTextField { (textField) in
+                    textField.text = defaultText
+                }
+
+                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action) in
+                    if let text = alertController.textFields?.first?.text {
+                        continuation.resume(returning: text)
+                    } else {
+                        continuation.resume(returning: defaultText)
+                    }
+                }))
+
+                alertController.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { (action) in
+                    continuation.resume(returning: nil)
+                }))
+
+                if let controller = self.topMostViewController() {
+                    controller.present(alertController, animated: true, completion: nil)
+                } else {
+                    continuation.resume(returning: nil)
+                }
             }
         }
 
