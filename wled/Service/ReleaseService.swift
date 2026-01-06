@@ -74,7 +74,7 @@ class ReleaseService {
 
         // Capture context locally to avoid capturing 'self' in the closure below
         let context = self.context
-        context.performAndWait {
+        await context.perform {
             do {
                 // Delete existing versions first
                 let fetchRequest = Version.fetchRequest()
