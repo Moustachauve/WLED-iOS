@@ -14,6 +14,7 @@ struct DeviceListView: View {
     @State private var addDeviceButtonActive: Bool = false
     @State private var showSettingsSheet: Bool = false
     @State private var currentTime = Date()
+    @State private var columnVisibility = NavigationSplitViewVisibility.doubleColumn
 
     @AppStorage("DeviceListView.showHiddenDevices") private var showHiddenDevices: Bool = false
     @AppStorage("DeviceListView.showOfflineDevices") private var showOfflineDevices: Bool = true
@@ -74,7 +75,7 @@ struct DeviceListView: View {
     //MARK: - Body
 
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             list
                 .toolbar{ toolbar }
                 .sheet(isPresented: $addDeviceButtonActive) {
@@ -90,6 +91,7 @@ struct DeviceListView: View {
         } detail: {
             detailView
         }
+        .navigationSplitViewStyle(.balanced)
         .onAppear(perform: appearAction)
         .onReceive(timer) { input in
             withAnimation {
