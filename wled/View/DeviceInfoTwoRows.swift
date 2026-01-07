@@ -30,6 +30,11 @@ struct DeviceInfoTwoRows: View {
                     .lineLimit(1)
                     .fixedSize()
                     .lineSpacing(0)
+
+                if let batteryLevel = device.stateInfo?.info.userMods?.batteryLevel {
+                    DeviceBatteryView(batteryLevel: batteryLevel)
+                }
+
                 let signalStrength = Int(device.stateInfo?.info.wifi.signal ?? 0)
                 Label {
                     Text(

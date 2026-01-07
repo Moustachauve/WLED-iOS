@@ -43,8 +43,7 @@ struct Info: Decodable {
     var product : String?
     var mac : String?
     var ipAddress : String?
-    // Missing: u - UserMods
-    
+    var userMods: UserMods?
     
     enum CodingKeys: String, CodingKey {
         case leds
@@ -80,5 +79,6 @@ struct Info: Decodable {
         case product
         case mac
         case ipAddress = "ip"
+        case userMods = "u"
     }
 }

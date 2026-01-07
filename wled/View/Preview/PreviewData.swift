@@ -19,7 +19,7 @@ struct PreviewData {
     // MARK: - Devices
 
     static var onlineDevice: DeviceWithState {
-        createDevice(name: "WLED Beam", ip: "10.0.1.12")
+        createDevice(name: "WLED Beam", ip: "10.0.1.12", batteryLevel: 85)
     }
 
     static var offlineDevice: DeviceWithState {
@@ -50,7 +50,8 @@ struct PreviewData {
         ip: String,
         version: String = "0.14.0",
         isHidden: Bool = false,
-        color: [Int] = [255, 160, 0]
+        color: [Int] = [255, 160, 0],
+        batteryLevel: Int? = nil
     ) -> DeviceWithState {
         let macAddress = "mock:mac:\(ip)"
         let request: NSFetchRequest<Device> = Device.fetchRequest()
@@ -73,7 +74,7 @@ struct PreviewData {
 
         let deviceWithState = DeviceWithState(initialDevice: device)
         deviceWithState.websocketStatus = .connected
-        deviceWithState.stateInfo = .mock(name: name, version: version, color: color)
+        deviceWithState.stateInfo = .mock(name: name, version: version, color: color, batteryLevel: batteryLevel)
 
         // Save to ensure ID is stable
         if viewContext.hasChanges {
@@ -104,10 +105,20 @@ struct PreviewData {
 // MARK: - Mock Data Extensions
 
 extension DeviceStateInfo {
-    static func mock(name: String, version: String, color: [Int]) -> DeviceStateInfo {
+    static func mock(name: String, version: String, color: [Int], batteryLevel: Int? = nil) -> DeviceStateInfo {
         let r = color.indices.contains(0) ? color[0] : 255
         let g = color.indices.contains(1) ? color[1] : 160
         let b = color.indices.contains(2) ? color[2] : 0
+
+        var userModsJson = ""
+        if let batteryLevel = batteryLevel {
+            userModsJson = """
+            , "u": {
+                "Battery level": [\(batteryLevel)],
+                "Battery voltage": [3.9]
+            }
+            """
+        }
 
         let json = """
         {
@@ -123,6 +134,7 @@ extension DeviceStateInfo {
                 "ver": "\(version)",
                 "leds": { "count": 30, "pwr": 0, "fps": 0, "maxpwr": 0, "maxseg": 0 },
                 "wifi": { "signal": -60 }
+                \(userModsJson)
             }
         }
         """
