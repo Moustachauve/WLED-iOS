@@ -63,6 +63,8 @@ struct WebView: UIViewRepresentable {
                 switch Locale.current.language.languageCode?.identifier {
                 case "fr":
                     return "fr"
+                case "zh":
+                    return "zh"
                 default:
                     return "en"
                 }
