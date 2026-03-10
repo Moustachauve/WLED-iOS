@@ -31,6 +31,32 @@ enum UpdateError: LocalizedError {
 @MainActor
 class DeviceUpdateService : ObservableObject {
 
+    // MARK: - Constants
+
+    /**
+     * Maps deprecated or transitional release names to the release name that should be used
+     * for OTA updates. This handles cases where the binary name changes between WLED releases.
+     *
+     * For example, devices running the ESP32_V4 tech-preview (WLED 0.15.x) must be updated
+     * with the standard ESP32 binary when upgrading to 0.16.0 or later, as ESP32_V4 assets will
+     * no longer be published in those releases. Within 0.15.x, ESP32_V4 assets still exist
+     * and no remapping is needed.
+     *
+     * These overrides are only applied when the target version is [RELEASE_OVERRIDES_MIN_VERSION]
+     * or greater.
+     *
+     * See: https://github.com/Moustachauve/WLED-Android/issues/129
+     */
+    static let releaseNameOverrides: [String: String] = [
+        "ESP32_V4": "ESP32",
+    ]
+    
+    /**
+     * The minimum target version from which [RELEASE_NAME_OVERRIDES] are applied.
+     * Overrides only take effect when upgrading to this version or later.
+     */
+    static let releaseOverridesMinVersion = "0.16.0"
+
     // MARK: - Properties
 
     /// List of platforms supported by the legacy update method.
@@ -98,13 +124,36 @@ class DeviceUpdateService : ObservableObject {
             return false
         }
 
-        let combined = "\(tagName)_\(release)"
+        let targetRelease = DeviceUpdateService.determineAsset(byRelease: release, targetVersion: tagName)
+
+        let combined = "\(tagName)_\(targetRelease)"
         let versionWithRelease = combined.lowercased().hasPrefix("v")
         ? String(combined.dropFirst())
         : combined
 
         self.assetName = "WLED_\(versionWithRelease).bin"
         return findAsset(assetName: assetName)
+    }
+
+    /// Determines the correct asset name by applying min version checks and overrides.
+    static func determineAsset(byRelease releaseName: String, targetVersion: String) -> String {
+        guard let parsedTargetVersion = SemanticVersion(targetVersion) else {
+            print("Warning: Failed to parse semantic version from \(targetVersion). Falling back to raw release name.")
+            return releaseName
+        }
+        
+        guard let minOverridesVersion = SemanticVersion(releaseOverridesMinVersion) else {
+            return releaseName
+        }
+        
+        if parsedTargetVersion >= minOverridesVersion {
+            let key = releaseName.uppercased()
+            if let override = releaseNameOverrides.first(where: { $0.key.uppercased() == key })?.value {
+                return override
+            }
+        }
+        
+        return releaseName
     }
 
     /// Determines the asset to download based on the device platform (e.g., esp32).
