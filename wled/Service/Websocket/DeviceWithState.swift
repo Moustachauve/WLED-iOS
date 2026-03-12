@@ -66,6 +66,11 @@ class DeviceWithState: ObservableObject, Identifiable {
     // MARK: - Update pipeline code
 
     private func setupUpdatePipeline() {
+        // Only react to changes in the version string, not the whole state
+        let versionPublisher = $stateInfo
+            .map { $0?.info.version }
+            .removeDuplicates()
+
         $device
             .map { device in
                 // This defines which values in the device can cause a
@@ -77,14 +82,13 @@ class DeviceWithState: ObservableObject, Identifiable {
                 .map { (branch: $0, skipTag: $1, device: device) }
             }
             .switchToLatest()
-            .combineLatest($stateInfo)
+            .combineLatest(versionPublisher)
             .receive(on: DispatchQueue.main) // Perform logic on Main Thread (safe for Core Data)
-            .map { (deviceInputs, stateInfo) -> String? in
+            .map { (deviceInputs, currentVersion) -> String? in
                 let (branchRaw, skipTag, device) = deviceInputs
 
                 // Extract necessary info, fail fast if missing
-                guard let info = stateInfo?.info,
-                      let currentVersion = info.version,
+                guard let currentVersion = currentVersion,
                       let context = device.managedObjectContext else {
                     return nil
                 }
