@@ -32,7 +32,6 @@ struct Card<Content: View>: View {
         case .device(let color):
             ZStack {
                 Rectangle().fill(color)
-                Rectangle().fill(.thickMaterial)
             }
         }
     }
