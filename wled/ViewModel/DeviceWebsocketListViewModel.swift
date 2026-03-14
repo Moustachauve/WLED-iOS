@@ -153,6 +153,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
             // Logic moved from WebsocketClient to here
             let newName = info.info.name
             let newVersion = info.info.version ?? ""
+            let newRepository = self.getRepositoryFromInfo(info.info)
 
             // Flag to determine if we need an immediate disk write
             var structuralChange = false
@@ -169,6 +170,10 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
             }
             if device.originalName != newName {
                 device.originalName = newName
+                structuralChange = true
+            }
+            if device.repository != newRepository {
+                device.repository = newRepository
                 structuralChange = true
             }
 
@@ -257,6 +262,15 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
                 try? ctx.save()
             }
         }
+    }
+
+    // MARK: - Repository Resolution
+
+    private func getRepositoryFromInfo(_ info: Info) -> String {
+        if let repo = info.repo, !repo.isEmpty {
+            return repo
+        }
+        return GithubApi.defaultRepository
     }
 
     // MARK: - Discovery Logic

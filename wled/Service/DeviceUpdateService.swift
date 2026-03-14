@@ -74,12 +74,16 @@ class DeviceUpdateService : ObservableObject {
 
     /// Returns the existing GitHub API instance or creates a new one if it doesn't exist.
     ///
+    /// Uses the repository stored in the firmware version record to ensure the binary
+    /// is downloaded from the correct GitHub repository.
+    ///
     /// - Returns: An instance of `GithubApi`.
     func getGithubApi() -> GithubApi {
         if let githubApi = self.githubApi {
             return githubApi
         }
-        let newApi = GithubApi()
+        let repository = version.repository ?? GithubApi.defaultRepository
+        let newApi = GithubApi(repository: repository)
         self.githubApi = newApi
         return newApi
     }

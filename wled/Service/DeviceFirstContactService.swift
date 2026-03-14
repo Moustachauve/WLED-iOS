@@ -61,7 +61,8 @@ actor DeviceFirstContactService {
             throw ServiceError.missingMacAddress
         }
 
-        return try await upsertDevice(macAddress: macAddress, hostname: cleanAddress, name: info.name)
+        let repository = getRepositoryFromInfo(info)
+        return try await upsertDevice(macAddress: macAddress, hostname: cleanAddress, name: info.name, repository: repository)
     }
 
     /// Attempts to identify and update a device using only the MAC address from mDNS/Discovery.
@@ -120,6 +121,23 @@ actor DeviceFirstContactService {
         return result
     }
 
+    // MARK: - Repository Resolution
+
+    /// Determines the GitHub repository to use for firmware updates based on device info.
+    ///
+    /// Resolution priority:
+    /// 1. Use the `repo` field from device info if available (added in WLED 0.15.2).
+    /// 2. Fall back to the default WLED repository.
+    ///
+    /// - Parameter info: The device info returned from the WLED API.
+    /// - Returns: A repository string in "owner/name" format.
+    func getRepositoryFromInfo(_ info: Info) -> String {
+        if let repo = info.repo, !repo.isEmpty {
+            return repo
+        }
+        return GithubApi.defaultRepository
+    }
+
     /// Fetches device information from the specified address.
     private func fetchDeviceInfo(address: String) async throws -> Info {
         // Construct URL, ensuring http scheme and json/info path
@@ -142,7 +160,7 @@ actor DeviceFirstContactService {
     }
 
     /// Handles the Core Data logic to find, update, or create the device.
-    private func upsertDevice(macAddress: String, hostname: String, name: String?) async throws -> NSManagedObjectID {
+    private func upsertDevice(macAddress: String, hostname: String, name: String?, repository: String) async throws -> NSManagedObjectID {
         let logger = self.logger
         return try await persistenceController.container.performBackgroundTask { context in
             context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -155,13 +173,14 @@ actor DeviceFirstContactService {
 
             if let existingDevice = try? context.fetch(request).first {
                 // Check if updates are actually needed to minimize Core Data thrashing
-                if existingDevice.address == hostname && existingDevice.originalName == name {
+                if existingDevice.address == hostname && existingDevice.originalName == name && existingDevice.repository == repository {
                     logger.debug("Device exists and is up to date: \(macAddress)")
                     device = existingDevice
                 } else {
                     logger.debug("Updating existing device: \(macAddress)")
                     existingDevice.address = hostname
                     existingDevice.originalName = name
+                    existingDevice.repository = repository
                     device = existingDevice
                 }
             } else {
@@ -171,6 +190,7 @@ actor DeviceFirstContactService {
                 device.address = hostname
                 device.originalName = name
                 device.isHidden = false
+                device.repository = repository
             }
 
             if context.hasChanges {

@@ -70,17 +70,18 @@ class DeviceWithState: ObservableObject, Identifiable {
             .map { device in
                 // This defines which values in the device can cause a
                 // recalculation of the currently available version.
-                return Publishers.CombineLatest(
+                return Publishers.CombineLatest3(
                     device.publisher(for: \.branch),
-                    device.publisher(for: \.skipUpdateTag)
+                    device.publisher(for: \.skipUpdateTag),
+                    device.publisher(for: \.repository)
                 )
-                .map { (branch: $0, skipTag: $1, device: device) }
+                .map { (branch: $0.0, skipTag: $0.1, repository: $0.2, device: device) }
             }
             .switchToLatest()
             .combineLatest($stateInfo)
             .receive(on: DispatchQueue.main) // Perform logic on Main Thread (safe for Core Data)
             .map { (deviceInputs, stateInfo) -> String? in
-                let (branchRaw, skipTag, device) = deviceInputs
+                let (branchRaw, skipTag, repositoryRaw, device) = deviceInputs
 
                 // Extract necessary info, fail fast if missing
                 guard let info = stateInfo?.info,
@@ -92,12 +93,14 @@ class DeviceWithState: ObservableObject, Identifiable {
                 // Use your existing Service logic
                 // Note: We use the raw strings from Core Data to create the Enum
                 let branchEnum = Branch(rawValue: branchRaw ?? "") ?? .unknown
+                let repository = repositoryRaw ?? GithubApi.defaultRepository
 
                 let releaseService = ReleaseService(context: context)
                 let newerTag = releaseService.getNewerReleaseTag(
                     versionName: currentVersion,
                     branch: branchEnum,
-                    ignoreVersion: skipTag ?? ""
+                    ignoreVersion: skipTag ?? "",
+                    repository: repository
                 )
 
                 return newerTag.isEmpty ? nil : newerTag

@@ -43,6 +43,8 @@ struct Info: Decodable {
     var product : String?
     var mac : String?
     var ipAddress : String?
+    /// The GitHub repository (owner/name) used for firmware updates. Added in WLED 0.15.2.
+    var repo : String?
     // Missing: u - UserMods
     
     
@@ -80,5 +82,6 @@ struct Info: Decodable {
         case product
         case mac
         case ipAddress = "ip"
+        case repo
     }
 }
