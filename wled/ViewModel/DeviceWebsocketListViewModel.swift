@@ -290,21 +290,21 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
         sortingQueue.async { [weak self] in
             guard let self = self else { return }
 
-            let online = currentDevices.filter { device in
-                self.isConsideredOnline(device, at: currentTime) && (showHidden || !device.device.isHidden)
+            let visibleDevices = currentDevices.filter { showHidden || !$0.device.isHidden }
+            let groupedDevices = Dictionary(grouping: visibleDevices) { device in
+                self.isConsideredOnline(device, at: currentTime)
             }
-            .sorted { $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending }
 
-            let offline = currentDevices.filter { device in
-                !self.isConsideredOnline(device, at: currentTime) && (showHidden || !device.device.isHidden)
+            let sortLogic: (DeviceWithState, DeviceWithState) -> Bool = {
+                $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending
             }
-            .sorted { $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending }
+
+            let online = (groupedDevices[true] ?? []).sorted(by: sortLogic)
+            let offline = (groupedDevices[false] ?? []).sorted(by: sortLogic)
 
             DispatchQueue.main.async {
-                withAnimation {
-                    self.onlineDevices = online
-                    self.offlineDevices = offline
-                }
+                self.onlineDevices = online
+                self.offlineDevices = offline
             }
         }
     }
@@ -320,7 +320,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
         let lastSeenDate = Date(timeIntervalSince1970: lastSeenSeconds)
 
         // Check if within grace period
-        return Date().timeIntervalSince(lastSeenDate) < offlineGracePeriod
+        return referenceTime.timeIntervalSince(lastSeenDate) < offlineGracePeriod
     }
 
     // MARK: - Discovery Logic

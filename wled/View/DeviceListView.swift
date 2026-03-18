@@ -121,6 +121,8 @@ struct DeviceListView: View {
                 .transition(.opacity)
             }
         }
+        .animation(.default, value: viewModel.onlineDevices)
+        .animation(.default, value: viewModel.offlineDevices)
         .animation(.easeInOut, value: showHiddenDevices)
         .navigationTitle("Device List")
     }
