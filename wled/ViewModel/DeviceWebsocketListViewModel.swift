@@ -11,6 +11,8 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     
     // The list of devices with their live state, exposed to the UI
     @Published var allDevicesWithState: [DeviceWithState] = []
+    @Published var onlineDevices: [DeviceWithState] = []
+    @Published var offlineDevices: [DeviceWithState] = []
     
     // Preferences (You can wrap these in AppStorage or standard UserDefaults in the View)
     @Published var showOfflineDevicesLast: Bool = false
@@ -37,6 +39,11 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     private var activeClients: [String: ClientWrapper] = [:]
     private var isPaused = false
     
+    /// Amount of time after a device becomes offline before it is considered offline.
+    private let offlineGracePeriod: TimeInterval = 60
+    private var cancellables = Set<AnyCancellable>()
+    private let sortingQueue = DispatchQueue(label: "com.wled.DeviceSortingQueue")
+
     // MARK: - Initialization
     
     init(context: NSManagedObjectContext) {
@@ -52,6 +59,20 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
         // Load preferences (Mocked for now, replace with your UserPreferences logic)
         self.showOfflineDevicesLast = UserDefaults.standard.bool(forKey: "showOfflineDevicesLast")
         self.showHiddenDevices = UserDefaults.standard.bool(forKey: "showHiddenDevices")
+
+        Timer.publish(every: 5, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] time in
+                self?.updateFilteredDevices(currentTime: time)
+            }
+            .store(in: &cancellables)
+
+        $showHiddenDevices
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.updateFilteredDevices(currentTime: Date())
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Setup and loading
@@ -188,6 +209,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
             self.allDevicesWithState = self.activeClients.values.map { wrapper in
                 wrapper.client.deviceState
             }
+            self.updateFilteredDevices(currentTime: Date())
         }
     }
     
@@ -257,6 +279,48 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
                 try? ctx.save()
             }
         }
+    }
+
+    // MARK: - Computed Data
+
+    private func updateFilteredDevices(currentTime: Date) {
+        let currentDevices = self.allDevicesWithState
+        let showHidden = self.showHiddenDevices
+
+        sortingQueue.async { [weak self] in
+            guard let self = self else { return }
+
+            let online = currentDevices.filter { device in
+                self.isConsideredOnline(device, at: currentTime) && (showHidden || !device.device.isHidden)
+            }
+            .sorted { $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending }
+
+            let offline = currentDevices.filter { device in
+                !self.isConsideredOnline(device, at: currentTime) && (showHidden || !device.device.isHidden)
+            }
+            .sorted { $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending }
+
+            DispatchQueue.main.async {
+                withAnimation {
+                    self.onlineDevices = online
+                    self.offlineDevices = offline
+                }
+            }
+        }
+    }
+
+    /// Determines if a device should be displayed in the "Online" section.
+    /// Returns true if the device is connected OR if it was seen within the grace period.
+    private func isConsideredOnline(_ device: DeviceWithState, at referenceTime: Date) -> Bool {
+        if device.isOnline { return true }
+
+        // Calculate time since last seen
+        // lastSeen is Int64 (milliseconds), convert to TimeInterval (seconds)
+        let lastSeenSeconds = TimeInterval(device.device.lastSeen) / 1000.0
+        let lastSeenDate = Date(timeIntervalSince1970: lastSeenSeconds)
+
+        // Check if within grace period
+        return Date().timeIntervalSince(lastSeenDate) < offlineGracePeriod
     }
 
     // MARK: - Discovery Logic

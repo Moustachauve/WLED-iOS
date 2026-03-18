@@ -13,16 +13,11 @@ struct DeviceListView: View {
 
     @State private var addDeviceButtonActive: Bool = false
     @State private var showSettingsSheet: Bool = false
-    @State private var currentTime = Date()
     @State private var columnVisibility = NavigationSplitViewVisibility.doubleColumn
 
     @AppStorage("DeviceListView.showHiddenDevices") private var showHiddenDevices: Bool = false
     @AppStorage("DeviceListView.showOfflineDevices") private var showOfflineDevices: Bool = true
     @AppStorage("lastSelectedDeviceMac") private var lastSelectedDeviceMac: String = ""
-
-    /// Amount of time after a device becomes offline before it is considered offline.
-    private let offlineGracePeriod: TimeInterval = 60
-    private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 
     private var hasHiddenDevices: Bool {
         viewModel.allDevicesWithState.contains { $0.device.isHidden }
@@ -40,36 +35,6 @@ struct DeviceListView: View {
             viewModel.makeClient = clientFactory
         }
         _viewModel = StateObject(wrappedValue: viewModel)
-    }
-
-    // MARK: - Computed Data
-
-    /// Determines if a device should be displayed in the "Online" section.
-    /// Returns true if the device is connected OR if it was seen within the grace period.
-    private func isConsideredOnline(_ device: DeviceWithState, at referenceTime: Date) -> Bool {
-        if device.isOnline { return true }
-
-        // Calculate time since last seen
-        // lastSeen is Int64 (milliseconds), convert to TimeInterval (seconds)
-        let lastSeenSeconds = TimeInterval(device.device.lastSeen) / 1000.0
-        let lastSeenDate = Date(timeIntervalSince1970: lastSeenSeconds)
-
-        // Check if within grace period
-        return Date().timeIntervalSince(lastSeenDate) < offlineGracePeriod
-    }
-
-    private var onlineDevices: [DeviceWithState] {
-        viewModel.allDevicesWithState.filter { device in
-            isConsideredOnline(device, at: currentTime) && (showHiddenDevices || !device.device.isHidden)
-        }
-        .sorted { $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending }
-    }
-
-    private var offlineDevices: [DeviceWithState] {
-        viewModel.allDevicesWithState.filter { device in
-            !isConsideredOnline(device, at: currentTime) && (showHiddenDevices || !device.device.isHidden)
-        }
-        .sorted { $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending }
     }
 
     //MARK: - Body
@@ -93,17 +58,13 @@ struct DeviceListView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .onAppear(perform: appearAction)
-        .onReceive(timer) { input in
-            withAnimation {
-                // Updating this state variable forces 'onlineDevices' to be re-evaluated
-                currentTime = input
-            }
+        .onChange(of: showHiddenDevices) { newValue in
+            viewModel.showHiddenDevices = newValue
         }
         .onChange(of: scenePhase) { newPhase in
             switch newPhase {
             case .active:
                 viewModel.onResume()
-                currentTime = Date()
             case .background, .inactive:
                 viewModel.onPause()
             @unknown default:
@@ -136,14 +97,14 @@ struct DeviceListView: View {
     var list: some View {
         ZStack {
             List(selection: $selection) {
-                if !onlineDevices.isEmpty {
-                    deviceRows(for: onlineDevices)
+                if !viewModel.onlineDevices.isEmpty {
+                    deviceRows(for: viewModel.onlineDevices)
                 }
 
                 // Offline Devices
-                if !offlineDevices.isEmpty && showOfflineDevices {
+                if !viewModel.offlineDevices.isEmpty && showOfflineDevices {
                     Section(header: Text("Offline Devices")) {
-                        deviceRows(for: offlineDevices)
+                        deviceRows(for: viewModel.offlineDevices)
                     }
                 }
             }
@@ -151,7 +112,7 @@ struct DeviceListView: View {
             .refreshable(action: refreshList)
             
             
-            if onlineDevices.isEmpty && offlineDevices.isEmpty {
+            if viewModel.onlineDevices.isEmpty && viewModel.offlineDevices.isEmpty {
                 EmptyDeviceListView(
                     addDeviceButtonActive: $addDeviceButtonActive,
                     showHiddenDevices: $showHiddenDevices,
@@ -288,6 +249,7 @@ struct DeviceListView: View {
     }
 
     private func appearAction() {
+        viewModel.showHiddenDevices = showHiddenDevices
         viewModel.load()
         viewModel.onResume()
         viewModel.startDiscovery()
