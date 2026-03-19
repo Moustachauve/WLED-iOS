@@ -66,9 +66,9 @@ struct DeviceWebsocketListViewModelTests {
         #expect(viewModel.offlineDevices.count == 1)
         #expect(viewModel.onlineDevices.isEmpty)
 
-        // Switch to connected — the reactive pipeline triggers immediately (no debounce)
+        // Switch to connected — the reactive pipeline triggers after debounce
         mockClient.setStatus(.connected)
-        try await Task.sleep(for: .milliseconds(100)) // Brief yield for Combine pipeline
+        try await Task.sleep(for: .milliseconds(500)) // Wait for 200ms debounce + Combine propagation
         
         #expect(viewModel.onlineDevices.count == 1)
         #expect(viewModel.offlineDevices.isEmpty)

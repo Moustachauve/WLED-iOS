@@ -96,6 +96,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
                     .prepend(()) // Trigger immediately when the list changes
             }
             .switchToLatest()
+            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateFilteredDevices(currentTime: Date())
             }

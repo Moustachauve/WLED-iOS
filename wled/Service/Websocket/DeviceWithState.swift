@@ -42,7 +42,11 @@ class DeviceWithState: ObservableObject, Identifiable {
 
     private func setDeviceWillChange() {
         // Forward changes from the inner Core Data Device to this wrapper
+        // Throttled to prevent high-frequency metadata changes (e.g. lastSeen)
+        // from spamming objectWillChange. Critical state like stateInfo and
+        // websocketStatus are @Published directly and bypass this throttle.
         device.objectWillChange
+            .throttle(for: .milliseconds(500), scheduler: DispatchQueue.main, latest: true)
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
@@ -77,7 +81,14 @@ class DeviceWithState: ObservableObject, Identifiable {
                 .map { (branch: $0, skipTag: $1, device: device) }
             }
             .switchToLatest()
-            .combineLatest($stateInfo)
+            .combineLatest(
+                $stateInfo
+                    .debounce(for: .seconds(2), scheduler: DispatchQueue.main)
+            )
+            .removeDuplicates { prev, curr in
+                // Only re-query Core Data if the firmware version actually changed
+                prev.1?.info.version == curr.1?.info.version
+            }
             .receive(on: DispatchQueue.main) // Perform logic on Main Thread (safe for Core Data)
             .map { (deviceInputs, stateInfo) -> String? in
                 let (branchRaw, skipTag, device) = deviceInputs
