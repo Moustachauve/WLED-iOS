@@ -46,6 +46,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     
     private var activeClients: [String: ClientWrapper] = [:]
     private var isPaused = false
+    private var backgroundTask: Task<Void, Never>?
     
     /// Amount of time after a device becomes offline before it is considered offline.
     private let offlineGracePeriod: TimeInterval = 60
@@ -251,18 +252,30 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     // MARK: - Lifecycle (Call these from App ScenePhase)
     
     func onPause() {
-        print("[ListVM] onPause: Pausing all connections.")
-        isPaused = true
-        activeClients.values.forEach { $0.client.disconnect() }
-        
-        // SAVE: Persist "lastSeen" and other pending changes when app goes to background
-        if context.hasChanges {
-            try? context.save()
+        print("[ListVM] onPause: Scheduling disconnect.")
+        backgroundTask?.cancel()
+        backgroundTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(for: .seconds(2))
+            } catch {
+                // Task was cancelled (user came back quickly)
+                return
+            }
+            guard let self = self else { return }
+            print("[ListVM] onPause: Disconnecting all connections.")
+            self.isPaused = true
+            self.activeClients.values.forEach { $0.client.disconnect() }
+            if self.context.hasChanges {
+                try? self.context.save()
+            }
         }
     }
     
     func onResume() {
-        print("[ListVM] onResume: Resuming all connections.")
+        print("[ListVM] onResume: Cancelling pending disconnect and resuming.")
+        backgroundTask?.cancel()
+        backgroundTask = nil
+        guard isPaused else { return } // Nothing to resume if we never disconnected
         isPaused = false
         activeClients.values.forEach { $0.client.connect() }
     }

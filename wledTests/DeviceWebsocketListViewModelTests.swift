@@ -84,6 +84,51 @@ struct DeviceWebsocketListViewModelTests {
         device.isHidden = isHidden
         return device
     }
+
+    @Test func testQuickResumeDoesNotDisconnect() async throws {
+        let device = createDevice(name: "Test Device", mac: "01", isHidden: false)
+        try context.save()
+
+        let viewModel = DeviceWebsocketListViewModel(context: context)
+        let mockClient = ManualMockWebsocketClient(device: device)
+        viewModel.makeClient = { _ in mockClient }
+
+        viewModel.load()
+        mockClient.setStatus(.connected)
+        viewModel.updateFilteredDevices(currentTime: Date())
+        #expect(viewModel.onlineDevices.count == 1)
+
+        // Simulate quick background + resume (app switcher peek)
+        viewModel.onPause()
+        try await Task.sleep(for: .milliseconds(200)) // Well under the 2s delay
+        viewModel.onResume()
+
+        // Device should still be connected — disconnect was cancelled
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(mockClient.deviceState.websocketStatus == .connected)
+        #expect(viewModel.onlineDevices.count == 1)
+    }
+
+    @Test func testFullBackgroundDisconnectsAfterDelay() async throws {
+        let device = createDevice(name: "Test Device", mac: "01", isHidden: false)
+        try context.save()
+
+        let viewModel = DeviceWebsocketListViewModel(context: context)
+        let mockClient = ManualMockWebsocketClient(device: device)
+        viewModel.makeClient = { _ in mockClient }
+
+        viewModel.load()
+        mockClient.setStatus(.connected)
+        viewModel.updateFilteredDevices(currentTime: Date())
+        #expect(viewModel.onlineDevices.count == 1)
+
+        // Simulate going to background and staying there
+        viewModel.onPause()
+        try await Task.sleep(for: .seconds(2.5)) // Wait past the 2s delay
+
+        // Device should now be disconnected
+        #expect(mockClient.deviceState.websocketStatus == .disconnected)
+    }
 }
 
 // Precise control mock
@@ -93,5 +138,8 @@ class ManualMockWebsocketClient: WebsocketClient {
     }
     
     override func connect() { /* no-op */ }
-    override func disconnect() { /* no-op */ }
+    override func disconnect() {
+        self.deviceState.websocketStatus = .disconnected
+    }
 }
+

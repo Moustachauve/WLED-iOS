@@ -60,8 +60,10 @@ struct DeviceListView: View {
             switch newPhase {
             case .active:
                 viewModel.onResume()
-            case .background, .inactive:
+            case .background:
                 viewModel.onPause()
+            case .inactive:
+                break // Don't disconnect during transient gestures (app switcher, notifications)
             @unknown default:
                 break
             }
