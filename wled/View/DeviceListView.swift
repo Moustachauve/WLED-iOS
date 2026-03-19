@@ -15,8 +15,6 @@ struct DeviceListView: View {
     @State private var showSettingsSheet: Bool = false
     @State private var columnVisibility = NavigationSplitViewVisibility.doubleColumn
 
-    @AppStorage("DeviceListView.showHiddenDevices") private var showHiddenDevices: Bool = false
-    @AppStorage("DeviceListView.showOfflineDevices") private var showOfflineDevices: Bool = true
     @AppStorage("lastSelectedDeviceMac") private var lastSelectedDeviceMac: String = ""
 
     private var hasHiddenDevices: Bool {
@@ -48,8 +46,8 @@ struct DeviceListView: View {
                 }
                 .sheet(isPresented: $showSettingsSheet) {
                     Settings(
-                        showHiddenDevices: $showHiddenDevices,
-                        showOfflineDevices: $showOfflineDevices
+                        showHiddenDevices: $viewModel.showHiddenDevices,
+                        showOfflineDevices: $viewModel.showOfflineDevices
                     )
                 }
                 .navigationBarTitleDisplayMode(.inline)
@@ -58,9 +56,6 @@ struct DeviceListView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .onAppear(perform: appearAction)
-        .onChange(of: showHiddenDevices) { newValue in
-            viewModel.showHiddenDevices = newValue
-        }
         .onChange(of: scenePhase) { newPhase in
             switch newPhase {
             case .active:
@@ -102,7 +97,7 @@ struct DeviceListView: View {
                 }
 
                 // Offline Devices
-                if !viewModel.offlineDevices.isEmpty && showOfflineDevices {
+                if !viewModel.offlineDevices.isEmpty && viewModel.showOfflineDevices {
                     Section(header: Text("Offline Devices")) {
                         deviceRows(for: viewModel.offlineDevices)
                     }
@@ -115,7 +110,7 @@ struct DeviceListView: View {
             if viewModel.onlineDevices.isEmpty && viewModel.offlineDevices.isEmpty {
                 EmptyDeviceListView(
                     addDeviceButtonActive: $addDeviceButtonActive,
-                    showHiddenDevices: $showHiddenDevices,
+                    showHiddenDevices: $viewModel.showHiddenDevices,
                     hasHiddenDevices: hasHiddenDevices
                 )
                 .transition(.opacity)
@@ -123,7 +118,7 @@ struct DeviceListView: View {
         }
         .animation(.default, value: viewModel.onlineDevices)
         .animation(.default, value: viewModel.offlineDevices)
-        .animation(.easeInOut, value: showHiddenDevices)
+        .animation(.easeInOut, value: viewModel.showHiddenDevices)
         .navigationTitle("Device List")
     }
         
@@ -217,10 +212,10 @@ struct DeviceListView: View {
     var visibilityButton: some View {
         Button {
             withAnimation {
-                showHiddenDevices.toggle()
+                viewModel.showHiddenDevices.toggle()
             }
         } label: {
-            if (showHiddenDevices) {
+            if (viewModel.showHiddenDevices) {
                 Label("Hide Hidden Devices", systemImage: "eye.slash")
             } else {
                 Label("Show Hidden Devices", systemImage: "eye")
@@ -231,10 +226,10 @@ struct DeviceListView: View {
     var hideOfflineButton: some View {
         Button {
             withAnimation {
-                showOfflineDevices.toggle()
+                viewModel.showOfflineDevices.toggle()
             }
         } label: {
-            if (showOfflineDevices) {
+            if (viewModel.showOfflineDevices) {
                 Label("Hide Offline Devices", systemImage: "wifi")
             } else {
                 Label("Show Offline Devices", systemImage: "wifi.slash")
@@ -251,7 +246,6 @@ struct DeviceListView: View {
     }
 
     private func appearAction() {
-        viewModel.showHiddenDevices = showHiddenDevices
         viewModel.load()
         viewModel.onResume()
         viewModel.startDiscovery()

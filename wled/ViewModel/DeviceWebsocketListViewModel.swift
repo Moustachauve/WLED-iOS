@@ -14,9 +14,17 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     @Published var onlineDevices: [DeviceWithState] = []
     @Published var offlineDevices: [DeviceWithState] = []
     
-    // Preferences (You can wrap these in AppStorage or standard UserDefaults in the View)
-    @Published var showOfflineDevicesLast: Bool = false
-    @Published var showHiddenDevices: Bool = false
+    // Preferences
+    @Published var showHiddenDevices: Bool = false {
+        didSet {
+            UserDefaults.standard.set(showHiddenDevices, forKey: "DeviceListView.showHiddenDevices")
+        }
+    }
+    @Published var showOfflineDevices: Bool = true {
+        didSet {
+            UserDefaults.standard.set(showOfflineDevices, forKey: "DeviceListView.showOfflineDevices")
+        }
+    }
 
     var makeClient: (Device) -> WebsocketClient = { device in
         WebsocketClient(device: device)
@@ -56,19 +64,38 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
             }
         }
 
-        // Load preferences (Mocked for now, replace with your UserPreferences logic)
-        self.showOfflineDevicesLast = UserDefaults.standard.bool(forKey: "showOfflineDevicesLast")
-        self.showHiddenDevices = UserDefaults.standard.bool(forKey: "showHiddenDevices")
+        // Load preferences
+        self.showHiddenDevices = UserDefaults.standard.bool(forKey: "DeviceListView.showHiddenDevices")
+        if UserDefaults.standard.object(forKey: "DeviceListView.showOfflineDevices") == nil {
+            self.showOfflineDevices = true
+        } else {
+            self.showOfflineDevices = UserDefaults.standard.bool(forKey: "DeviceListView.showOfflineDevices")
+        }
 
-        Timer.publish(every: 5, on: .main, in: .common)
+        // Periodically refresh for time-based online/offline status changes (grace period)
+        Timer.publish(every: 30, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] time in
                 self?.updateFilteredDevices(currentTime: time)
             }
             .store(in: &cancellables)
 
-        $showHiddenDevices
+        // Reactively update when preferences change
+        Publishers.CombineLatest($showHiddenDevices, $showOfflineDevices)
             .dropFirst()
+            .sink { [weak self] _ in
+                self?.updateFilteredDevices(currentTime: Date())
+            }
+            .store(in: &cancellables)
+
+        // Reactively update when any device status changes or the list itself changes
+        $allDevicesWithState
+            .map { devices in
+                Publishers.MergeMany(devices.map { $0.objectWillChange })
+                    .map { _ in () }
+                    .prepend(()) // Trigger immediately when the list changes
+            }
+            .switchToLatest()
             .sink { [weak self] _ in
                 self?.updateFilteredDevices(currentTime: Date())
             }
@@ -205,12 +232,10 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
 
     private func publishState() {
         // Map the clients to the DeviceWithState list expected by the UI
-        DispatchQueue.main.async {
-            self.allDevicesWithState = self.activeClients.values.map { wrapper in
-                wrapper.client.deviceState
-            }
-            self.updateFilteredDevices(currentTime: Date())
+        self.allDevicesWithState = self.activeClients.values.map { wrapper in
+            wrapper.client.deviceState
         }
+        self.updateFilteredDevices(currentTime: Date())
     }
     
     // MARK: - NSFetchedResultsControllerDelegate
@@ -270,7 +295,8 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     }
     
     func deleteDevice(_ device: Device) {
-        print("[ListVM] Deleting device \(device.originalName ?? "")")// Capture context locally to avoid isolation issues in the closure
+        print("[ListVM] Deleting device \(device.originalName ?? "")")
+        // Capture context locally to avoid isolation issues in the closure
         let objectID = device.objectID
         let ctx = context
         ctx.perform {
@@ -281,47 +307,35 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
         }
     }
 
-    // MARK: - Computed Data
+    func updateFilteredDevices(currentTime: Date) {
+        let visible = allDevicesWithState.filter { showHiddenDevices || !$0.device.isHidden }
+        let sorted = visible.sorted {
+            $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending
+        }
 
-    private func updateFilteredDevices(currentTime: Date) {
-        let currentDevices = self.allDevicesWithState
-        let showHidden = self.showHiddenDevices
-
-        sortingQueue.async { [weak self] in
-            guard let self = self else { return }
-
-            let visibleDevices = currentDevices.filter { showHidden || !$0.device.isHidden }
-            let groupedDevices = Dictionary(grouping: visibleDevices) { device in
-                self.isConsideredOnline(device, at: currentTime)
+        var online: [DeviceWithState] = []
+        var offline: [DeviceWithState] = []
+        for device in sorted {
+            let isConsideredOnline = device.isOnline || {
+                let lastSeenDate = Date(timeIntervalSince1970: TimeInterval(device.device.lastSeen) / 1000.0)
+                return currentTime.timeIntervalSince(lastSeenDate) < offlineGracePeriod
+            }()
+            if isConsideredOnline {
+                online.append(device)
+            } else {
+                offline.append(device)
             }
+        }
 
-            let sortLogic: (DeviceWithState, DeviceWithState) -> Bool = {
-                $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending
-            }
-
-            let online = (groupedDevices[true] ?? []).sorted(by: sortLogic)
-            let offline = (groupedDevices[false] ?? []).sorted(by: sortLogic)
-
-            DispatchQueue.main.async {
-                self.onlineDevices = online
-                self.offlineDevices = offline
-            }
+        // Only update if content changed to avoid unnecessary SwiftUI view body evaluations
+        if self.onlineDevices != online {
+            self.onlineDevices = online
+        }
+        if self.offlineDevices != offline {
+            self.offlineDevices = offline
         }
     }
 
-    /// Determines if a device should be displayed in the "Online" section.
-    /// Returns true if the device is connected OR if it was seen within the grace period.
-    private func isConsideredOnline(_ device: DeviceWithState, at referenceTime: Date) -> Bool {
-        if device.isOnline { return true }
-
-        // Calculate time since last seen
-        // lastSeen is Int64 (milliseconds), convert to TimeInterval (seconds)
-        let lastSeenSeconds = TimeInterval(device.device.lastSeen) / 1000.0
-        let lastSeenDate = Date(timeIntervalSince1970: lastSeenSeconds)
-
-        // Check if within grace period
-        return referenceTime.timeIntervalSince(lastSeenDate) < offlineGracePeriod
-    }
 
     // MARK: - Discovery Logic
 
