@@ -13,7 +13,6 @@ struct DeviceEditView: View {
         self.device = device
     }
 
-
     // MARK: - body
 
     var body: some View {
@@ -50,9 +49,9 @@ struct DeviceEditView: View {
                 }
                 .padding(.bottom)
 
-                if (device.stateInfo != nil) {
+                if device.stateInfo != nil {
                     Card {
-                        if ((device.availableUpdateVersion ?? "").isEmpty) {
+                        if (device.availableUpdateVersion ?? "").isEmpty {
                             DeviceNoUpdateAvailable(
                                 device: device,
                                 isCheckingForUpdates: viewModel.isCheckingForUpdates
@@ -95,13 +94,16 @@ struct DeviceNoUpdateAvailable: View {
             "Version \(device.stateInfo?.info.version ?? String(localized: "unknown_version"))"
         )
         HStack {
-            Button(action: {
-                Task {
-                    await onCheckForUpdate()
+            Button(
+                action: {
+                    Task {
+                        await onCheckForUpdate()
+                    }
+                },
+                label: {
+                    Text(isCheckingForUpdates ? "Checking for Updates" : "Check for Update")
                 }
-            }) {
-                Text(isCheckingForUpdates ? "Checking for Updates" : "Check for Update")
-            }
+            )
             .buttonStyle(.bordered)
             .padding(.trailing)
             .disabled(isCheckingForUpdates)
@@ -153,4 +155,3 @@ struct DeviceUpdateAvailable: View {
         DeviceEditView(device: PreviewData.onlineDevice)
     }
 }
-

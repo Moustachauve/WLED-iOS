@@ -142,4 +142,3 @@ class ManualMockWebsocketClient: WebsocketClient {
         self.deviceState.websocketStatus = .disconnected
     }
 }
-

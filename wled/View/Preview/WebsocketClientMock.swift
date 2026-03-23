@@ -47,4 +47,3 @@ class MockWebsocketClient: WebsocketClient {
         print("MockClient: Ignoring sendState \(state)")
     }
 }
-

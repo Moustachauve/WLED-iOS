@@ -1,4 +1,3 @@
-
 import SwiftUI
 @preconcurrency import WebKit
 
@@ -6,9 +5,9 @@ struct WebView: UIViewRepresentable {
 
     var url: URL?
     @Binding var reload: Bool
-    private let downloadCompleted: (URL) -> ()
+    private let downloadCompleted: (URL) -> Void
 
-    init(url: URL?, reload: Binding<Bool>, downloadCompleted: @escaping(URL) -> ()) {
+    init(url: URL?, reload: Binding<Bool>, downloadCompleted: @escaping (URL) -> Void) {
         self.url = url
         _reload = reload
         self.downloadCompleted = downloadCompleted
@@ -36,7 +35,7 @@ struct WebView: UIViewRepresentable {
             webView.load(request)
         }
 
-        if (reload) {
+        if reload {
             webView.reload()
             DispatchQueue.main.async {
                 reload = false
@@ -68,8 +67,8 @@ struct WebView: UIViewRepresentable {
                 }
             }()
 
-            let htmlPath = Bundle.main.path(forResource: "errorPage.\(langStr)", ofType: "html")
-            let htmlUrl = URL(fileURLWithPath: htmlPath!, isDirectory: false)
+            guard let htmlPath = Bundle.main.path(forResource: "errorPage.\(langStr)", ofType: "html") else { return }
+            let htmlUrl = URL(fileURLWithPath: htmlPath, isDirectory: false)
             webView.loadFileURL(htmlUrl, allowingReadAccessTo: htmlUrl)
         }
 
@@ -139,7 +138,7 @@ struct WebView: UIViewRepresentable {
                 let fileName = "\(pathPrefix)\(counterSuffix).\(pathExtension)"
 
                 let path = downloadDirectory.appendingPathComponent(fileName)
-                if (FileManager.default.fileExists(atPath: path.path)) {
+                if FileManager.default.fileExists(atPath: path.path) {
                     return getDownloadPath(suggestedFilename, counter + 1)
                 }
 
@@ -159,12 +158,12 @@ struct WebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo) async {
             await withCheckedContinuation { continuation in
                 var alertStyle = UIAlertController.Style.actionSheet
-                if (UIDevice.current.userInterfaceIdiom == .pad) {
+                if UIDevice.current.userInterfaceIdiom == .pad {
                     alertStyle = UIAlertController.Style.alert
                 }
                 let alertController = UIAlertController(title: nil, message: message, preferredStyle: alertStyle)
                 alertController.addAction(
-                    UIAlertAction(title: "OK", style: .default, handler: { (action) in
+                    UIAlertAction(title: "OK", style: .default, handler: { (_) in
                         continuation.resume()
                     })
                 )
@@ -180,17 +179,17 @@ struct WebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo) async -> Bool {
             await withCheckedContinuation { continuation in
                 var alertStyle = UIAlertController.Style.actionSheet
-                if (UIDevice.current.userInterfaceIdiom == .pad) {
+                if UIDevice.current.userInterfaceIdiom == .pad {
                     alertStyle = UIAlertController.Style.alert
                 }
                 let alertController = UIAlertController(title: nil, message: message, preferredStyle: alertStyle)
                 alertController.addAction(
-                    UIAlertAction(title: "OK", style: .default, handler: { (action) in
+                    UIAlertAction(title: "OK", style: .default, handler: { (_) in
                         continuation.resume(returning: true)
                     })
                 )
                 alertController.addAction(
-                    UIAlertAction(title: "Cancel", style: .default, handler: { (action) in
+                    UIAlertAction(title: "Cancel", style: .default, handler: { (_) in
                         continuation.resume(returning: false)
                     })
                 )
@@ -206,7 +205,7 @@ struct WebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo) async -> String? {
             await withCheckedContinuation { continuation in
                 var alertStyle = UIAlertController.Style.actionSheet
-                if (UIDevice.current.userInterfaceIdiom == .pad) {
+                if UIDevice.current.userInterfaceIdiom == .pad {
                     alertStyle = UIAlertController.Style.alert
                 }
                 let alertController = UIAlertController(title: nil, message: prompt, preferredStyle: alertStyle)
@@ -215,7 +214,7 @@ struct WebView: UIViewRepresentable {
                     textField.text = defaultText
                 }
 
-                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action) in
+                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { (_) in
                     if let text = alertController.textFields?.first?.text {
                         continuation.resume(returning: text)
                     } else {
@@ -223,7 +222,7 @@ struct WebView: UIViewRepresentable {
                     }
                 }))
 
-                alertController.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { (action) in
+                alertController.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { (_) in
                     continuation.resume(returning: nil)
                 }))
 

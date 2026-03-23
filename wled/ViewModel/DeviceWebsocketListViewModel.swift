@@ -3,7 +3,6 @@ import CoreData
 import Combine
 import SwiftUI
 
-
 @MainActor
 class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResultsControllerDelegate {
     
@@ -59,7 +58,7 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
         self.context = context
         super.init()
 
-        self.discoveryService = DiscoveryService{ [weak self] address, macAddress in
+        self.discoveryService = DiscoveryService { [weak self] address, macAddress in
             Task { @MainActor [weak self] in
                 self?.deviceDiscovered(at: address, withMACAddress: macAddress)
             }
@@ -349,7 +348,6 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
             self.offlineDevices = offline
         }
     }
-
 
     // MARK: - Discovery Logic
 

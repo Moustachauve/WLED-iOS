@@ -74,7 +74,7 @@ final class GithubApi: Sendable {
             do {
                 _ = try FileManager.default.replaceItemAt(targetFile, withItemAt: tempLocalUrl)
                 return true
-            } catch (let writeError) {
+            } catch let writeError {
                 print("error writing file \(targetFile) : \(writeError)")
                 return false
             }

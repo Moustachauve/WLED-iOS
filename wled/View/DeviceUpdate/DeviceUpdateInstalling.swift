@@ -64,7 +64,7 @@ struct DeviceUpdateInstalling: View {
     }
 
     var canDismiss: Bool {
-        switch (viewModel.status) {
+        switch viewModel.status {
         case .completed, .failed:
             return true
         default:
@@ -73,7 +73,7 @@ struct DeviceUpdateInstalling: View {
     }
 
     var dismissButtonText: LocalizedStringKey {
-        switch (viewModel.status) {
+        switch viewModel.status {
         case .completed, .failed:
             return LocalizedStringKey("Done")
         default:
@@ -118,7 +118,6 @@ struct SuccessView: View {
             .frame(width: 32.0, height: 32.0)
             .padding(.bottom, 5)
 
-
         Text("Update Completed!")
             .font(.title3)
             .bold()
@@ -159,11 +158,9 @@ extension Notification.Name {
     }
 }
 
-
 #Preview {
     let device = PreviewData.deviceWithUpdate
     let version = Version(context: PreviewData.viewContext)
     
     return DeviceUpdateInstalling(device: device, version: version)
 }
-

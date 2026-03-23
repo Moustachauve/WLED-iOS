@@ -13,9 +13,9 @@ struct PersistenceController {
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "wled_native_data")
         if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
         }
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+        container.loadPersistentStores(completionHandler: { (_, error) in
             if let error = error as NSError? {
                 // MARK: - Enhanced Error Logging
 
@@ -69,4 +69,3 @@ struct PersistenceController {
         description?.shouldInferMappingModelAutomatically = true
     }
 }
-

@@ -1,4 +1,3 @@
-
 import SwiftUI
 import CoreData
 
@@ -9,7 +8,7 @@ struct DeviceListView: View {
 
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.scenePhase) private var scenePhase
-    @State private var selection: DeviceWithState? = nil
+    @State private var selection: DeviceWithState?
 
     @State private var addDeviceButtonActive: Bool = false
     @State private var showSettingsSheet: Bool = false
@@ -35,12 +34,12 @@ struct DeviceListView: View {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
-    //MARK: - Body
+    // MARK: - Body
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             list
-                .toolbar{ toolbar }
+                .toolbar { toolbar }
                 .sheet(isPresented: $addDeviceButtonActive) {
                     DeviceAddView()
                 }
@@ -108,7 +107,6 @@ struct DeviceListView: View {
             .listStyle(.plain)
             .refreshable(action: refreshList)
             
-            
             if viewModel.onlineDevices.isEmpty && viewModel.offlineDevices.isEmpty {
                 EmptyDeviceListView(
                     addDeviceButtonActive: $addDeviceButtonActive,
@@ -124,7 +122,6 @@ struct DeviceListView: View {
         .navigationTitle("Device List")
     }
         
-
     @ViewBuilder
     private func deviceRows(for devices: [DeviceWithState]) -> some View {
         ForEach(devices) { device in
@@ -217,7 +214,7 @@ struct DeviceListView: View {
                 viewModel.showHiddenDevices.toggle()
             }
         } label: {
-            if (viewModel.showHiddenDevices) {
+            if viewModel.showHiddenDevices {
                 Label("Hide Hidden Devices", systemImage: "eye.slash")
             } else {
                 Label("Show Hidden Devices", systemImage: "eye")
@@ -231,7 +228,7 @@ struct DeviceListView: View {
                 viewModel.showOfflineDevices.toggle()
             }
         } label: {
-            if (viewModel.showOfflineDevices) {
+            if viewModel.showOfflineDevices {
                 Label("Hide Offline Devices", systemImage: "wifi")
             } else {
                 Label("Show Offline Devices", systemImage: "wifi.slash")
@@ -239,7 +236,7 @@ struct DeviceListView: View {
         }
     }
 
-    //MARK: - Actions
+    // MARK: - Actions
 
     @Sendable
     private func refreshList() async {
@@ -254,7 +251,7 @@ struct DeviceListView: View {
     }
 
     private func deleteItems(device: Device) {
-        if (selection?.device == device) {
+        if selection?.device == device {
             selection = nil
         }
         viewModel.deleteDevice(device)
@@ -291,10 +288,12 @@ struct DeviceListView: View {
 
 #Preview {
     // Ensure some data exists in the preview context
+    // swiftlint:disable redundant_discardable_let
     let _ = PreviewData.onlineDevice
     let _ = PreviewData.offlineDevice
     let _ = PreviewData.deviceWithUpdate
     let _ = PreviewData.hiddenDevice
+    // swiftlint:enable redundant_discardable_let
 
     DeviceListView(
         context: PreviewData.viewContext,

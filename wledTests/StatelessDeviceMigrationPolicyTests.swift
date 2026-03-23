@@ -83,7 +83,7 @@ struct StatelessDeviceMigrationPolicyTests {
         sInstance.setValue("", forKey: "macAddress")
 
         try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
-        #expect(manager.createdDestinations.count == 0)
+        #expect(manager.createdDestinations.isEmpty)
     }
 
     @Test
@@ -93,7 +93,7 @@ struct StatelessDeviceMigrationPolicyTests {
         sInstance.setValue("__unknown__", forKey: "macAddress")
 
         try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
-        #expect(manager.createdDestinations.count == 0)
+        #expect(manager.createdDestinations.isEmpty)
     }
 
     @Test
@@ -103,7 +103,7 @@ struct StatelessDeviceMigrationPolicyTests {
          sInstance.setValue(nil, forKey: "macAddress")
 
          try policy.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
-         #expect(manager.createdDestinations.count == 0)
+         #expect(manager.createdDestinations.isEmpty)
      }
 
     @Test

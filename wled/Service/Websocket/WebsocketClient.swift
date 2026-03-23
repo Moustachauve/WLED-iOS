@@ -2,7 +2,6 @@ import Foundation
 import CoreData
 import Combine
 
-
 @MainActor
 class WebsocketClient: NSObject, ObservableObject, URLSessionWebSocketDelegate {
     
@@ -94,7 +93,7 @@ class WebsocketClient: NSObject, ObservableObject, URLSessionWebSocketDelegate {
         print("\(tag): Manually disconnecting from \(deviceState.device.address ?? "")")
         isManuallyDisconnected = true
         
-        webSocketTask?.cancel(with: .normalClosure, reason: "Client disconnected".data(using: .utf8))
+        webSocketTask?.cancel(with: .normalClosure, reason: Data("Client disconnected".utf8))
         webSocketTask = nil
         
         DispatchQueue.main.async {

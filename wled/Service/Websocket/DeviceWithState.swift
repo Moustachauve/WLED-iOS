@@ -26,9 +26,9 @@ class DeviceWithState: ObservableObject, Identifiable {
     private var cancellables = Set<AnyCancellable>()
 
     @Published var device: Device
-    @Published var stateInfo: DeviceStateInfo? = nil
+    @Published var stateInfo: DeviceStateInfo?
     @Published var websocketStatus: WebsocketStatus = .disconnected
-    @Published var availableUpdateVersion: String? = nil
+    @Published var availableUpdateVersion: String?
 
     nonisolated let id: String
 

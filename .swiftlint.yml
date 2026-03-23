@@ -20,6 +20,7 @@ disabled_rules:
   - type_name
   - function_body_length
   - file_length
+  - todo
 
 # Opt-in rules
 opt_in_rules:
