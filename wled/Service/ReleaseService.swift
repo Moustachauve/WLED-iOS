@@ -2,13 +2,13 @@ import Foundation
 import CoreData
 
 class ReleaseService {
-    
+
     let context: NSManagedObjectContext
-    
+
     init(context: NSManagedObjectContext) {
         self.context = context
     }
-    
+
     /**
      * If a new version is available, returns the version tag of it.
      *
@@ -27,76 +27,90 @@ class ReleaseService {
         guard let latestTagName = latestVersion?.tagName, latestTagName != ignoreVersion else {
             return ""
         }
-        
+
         // If device is currently on a beta branch but the user selected a stable branch,
         // show the latest version as an update so that the user can get out of beta.
         if (branch == .stable && versionName.contains("-b")) {
             return latestTagName
         }
-        
-        let versionCompare = latestTagName.dropFirst().compare(versionName, options: .numeric)
+
+        let versionCompare = latestTagName.compare(versionName, options: .numeric)
         return versionCompare == .orderedDescending ? latestTagName : ""
     }
-    
-    
+
+
     func getLatestVersion(branch: Branch) -> Version? {
         let fetchRequest = Version.fetchRequest()
         fetchRequest.fetchLimit = 1
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "publishedDate", ascending: false)]
-        
+        var predicates = [NSPredicate]()
+
+        // For now, nightly branches are not supported.
+        predicates.append(NSPredicate(format: "tagName != %@", "nightly"))
+
         if (branch == Branch.stable) {
-            fetchRequest.predicate = NSPredicate(format: "isPrerelease == %@", "0")
+            predicates.append(NSPredicate(format: "isPrerelease == %@", NSNumber(value: false)))
         }
-        
+
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+
         do {
             let versions = try context.fetch(fetchRequest)
             return versions.first
         } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            print("ReleaseService: Failed to fetch latest version. Error: \(error.localizedDescription)")
+            return nil
         }
     }
-    
-    
+
+
     func refreshVersions() async {
-        let allReleases = await WLEDRepoApi().getAllReleases()
-        
+        let allReleases = await GithubApi().getAllReleases()
+
         guard !allReleases.isEmpty else {
             print("Did not find any releases")
             return
         }
-        
-        context.performAndWait {
-            // Delete existing versions first
-            let fetchRequest = Version.fetchRequest()
-            let versions = try? context.fetch(fetchRequest)
-            print("Deleting \(versions?.count ?? 0) versions")
-            for version in versions ?? [] {
-                context.delete(version)
-            }
-            
-            // Create new versions
-            for release in allReleases {
-                let version = createVersion(release: release)
-                let assets = createAssetsForVersion(version: version, release: release)
-                print("Added version \(version.tagName ?? "[unknown]") with \(assets.count) assets")
-                do {
-                    try context.save()
-                } catch {
-                    let nsError = error as NSError
-                    fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+
+        // Capture context locally to avoid capturing 'self' in the closure below
+        let context = self.context
+        await context.perform {
+            do {
+                // Delete existing versions first
+                let fetchRequest = Version.fetchRequest()
+                let versions = try context.fetch(fetchRequest)
+                print("Deleting \(versions.count) versions")
+                for version in versions {
+                    context.delete(version)
                 }
+
+                // Create new versions
+                for release in allReleases {
+                    let version = ReleaseService.createVersion(release: release, context: context)
+                    let assets = ReleaseService.createAssetsForVersion(version: version, release: release, context: context)
+                    print("Added version \(version.tagName ?? "[unknown]") with \(assets.count) assets")
+                }
+
+                try context.save()
+            } catch {
+                print("ReleaseService: Failed to refresh versions. Error: \(error.localizedDescription)")
+                // Rollback to clear any invalid state from the context
+                context.rollback()
             }
         }
     }
+
+    // MARK: - Static Helpers
+    // Made static to avoid capturing 'self' inside async/sendable closures
     
-    
-    
-    private func createVersion(release: Release) -> Version {
+    private static func createVersion(release: Release, context: NSManagedObjectContext) -> Version {
         let version = Version(context: context)
-        version.tagName = release.tagName
+        // Strip 'v' prefix if present to normalize data with the WLED API
+        if release.tagName.hasPrefix("v") {
+            version.tagName = String(release.tagName.dropFirst())
+        } else {
+            version.tagName = release.tagName
+        }
         version.name = release.name
         version.versionDescription = release.body
         version.isPrerelease = release.prerelease
@@ -108,7 +122,7 @@ class ReleaseService {
         return version
     }
     
-    private func createAssetsForVersion(version: Version, release: Release) -> [Asset] {
+    private static func createAssetsForVersion(version: Version, release: Release, context: NSManagedObjectContext) -> [Asset] {
         var assets = [Asset]()
         for releaseAsset in release.assets {
             let asset = Asset(context: context)

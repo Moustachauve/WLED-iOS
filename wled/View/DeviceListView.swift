@@ -1,136 +1,208 @@
 
-
 import SwiftUI
 import CoreData
 
-//  This helper class creates the correct `DeviceListView` depending on the iOS version
-struct DeviceListViewFabric {
-    @ViewBuilder
-    static func make() -> some View {
-        DeviceListView()
-    }
-}
-
-@available(iOS 16.0, macOS 13, tvOS 16.0, watchOS 9.0, *)
 struct DeviceListView: View {
-    
-    private static let sort = [
-        SortDescriptor(\Device.name, comparator: .localized, order: .forward)
-    ]
-    
-    @Environment(\.managedObjectContext) private var viewContext
-    
-    @FetchRequest(sortDescriptors: sort, animation: .default)
-    private var devices: FetchedResults<Device>
-    
-    @FetchRequest(sortDescriptors: sort, animation: .default)
-    private var devicesOffline: FetchedResults<Device>
-    
-    @State private var timer: Timer? = nil
-    
-    @State private var selection: Device? = nil
-    
+
+    // MARK: - Properties
+    @StateObject private var viewModel: DeviceWebsocketListViewModel
+
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var selection: DeviceWithState? = nil
+
     @State private var addDeviceButtonActive: Bool = false
-    
-    @SceneStorage("DeviceListView.showHiddenDevices") private var showHiddenDevices: Bool = false
-    @SceneStorage("DeviceListView.showOfflineDevices") private var showOfflineDevices: Bool = true
-    
-    private let discoveryService = DiscoveryService()
-    
-    //MARK: - UI
-    
+    @State private var showSettingsSheet: Bool = false
+    @State private var columnVisibility = NavigationSplitViewVisibility.doubleColumn
+
+    @AppStorage("lastSelectedDeviceMac") private var lastSelectedDeviceMac: String = ""
+
+    private var hasHiddenDevices: Bool {
+        viewModel.allDevicesWithState.contains { $0.device.isHidden }
+    }
+
+    // MARK: - init
+
+    // Allow injecting a specific context (defaulting to shared for the actual app)
+    init(
+        context: NSManagedObjectContext = PersistenceController.shared.container.viewContext,
+        clientFactory: ((Device) -> WebsocketClient)? = nil
+    ) {
+        let viewModel = DeviceWebsocketListViewModel(context: context)
+        if let clientFactory = clientFactory {
+            viewModel.makeClient = clientFactory
+        }
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
+    //MARK: - Body
+
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             list
                 .toolbar{ toolbar }
-                .sheet(isPresented: $addDeviceButtonActive, content: DeviceAddView.init)
+                .sheet(isPresented: $addDeviceButtonActive) {
+                    DeviceAddView()
+                }
+                .sheet(isPresented: $showSettingsSheet) {
+                    Settings(
+                        showHiddenDevices: $viewModel.showHiddenDevices,
+                        showOfflineDevices: $viewModel.showOfflineDevices
+                    )
+                }
                 .navigationBarTitleDisplayMode(.inline)
         } detail: {
             detailView
         }
+        .navigationSplitViewStyle(.balanced)
         .onAppear(perform: appearAction)
-        .onDisappear(perform: disappearAction)
-        .onChange(of: showHiddenDevices) { _ in updateFilter() }
-        .onChange(of: showOfflineDevices) { _ in updateFilter() }
+        .onChange(of: scenePhase) { newPhase in
+            switch newPhase {
+            case .active:
+                viewModel.onResume()
+            case .background:
+                viewModel.onPause()
+            case .inactive:
+                break // Don't disconnect during transient gestures (app switcher, notifications)
+            @unknown default:
+                break
+            }
+        }
+        .onChange(of: viewModel.allDevicesWithState) { devices in
+            restoreLastSelection(from: devices)
+        }
+        .onChange(of: selection) { newSelection in
+            if let mac = newSelection?.device.macAddress {
+                lastSelectedDeviceMac = mac
+            }
+        }
+        // Listen for layout changes (e.g. iPad rotation or window resizing)
+        // If the user expands the window, we want to fill the empty space immediately.
+        .onChange(of: horizontalSizeClass) { newSizeClass in
+            print(
+                "changed horizontalSizeClass, \(horizontalSizeClass, default: "unknown") -> \(newSizeClass, default: "unknown")"
+            )
+            // newSizeClass needs to be passed because the actual sizeClass is
+            // not changed just yet.
+            restoreLastSelection(
+                from: viewModel.allDevicesWithState,
+                currentSizeClass: newSizeClass
+            )
+        }
     }
-    
+
     var list: some View {
-        List(selection: $selection) {
-            sublist(devices: devices)
-            if !devicesOffline.isEmpty && showOfflineDevices {
-                Section(header: Text("Offline Devices")) {
-                    sublist(devices: devicesOffline)
+        ZStack {
+            List(selection: $selection) {
+                if !viewModel.onlineDevices.isEmpty {
+                    deviceRows(for: viewModel.onlineDevices)
+                }
+
+                // Offline Devices
+                if !viewModel.offlineDevices.isEmpty && viewModel.showOfflineDevices {
+                    Section(header: Text("Offline Devices")) {
+                        deviceRows(for: viewModel.offlineDevices)
+                    }
+                }
+            }
+            .listStyle(.plain)
+            .refreshable(action: refreshList)
+            
+            
+            if viewModel.onlineDevices.isEmpty && viewModel.offlineDevices.isEmpty {
+                EmptyDeviceListView(
+                    addDeviceButtonActive: $addDeviceButtonActive,
+                    showHiddenDevices: $viewModel.showHiddenDevices,
+                    hasHiddenDevices: hasHiddenDevices
+                )
+                .transition(.opacity)
+            }
+        }
+        .animation(.default, value: viewModel.onlineDevices)
+        .animation(.default, value: viewModel.offlineDevices)
+        .animation(.easeInOut, value: viewModel.showHiddenDevices)
+        .navigationTitle("Device List")
+    }
+        
+
+    @ViewBuilder
+    private func deviceRows(for devices: [DeviceWithState]) -> some View {
+        ForEach(devices) { device in
+            DeviceListItemView(
+                device: device,
+                isSelected: selection == device,
+                onTogglePower: { isOn in
+                    viewModel.setDevicePower(for: device, isOn: isOn)
+                },
+                onChangeBrightness: { brightness in
+                    viewModel.setBrightness(for: device, brightness: brightness)
+                }
+            )
+            .onTapGesture {
+                withAnimation {
+                    selection = device
+                }
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
+            .listRowSeparator(.hidden)
+            .buttonStyle(.plain)
+            .swipeActions(allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    withAnimation {
+                        deleteItems(device: device.device)
+                        let remainingDevices = devices.filter { $0 != device }
+                        // Call restore in case the selected item was deleted, this
+                        // will select another device (most likely the first one)
+                        restoreLastSelection(from: remainingDevices)
+                    }
+                } label: {
+                    Label("Delete", systemImage: "trash.fill")
                 }
             }
         }
-        .listStyle(.plain)
-        .refreshable(action: refreshList)
     }
-    
-    private func sublist(devices: FetchedResults<Device>) -> some View {
-        ForEach(devices) { device in
-            DeviceListItemView()
-                .overlay(
-                    NavigationLink("", value: device).opacity(0)
-                )
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-                .buttonStyle(PlainButtonStyle())
-                .environmentObject(device)
-                .swipeActions(allowsFullSwipe: true) {
-                    Button(role: .destructive) {
-                        deleteItems(device: device)
-                    } label: {
-                        Label("Delete", systemImage: "trash.fill")
-                    }
-                }
-        }
-    }
-    
+
     @ViewBuilder
     private var detailView: some View {
         if let device = selection {
             NavigationStack {
-                DeviceView()
-                    .environmentObject(device)
+                DeviceView(device: device)
             }
         } else {
             Text("Select A Device")
                 .font(.title2)
         }
     }
-    
+
+    // MARK: - Toolbar
+
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .principal) {
-            VStack {
-                Image(.wledLogoAkemi)
-                    .resizable()
-                    .scaledToFit()
-                    .padding(2)
-            }
-            .frame(maxWidth: 200)
+            Image(.wledLogoAkemi)
+                .resizable()
+                .scaledToFit()
+                .padding(3)
+                .frame(height: 50)
         }
-        ToolbarItem {
-            Menu {
-                Section {
-                    addButton
-                }
-                Section {
-                    visibilityButton
-                    hideOfflineButton
-                }
-                Section {
-                    Link(destination: URL(string: "https://kno.wled.ge/")!) {
-                        Label("WLED Documentation", systemImage: "questionmark.circle")
-                    }
-                }
+        ToolbarItemGroup(placement: .primaryAction) {
+            // 1. Add Button (Direct Access)
+            Button {
+                addDeviceButtonActive.toggle()
             } label: {
-                Label("Menu", systemImage: "ellipsis.circle")
+                Label("Add Device", systemImage: "plus")
+            }
+
+            // 2. Settings Button
+            Button {
+                showSettingsSheet.toggle()
+            } label: {
+                Label("Settings", systemImage: "ellipsis.circle")
             }
         }
     }
-    
+
     var addButton: some View {
         Button {
             addDeviceButtonActive.toggle()
@@ -138,114 +210,97 @@ struct DeviceListView: View {
             Label("Add New Device", systemImage: "plus")
         }
     }
-    
+
     var visibilityButton: some View {
         Button {
             withAnimation {
-                showHiddenDevices.toggle()
+                viewModel.showHiddenDevices.toggle()
             }
         } label: {
-            if (showHiddenDevices) {
+            if (viewModel.showHiddenDevices) {
                 Label("Hide Hidden Devices", systemImage: "eye.slash")
             } else {
                 Label("Show Hidden Devices", systemImage: "eye")
             }
         }
     }
-    
+
     var hideOfflineButton: some View {
         Button {
             withAnimation {
-                showOfflineDevices.toggle()
+                viewModel.showOfflineDevices.toggle()
             }
         } label: {
-            if (showOfflineDevices) {
+            if (viewModel.showOfflineDevices) {
                 Label("Hide Offline Devices", systemImage: "wifi")
             } else {
                 Label("Show Offline Devices", systemImage: "wifi.slash")
             }
         }
     }
-    
+
     //MARK: - Actions
-    
+
     @Sendable
     private func refreshList() async {
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask { await discoveryService.scan() }
-            group.addTask { await refreshDevices() }
-        }
+        viewModel.startDiscovery()
+        viewModel.refreshOfflineDevices()
     }
-    
-    private func updateFilter() {
-        print("Update Filter")
-        if showHiddenDevices {
-            devices.nsPredicate = NSPredicate(format: "isOnline == %@", NSNumber(value: true))
-            devicesOffline.nsPredicate =  NSPredicate(format: "isOnline == %@", NSNumber(value: false))
-        } else {
-            devices.nsPredicate = NSPredicate(format: "isOnline == %@ AND isHidden == %@", NSNumber(value: true), NSNumber(value: false))
-            devicesOffline.nsPredicate =  NSPredicate(format: "isOnline == %@ AND isHidden == %@", NSNumber(value: false), NSNumber(value: false))
-        }
-    }
-    
-    //  Instead of using a timer, use the WebSocket API to get notified about changes
-    //  Cancel the connection if the view disappears and reconnect as soon it apears again
+
     private func appearAction() {
-        updateFilter()
-        timer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { _ in
-            Task {
-                print("auto-refreshing")
-                await refreshList()
-                await refreshDevices()
-            }
-        }
-        discoveryService.scan()
+        viewModel.load()
+        viewModel.onResume()
+        viewModel.startDiscovery()
     }
-    
-    private func disappearAction() {
-        timer?.invalidate()
-    }
-    
-    @Sendable
-    private func refreshDevices() async {
-        await withTaskGroup(of: Void.self) { group in
-            devices.forEach { refreshDevice(device: $0, group: &group) }
-            devicesOffline.forEach { refreshDevice(device: $0, group: &group) }
-        }
-    }
-    
-    private func refreshDevice(device: Device, group: inout TaskGroup<Void>) {
-        // Don't start a refresh request when the device is not done refreshing.
-        if (!device.isRefreshing) {
-            return
-        }
-        group.addTask {
-            await self.viewContext.performAndWait {
-                device.isRefreshing = true
-            }
-            await device.requestManager.addRequest(WLEDRefreshRequest(context: viewContext))
-        }
-    }
-    
+
     private func deleteItems(device: Device) {
-        withAnimation {
-            viewContext.delete(device)
-            do {
-                if viewContext.hasChanges {
-                    try viewContext.save()
-                }
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
+        if (selection?.device == device) {
+            selection = nil
+        }
+        viewModel.deleteDevice(device)
+    }
+
+    // MARK: - Automatic device selection
+
+    private func restoreLastSelection(
+        from devices: [DeviceWithState],
+        currentSizeClass: UserInterfaceSizeClass? = nil
+    ) {
+        // Use the passed-in class if available, otherwise use the environment value
+        let sizeClass = currentSizeClass ?? horizontalSizeClass
+        // Only run if we are in a wide layout (Split View is active)
+        // This prevents auto-navigation on iPhone or iPad narrow multitasking.
+        guard sizeClass == .regular else { return }
+        // IMPORTANT: Only try to restore if NOTHING is currently selected.
+        // This prevents us from overriding a device the user just clicked on,
+        // while ensuring we fill the "empty" screen if it appears.
+        guard selection == nil else { return }
+        // Ensure there are devices to select
+        guard !devices.isEmpty else { return }
+
+        // Try to find the last selected device by MAC address
+        if let lastDevice = devices.first(where: { $0.device.macAddress == lastSelectedDeviceMac }) {
+            selection = lastDevice
+        }
+        // Fallback: Auto-select the first device
+        else if let firstDevice = devices.first {
+            selection = firstDevice
         }
     }
 }
 
-@available(iOS 16.0, macOS 13, tvOS 16.0, watchOS 9.0, *)
-#Preview("iOS 16") {
-    DeviceListView()
-        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+#Preview {
+    // Ensure some data exists in the preview context
+    let _ = PreviewData.onlineDevice
+    let _ = PreviewData.offlineDevice
+    let _ = PreviewData.deviceWithUpdate
+    let _ = PreviewData.hiddenDevice
+
+    DeviceListView(
+        context: PreviewData.viewContext,
+        clientFactory: { device in
+            MockWebsocketClient(device: device)
+        }
+    )
+    .environment(\.managedObjectContext, PreviewData.viewContext)
 }

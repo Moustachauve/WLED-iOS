@@ -1,7 +1,6 @@
-
 import Foundation
 
-struct Nightlight: Decodable {
+struct Nightlight: Codable {
     var isOn : Bool?
     var duration : Int64?
     var fade : Bool?

@@ -5,11 +5,7 @@ class VersionViewModel: ObservableObject {
 
     @Published var version: Version?
 
-    func loadVersion(_ versionTagParam: String, context: NSManagedObjectContext) {
-        var versionTag = versionTagParam
-        if !versionTag.isEmpty && !versionTag.hasPrefix("v") {
-            versionTag = "v\(versionTag)"
-        }
+    func loadVersion(_ versionTag: String, context: NSManagedObjectContext) {
         let fetchRequest = Version.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "tagName == %@", versionTag)
 

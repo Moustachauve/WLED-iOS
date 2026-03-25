@@ -1,9 +1,8 @@
-
 import Foundation
 
-struct WledState: Decodable {
-    var isOn: Bool
-    var brightness: Int64
+struct WledState: Codable {
+    var isOn: Bool?
+    var brightness: Int64?
     var transition: Int64?
     var selectedPresetId: Int64?
     var selectedPlaylistId: Int64?

@@ -1,44 +1,10 @@
-
 import CoreData
 
 struct PersistenceController {
     static let shared = PersistenceController()
     
-    static var preview: PersistenceController = {
+    static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
-        let viewContext = result.container.viewContext
-        for i in 0..<10 {
-            let newDevice = Device(context: viewContext)
-            newDevice.tag = UUID()
-            newDevice.name = i % 9 != 0 ? "Device \(i)" : ""
-            newDevice.address = "192.168.1.\(i + 10)"
-            newDevice.brightness = Int64(i * 26)
-            newDevice.isOnline = i % 4 != 0
-            newDevice.isPoweredOn = i % 2 != 0
-            newDevice.isRefreshing = i % 8 == 0
-            switch i % 3 {
-            case 0:
-                newDevice.networkRssi = -101
-                newDevice.color = 38600
-            case 1:
-                newDevice.networkRssi = -90
-                newDevice.color = 13107455
-            case 2:
-                newDevice.networkRssi = -70
-                newDevice.color = 250255
-            default:
-                newDevice.networkRssi = -50
-                newDevice.color = 1500
-            }
-        }
-        do {
-            try viewContext.save()
-        } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
         return result
     }()
     
@@ -51,21 +17,56 @@ struct PersistenceController {
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                // MARK: - Enhanced Error Logging
+
+                // Create a readable error message starting with the main error
+                var errorMsg = "CORE DATA ERROR: \(error.localizedDescription)"
+
+                // Define a helper to recursively dig for the "real" cause
+                func appendDetails(from nsError: NSError, depth: Int = 1) -> String {
+                    var extraInfo = ""
+                    let indent = String(repeating: "  ", count: depth)
+
+                    // Check for a single underlying error (common in migration failures)
+                    if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? NSError {
+                        extraInfo += "\n\(indent)Cause: \(underlying.localizedDescription)"
+                        extraInfo += appendDetails(from: underlying, depth: depth + 1)
+                    }
+
+                    // Check for multiple detailed errors (common in validation failures)
+                    if let detailedErrors = nsError.userInfo[NSDetailedErrorsKey] as? [NSError] {
+                        for (index, detail) in detailedErrors.enumerated() {
+                            extraInfo += "\n\(indent)Detail #\(index + 1): \(detail.localizedDescription)"
+                            extraInfo += appendDetails(from: detail, depth: depth + 1)
+                        }
+                    }
+
+                    // Append specific migration failure reasons if present
+                    if let storeURL = nsError.userInfo[NSPersistentStoreURLKey] as? URL {
+                        extraInfo += "\n\(indent)Store URL: \(storeURL.path)"
+                    }
+
+                    return extraInfo
+                }
+
+                // Append the details
+                errorMsg += appendDetails(from: error)
+
+                // Print full details to console (captured in system logs)
+                print(errorMsg)
+                print("Full UserInfo: \(error.userInfo)")
+
+                // Crash with the detailed message. This ensures the "Last
+                // Exception Backtrace" in Xcode/TestFlight contains the
+                // readable reason.
+                fatalError(errorMsg)
             }
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        let description = container.persistentStoreDescriptions.first
+        description?.shouldMigrateStoreAutomatically = true
+        description?.shouldInferMappingModelAutomatically = true
     }
 }
+

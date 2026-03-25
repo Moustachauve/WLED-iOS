@@ -3,20 +3,22 @@ import SwiftUI
 
 struct DeviceView: View {
     @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var device: Device
-    
+    @ObservedObject var device: DeviceWithState
+
     @State var showDownloadFinished = false
     @State var shouldWebViewRefresh = false
-    
+
     @State var showEditDeviceView = false
-    
+
     var body: some View {
         ZStack {
             WebView(url: getDeviceAddress(), reload: $shouldWebViewRefresh) { filePathDestination in
                 withAnimation {
                     showDownloadFinished = true
-                    Task {
-                        try await Task.sleep(nanoseconds: UInt64(3 * Double(NSEC_PER_SEC)))
+                }
+                Task {
+                    try await Task.sleep(for: .seconds(3))
+                    withAnimation {
                         showDownloadFinished = false
                     }
                 }
@@ -28,74 +30,55 @@ struct DeviceView: View {
                         .font(.title3)
                         .padding()
                         .background(.regularMaterial)
-                        .cornerRadius(15)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
                         .padding(.bottom)
                 }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .zIndex(1) // Ensures it stays on top during transition
             }
         }
-        .navigationTitle(getDeviceName())
+        .navigationTitle(device.device.displayName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
     }
-    
-    
+
+
     @ToolbarContentBuilder
     var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .navigation) {
+        ToolbarItem(placement: .principal) {
+            DeviceInfoTwoRows(device: device)
+        }
+        ToolbarItem(placement: .primaryAction) {
             NavigationLink {
-                DeviceEditView()
-                    .environmentObject(device)
+                DeviceEditView(device: device)
             } label: {
-                Image(systemName: "gear")
-            }
-            .overlay(alignment: .bottomTrailing) {
-                ToolbarBadge(value: .constant(getToolbarBadgeCount()))
+                Label("Settings", systemImage: "gear")
+                // This badge only works on iOS 26+, but that's fine.
+                    .badge(getToolbarBadgeCount())
             }
         }
         ToolbarItem(placement: .automatic) {
-            Button {
+            Button("Refresh", systemImage: "arrow.clockwise") {
                 shouldWebViewRefresh = true
-            } label: {
-                Image(systemName: "arrow.clockwise")
             }
         }
     }
-    
+
     func getDeviceAddress() -> URL? {
-        guard let deviceAddress = device.address else {
+        guard let deviceAddress = device.device.address,
+              let url = URL(string: "http://\(deviceAddress)") else {
             return nil
         }
-        return URL(string: "http://\(deviceAddress)")!
+        return url
     }
-    
+
     func getToolbarBadgeCount() -> Int {
-        return (device.latestUpdateVersionTagAvailable ?? "").isEmpty ? 0 : 1
-    }
-    
-    private func getDeviceName() -> String {
-        guard let name = device.name, !name.isEmpty else {
-            return String(localized: "(New Device)")
-        }
-        return name
+        return device.hasUpdateAvailable ? 1 : 0
     }
 }
 
-struct DeviceView_Previews: PreviewProvider {
-    static let device = Device(context: PersistenceController.preview.container.viewContext)
-    
-    static var previews: some View {
-        device.tag = UUID()
-        device.name = ""
-        device.address = "google.com"
-        device.isOnline = true
-        device.networkRssi = -80
-        device.color = 6244567779
-        device.brightness = 125
-        
-        return NavigationView{
-            DeviceView()
-                .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-                .environmentObject(device)
-        }
+#Preview {
+    NavigationStack {
+        DeviceView(device: PreviewData.onlineDevice)
     }
 }
