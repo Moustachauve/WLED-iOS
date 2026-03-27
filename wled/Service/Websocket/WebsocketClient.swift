@@ -2,7 +2,6 @@ import Foundation
 import CoreData
 import Combine
 
-
 @MainActor
 class WebsocketClient: NSObject, ObservableObject, URLSessionWebSocketDelegate {
     
@@ -94,7 +93,7 @@ class WebsocketClient: NSObject, ObservableObject, URLSessionWebSocketDelegate {
         print("\(tag): Manually disconnecting from \(deviceState.device.address ?? "")")
         isManuallyDisconnected = true
         
-        webSocketTask?.cancel(with: .normalClosure, reason: "Client disconnected".data(using: .utf8))
+        webSocketTask?.cancel(with: .normalClosure, reason: Data("Client disconnected".utf8))
         webSocketTask = nil
         
         DispatchQueue.main.async {
@@ -149,12 +148,13 @@ class WebsocketClient: NSObject, ObservableObject, URLSessionWebSocketDelegate {
     }
     
     private func handleMessage(_ text: String) {
+        let decoder = self.decoder
         Task.detached(priority: .userInitiated) { [weak self] in
             guard let self = self else { return }
             guard let data = text.data(using: .utf8) else { return }
 
             do {
-                let info = try JSONDecoder().decode(DeviceStateInfo.self, from: data)
+                let info = try decoder.decode(DeviceStateInfo.self, from: data)
                 await MainActor.run {
                     self.deviceState.stateInfo = info
 

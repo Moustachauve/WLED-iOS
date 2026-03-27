@@ -3,7 +3,6 @@ import CoreData
 import Combine
 import SwiftUI
 
-
 @MainActor
 class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResultsControllerDelegate {
     
@@ -11,10 +10,20 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     
     // The list of devices with their live state, exposed to the UI
     @Published var allDevicesWithState: [DeviceWithState] = []
+    @Published var onlineDevices: [DeviceWithState] = []
+    @Published var offlineDevices: [DeviceWithState] = []
     
-    // Preferences (You can wrap these in AppStorage or standard UserDefaults in the View)
-    @Published var showOfflineDevicesLast: Bool = false
-    @Published var showHiddenDevices: Bool = false
+    // Preferences
+    @Published var showHiddenDevices: Bool = false {
+        didSet {
+            UserDefaults.standard.set(showHiddenDevices, forKey: "DeviceListView.showHiddenDevices")
+        }
+    }
+    @Published var showOfflineDevices: Bool = true {
+        didSet {
+            UserDefaults.standard.set(showOfflineDevices, forKey: "DeviceListView.showOfflineDevices")
+        }
+    }
 
     var makeClient: (Device) -> WebsocketClient = { device in
         WebsocketClient(device: device)
@@ -36,22 +45,62 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     
     private var activeClients: [String: ClientWrapper] = [:]
     private var isPaused = false
+    private var backgroundTask: Task<Void, Never>?
     
+    /// Amount of time after a device becomes offline before it is considered offline.
+    private let offlineGracePeriod: TimeInterval = 60
+    private var cancellables = Set<AnyCancellable>()
+    private let sortingQueue = DispatchQueue(label: "com.wled.DeviceSortingQueue")
+
     // MARK: - Initialization
     
     init(context: NSManagedObjectContext) {
         self.context = context
         super.init()
 
-        self.discoveryService = DiscoveryService{ [weak self] address, macAddress in
+        self.discoveryService = DiscoveryService { [weak self] address, macAddress in
             Task { @MainActor [weak self] in
                 self?.deviceDiscovered(at: address, withMACAddress: macAddress)
             }
         }
 
-        // Load preferences (Mocked for now, replace with your UserPreferences logic)
-        self.showOfflineDevicesLast = UserDefaults.standard.bool(forKey: "showOfflineDevicesLast")
-        self.showHiddenDevices = UserDefaults.standard.bool(forKey: "showHiddenDevices")
+        // Load preferences
+        self.showHiddenDevices = UserDefaults.standard.bool(forKey: "DeviceListView.showHiddenDevices")
+        if UserDefaults.standard.object(forKey: "DeviceListView.showOfflineDevices") == nil {
+            self.showOfflineDevices = true
+        } else {
+            self.showOfflineDevices = UserDefaults.standard.bool(forKey: "DeviceListView.showOfflineDevices")
+        }
+
+        // Periodically refresh for time-based online/offline status changes (grace period)
+        Timer.publish(every: 30, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] time in
+                self?.updateFilteredDevices(currentTime: time)
+            }
+            .store(in: &cancellables)
+
+        // Reactively update when preferences change
+        Publishers.CombineLatest($showHiddenDevices, $showOfflineDevices)
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.updateFilteredDevices(currentTime: Date())
+            }
+            .store(in: &cancellables)
+
+        // Reactively update when any device status changes or the list itself changes
+        $allDevicesWithState
+            .map { devices in
+                Publishers.MergeMany(devices.map { $0.objectWillChange })
+                    .map { _ in () }
+                    .prepend(()) // Trigger immediately when the list changes
+            }
+            .switchToLatest()
+            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateFilteredDevices(currentTime: Date())
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Setup and loading
@@ -184,11 +233,10 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
 
     private func publishState() {
         // Map the clients to the DeviceWithState list expected by the UI
-        DispatchQueue.main.async {
-            self.allDevicesWithState = self.activeClients.values.map { wrapper in
-                wrapper.client.deviceState
-            }
+        self.allDevicesWithState = self.activeClients.values.map { wrapper in
+            wrapper.client.deviceState
         }
+        self.updateFilteredDevices(currentTime: Date())
     }
     
     // MARK: - NSFetchedResultsControllerDelegate
@@ -203,18 +251,30 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     // MARK: - Lifecycle (Call these from App ScenePhase)
     
     func onPause() {
-        print("[ListVM] onPause: Pausing all connections.")
-        isPaused = true
-        activeClients.values.forEach { $0.client.disconnect() }
-        
-        // SAVE: Persist "lastSeen" and other pending changes when app goes to background
-        if context.hasChanges {
-            try? context.save()
+        print("[ListVM] onPause: Scheduling disconnect.")
+        backgroundTask?.cancel()
+        backgroundTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(for: .seconds(2))
+            } catch {
+                // Task was cancelled (user came back quickly)
+                return
+            }
+            guard let self = self else { return }
+            print("[ListVM] onPause: Disconnecting all connections.")
+            self.isPaused = true
+            self.activeClients.values.forEach { $0.client.disconnect() }
+            if self.context.hasChanges {
+                try? self.context.save()
+            }
         }
     }
     
     func onResume() {
-        print("[ListVM] onResume: Resuming all connections.")
+        print("[ListVM] onResume: Cancelling pending disconnect and resuming.")
+        backgroundTask?.cancel()
+        backgroundTask = nil
+        guard isPaused else { return } // Nothing to resume if we never disconnected
         isPaused = false
         activeClients.values.forEach { $0.client.connect() }
     }
@@ -248,7 +308,8 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     }
     
     func deleteDevice(_ device: Device) {
-        print("[ListVM] Deleting device \(device.originalName ?? "")")// Capture context locally to avoid isolation issues in the closure
+        print("[ListVM] Deleting device \(device.originalName ?? "")")
+        // Capture context locally to avoid isolation issues in the closure
         let objectID = device.objectID
         let ctx = context
         ctx.perform {
@@ -256,6 +317,35 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
                 ctx.delete(deviceToDelete)
                 try? ctx.save()
             }
+        }
+    }
+
+    func updateFilteredDevices(currentTime: Date) {
+        let visible = allDevicesWithState.filter { showHiddenDevices || !$0.device.isHidden }
+        let sorted = visible.sorted {
+            $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending
+        }
+
+        var online: [DeviceWithState] = []
+        var offline: [DeviceWithState] = []
+        for device in sorted {
+            let isConsideredOnline = device.isOnline || {
+                let lastSeenDate = Date(timeIntervalSince1970: TimeInterval(device.device.lastSeen) / 1000.0)
+                return currentTime.timeIntervalSince(lastSeenDate) < offlineGracePeriod
+            }()
+            if isConsideredOnline {
+                online.append(device)
+            } else {
+                offline.append(device)
+            }
+        }
+
+        // Only update if content changed to avoid unnecessary SwiftUI view body evaluations
+        if self.onlineDevices != online {
+            self.onlineDevices = online
+        }
+        if self.offlineDevices != offline {
+            self.offlineDevices = offline
         }
     }
 

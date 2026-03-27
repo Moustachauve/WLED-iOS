@@ -29,7 +29,7 @@ enum UpdateError: LocalizedError {
 
 /// Service responsible for identifying, downloading, and installing firmware updates for WLED devices.
 @MainActor
-class DeviceUpdateService : ObservableObject {
+class DeviceUpdateService: ObservableObject {
 
     // MARK: - Constants
 
@@ -64,7 +64,7 @@ class DeviceUpdateService : ObservableObject {
         "esp01",
         "esp02",
         "esp32",
-        "esp8266",
+        "esp8266"
     ]
 
     let device: DeviceWithState
@@ -73,7 +73,7 @@ class DeviceUpdateService : ObservableObject {
 
     private var assetName: String = ""
     private(set) var couldDetermineAsset = false
-    private var asset: Asset? = nil
+    private var asset: Asset?
 
     // MARK: - Initialization
 
@@ -238,7 +238,7 @@ class DeviceUpdateService : ObservableObject {
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             return directory.appendingPathExtension(asset?.name ?? "unknown")
-        } catch (let writeError) {
+        } catch let writeError {
             print("error creating directory \(directory) : \(writeError)")
             return nil
         }
@@ -279,7 +279,7 @@ class DeviceUpdateService : ObservableObject {
                 throw UpdateError.uploadFailed(httpResponse.statusCode)
             }
 
-            print("Update Success: \(String(decoding: data, as: UTF8.self))")
+            print("Update Success: \(String(data: data, encoding: .utf8) ?? "")")
         } catch {
             throw UpdateError.networkError(error)
         }

@@ -1,4 +1,3 @@
-
 import Foundation
 
 struct GithubAsset: Decodable {
@@ -17,7 +16,6 @@ struct GithubAsset: Decodable {
     var updatedAt: String
     var browserDownloadUrl: String
 
-    
     enum CodingKeys: String, CodingKey {
         case url
         case id

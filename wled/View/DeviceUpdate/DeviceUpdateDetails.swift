@@ -1,4 +1,3 @@
-
 import SwiftUI
 import CoreData
 import MarkdownUI
@@ -60,7 +59,7 @@ struct DeviceUpdateDetails: View {
         .onReceive(NotificationCenter.default.publisher(for: .didCompleteUpdateInstall)) {_ in
             dismiss()
         }
-        .onAppear() {
+        .onAppear {
             versionViewModel
                 .loadVersion(
                     device.availableUpdateVersion ?? "",
@@ -84,7 +83,6 @@ struct DeviceUpdateDetails: View {
         showInstallingDialog = true
     }
     
-    
 }
 
 #Preview {
@@ -94,4 +92,3 @@ struct DeviceUpdateDetails: View {
     // This line is required to provide the Core Data context to the view
     .environment(\.managedObjectContext, PreviewData.viewContext)
 }
-

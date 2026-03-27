@@ -1,4 +1,3 @@
-
 import Foundation
 
 struct Author: Decodable {
@@ -22,7 +21,6 @@ struct Author: Decodable {
     var type: String
     var siteAdmin: Bool
 
-    
     enum CodingKeys: String, CodingKey {
         case login
         case id

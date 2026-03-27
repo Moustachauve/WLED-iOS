@@ -1,4 +1,3 @@
-
 import SwiftUI
 import CoreData
 
@@ -9,20 +8,13 @@ struct DeviceListView: View {
 
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.scenePhase) private var scenePhase
-    @State private var selection: DeviceWithState? = nil
+    @State private var selection: DeviceWithState?
 
     @State private var addDeviceButtonActive: Bool = false
     @State private var showSettingsSheet: Bool = false
-    @State private var currentTime = Date()
     @State private var columnVisibility = NavigationSplitViewVisibility.doubleColumn
 
-    @AppStorage("DeviceListView.showHiddenDevices") private var showHiddenDevices: Bool = false
-    @AppStorage("DeviceListView.showOfflineDevices") private var showOfflineDevices: Bool = true
     @AppStorage("lastSelectedDeviceMac") private var lastSelectedDeviceMac: String = ""
-
-    /// Amount of time after a device becomes offline before it is considered offline.
-    private let offlineGracePeriod: TimeInterval = 60
-    private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 
     private var hasHiddenDevices: Bool {
         viewModel.allDevicesWithState.contains { $0.device.isHidden }
@@ -42,49 +34,19 @@ struct DeviceListView: View {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
-    // MARK: - Computed Data
-
-    /// Determines if a device should be displayed in the "Online" section.
-    /// Returns true if the device is connected OR if it was seen within the grace period.
-    private func isConsideredOnline(_ device: DeviceWithState, at referenceTime: Date) -> Bool {
-        if device.isOnline { return true }
-
-        // Calculate time since last seen
-        // lastSeen is Int64 (milliseconds), convert to TimeInterval (seconds)
-        let lastSeenSeconds = TimeInterval(device.device.lastSeen) / 1000.0
-        let lastSeenDate = Date(timeIntervalSince1970: lastSeenSeconds)
-
-        // Check if within grace period
-        return Date().timeIntervalSince(lastSeenDate) < offlineGracePeriod
-    }
-
-    private var onlineDevices: [DeviceWithState] {
-        viewModel.allDevicesWithState.filter { device in
-            isConsideredOnline(device, at: currentTime) && (showHiddenDevices || !device.device.isHidden)
-        }
-        .sorted { $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending }
-    }
-
-    private var offlineDevices: [DeviceWithState] {
-        viewModel.allDevicesWithState.filter { device in
-            !isConsideredOnline(device, at: currentTime) && (showHiddenDevices || !device.device.isHidden)
-        }
-        .sorted { $0.device.displayName.localizedStandardCompare($1.device.displayName) == .orderedAscending }
-    }
-
-    //MARK: - Body
+    // MARK: - Body
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             list
-                .toolbar{ toolbar }
+                .toolbar { toolbar }
                 .sheet(isPresented: $addDeviceButtonActive) {
                     DeviceAddView()
                 }
                 .sheet(isPresented: $showSettingsSheet) {
                     Settings(
-                        showHiddenDevices: $showHiddenDevices,
-                        showOfflineDevices: $showOfflineDevices
+                        showHiddenDevices: $viewModel.showHiddenDevices,
+                        showOfflineDevices: $viewModel.showOfflineDevices
                     )
                 }
                 .navigationBarTitleDisplayMode(.inline)
@@ -93,19 +55,14 @@ struct DeviceListView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .onAppear(perform: appearAction)
-        .onReceive(timer) { input in
-            withAnimation {
-                // Updating this state variable forces 'onlineDevices' to be re-evaluated
-                currentTime = input
-            }
-        }
         .onChange(of: scenePhase) { newPhase in
             switch newPhase {
             case .active:
                 viewModel.onResume()
-                currentTime = Date()
-            case .background, .inactive:
+            case .background:
                 viewModel.onPause()
+            case .inactive:
+                break // Don't disconnect during transient gestures (app switcher, notifications)
             @unknown default:
                 break
             }
@@ -136,35 +93,35 @@ struct DeviceListView: View {
     var list: some View {
         ZStack {
             List(selection: $selection) {
-                if !onlineDevices.isEmpty {
-                    deviceRows(for: onlineDevices)
+                if !viewModel.onlineDevices.isEmpty {
+                    deviceRows(for: viewModel.onlineDevices)
                 }
 
                 // Offline Devices
-                if !offlineDevices.isEmpty && showOfflineDevices {
+                if !viewModel.offlineDevices.isEmpty && viewModel.showOfflineDevices {
                     Section(header: Text("Offline Devices")) {
-                        deviceRows(for: offlineDevices)
+                        deviceRows(for: viewModel.offlineDevices)
                     }
                 }
             }
             .listStyle(.plain)
             .refreshable(action: refreshList)
             
-            
-            if onlineDevices.isEmpty && offlineDevices.isEmpty {
+            if viewModel.onlineDevices.isEmpty && viewModel.offlineDevices.isEmpty {
                 EmptyDeviceListView(
                     addDeviceButtonActive: $addDeviceButtonActive,
-                    showHiddenDevices: $showHiddenDevices,
+                    showHiddenDevices: $viewModel.showHiddenDevices,
                     hasHiddenDevices: hasHiddenDevices
                 )
                 .transition(.opacity)
             }
         }
-        .animation(.easeInOut, value: showHiddenDevices)
+        .animation(.default, value: viewModel.onlineDevices)
+        .animation(.default, value: viewModel.offlineDevices)
+        .animation(.easeInOut, value: viewModel.showHiddenDevices)
         .navigationTitle("Device List")
     }
         
-
     @ViewBuilder
     private func deviceRows(for devices: [DeviceWithState]) -> some View {
         ForEach(devices) { device in
@@ -254,10 +211,10 @@ struct DeviceListView: View {
     var visibilityButton: some View {
         Button {
             withAnimation {
-                showHiddenDevices.toggle()
+                viewModel.showHiddenDevices.toggle()
             }
         } label: {
-            if (showHiddenDevices) {
+            if viewModel.showHiddenDevices {
                 Label("Hide Hidden Devices", systemImage: "eye.slash")
             } else {
                 Label("Show Hidden Devices", systemImage: "eye")
@@ -268,10 +225,10 @@ struct DeviceListView: View {
     var hideOfflineButton: some View {
         Button {
             withAnimation {
-                showOfflineDevices.toggle()
+                viewModel.showOfflineDevices.toggle()
             }
         } label: {
-            if (showOfflineDevices) {
+            if viewModel.showOfflineDevices {
                 Label("Hide Offline Devices", systemImage: "wifi")
             } else {
                 Label("Show Offline Devices", systemImage: "wifi.slash")
@@ -279,7 +236,7 @@ struct DeviceListView: View {
         }
     }
 
-    //MARK: - Actions
+    // MARK: - Actions
 
     @Sendable
     private func refreshList() async {
@@ -294,7 +251,7 @@ struct DeviceListView: View {
     }
 
     private func deleteItems(device: Device) {
-        if (selection?.device == device) {
+        if selection?.device == device {
             selection = nil
         }
         viewModel.deleteDevice(device)
@@ -331,10 +288,12 @@ struct DeviceListView: View {
 
 #Preview {
     // Ensure some data exists in the preview context
+    // swiftlint:disable redundant_discardable_let
     let _ = PreviewData.onlineDevice
     let _ = PreviewData.offlineDevice
     let _ = PreviewData.deviceWithUpdate
     let _ = PreviewData.hiddenDevice
+    // swiftlint:enable redundant_discardable_let
 
     DeviceListView(
         context: PreviewData.viewContext,

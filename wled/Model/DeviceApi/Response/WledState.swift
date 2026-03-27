@@ -11,7 +11,6 @@ struct WledState: Codable {
     var mainSegment: Int64?
     var segment: [Segment]?
     
-    
     enum CodingKeys: String, CodingKey {
         case isOn = "on"
         case brightness = "bri"

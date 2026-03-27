@@ -38,7 +38,7 @@ final class DeviceAddViewModel: ObservableObject {
     }
 
     func submitCreateDevice() {
-        if (!isAddressValid) {
+        if !isAddressValid {
             currentStep = .form(errorMessage: Error.enterValidAddress)
             return
         }
@@ -58,7 +58,7 @@ final class DeviceAddViewModel: ObservableObject {
             if let newDevice = viewContext.object(with: newDeviceId) as? Device {
                 currentStep = .success(device: newDevice)
             }
-        } catch (let error) {
+        } catch let error {
             print("Error: \(error)")
             currentStep = .form(errorMessage: Error.cantConnect)
         }
@@ -82,4 +82,3 @@ final class DeviceAddViewModel: ObservableObject {
         static let cantConnect = String(localized: "Could not connect to the device. Verify the address")
     }
 }
-

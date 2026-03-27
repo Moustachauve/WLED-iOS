@@ -5,7 +5,6 @@
 //  Created by Christophe Gagnier on 2025-12-16.
 //
 
-
 import SwiftUI
 
 struct DeviceInfoTwoRows: View {
@@ -42,7 +41,7 @@ struct DeviceInfoTwoRows: View {
                     )
                 }
                 .labelStyle(.iconOnly)
-                if (!device.isOnline) {
+                if !device.isOnline {
                     OfflineSinceText(device: device)
                         .lineLimit(1)
                         .allowsTightening(true)
@@ -50,7 +49,7 @@ struct DeviceInfoTwoRows: View {
                         .lineSpacing(0)
                         .minimumScaleFactor(0.6)
                 }
-                if (device.device.isHidden) {
+                if device.device.isHidden {
                     HStack(spacing: 3) {
                         Image(systemName: "eye.slash")
                             .accessibilityHidden(true)
@@ -97,13 +96,13 @@ struct DeviceInfoTwoRows: View {
 
     func getSignalValue(signalStrength: Int?) -> Double {
         if let signalStrength {
-            if (signalStrength >= -67) {
+            if signalStrength >= -67 {
                 return 1
             }
-            if (signalStrength >= -80) {
+            if signalStrength >= -80 {
                 return 0.64
             }
-            if (signalStrength >= -100) {
+            if signalStrength >= -100 {
                 return 0.33
             }
         }
@@ -225,4 +224,3 @@ struct OfflineSinceText_Previews: PreviewProvider {
         }
     }
 }
-

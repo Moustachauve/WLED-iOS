@@ -1,4 +1,3 @@
-
 import Foundation
 
 enum Branch: String, CaseIterable, Identifiable {

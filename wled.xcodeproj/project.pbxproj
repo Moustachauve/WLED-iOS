@@ -135,6 +135,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				8849FA232F710B1B008ACEC3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				8813CE002EE9178D00B0A987 /* wled */,
@@ -182,6 +183,7 @@
 			packageReferences = (
 				C948F4962B3D2B320092C4B1 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				C946FB842B68C53600D5B00D /* XCRemoteSwiftPackageReference "swift-collections" */,
+				8849F9052F710909008ACEC3 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
 			productRefGroup = C9A9E5BE2918D1C3005B5C22 /* Products */;
 			projectDirPath = "";
@@ -234,6 +236,10 @@
 			isa = PBXTargetDependency;
 			target = C9A9E5BC2918D1C3005B5C22 /* WLED */;
 			targetProxy = 882CC9172F05CFE00080567C /* PBXContainerItemProxy */;
+		};
+		8849FA232F710B1B008ACEC3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 8849FA222F710B1B008ACEC3 /* SwiftLintBuildToolPlugin */;
 		};
 /* End PBXTargetDependency section */
 
@@ -435,6 +441,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "ca.cgagnier.wled-native";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -464,6 +471,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "ca.cgagnier.wled-native";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -506,6 +514,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		8849F9052F710909008ACEC3 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.63.2;
+			};
+		};
 		C946FB842B68C53600D5B00D /* XCRemoteSwiftPackageReference "swift-collections" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-collections.git";
@@ -525,6 +541,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8849FA222F710B1B008ACEC3 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8849F9052F710909008ACEC3 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
 		C946FB852B68C53600D5B00D /* Collections */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C946FB842B68C53600D5B00D /* XCRemoteSwiftPackageReference "swift-collections" */;

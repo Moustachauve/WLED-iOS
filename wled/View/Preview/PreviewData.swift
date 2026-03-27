@@ -126,7 +126,10 @@ extension DeviceStateInfo {
             }
         }
         """
-        let data = json.data(using: .utf8)!
-        return try! JSONDecoder().decode(DeviceStateInfo.self, from: data)
+        guard let data = json.data(using: .utf8),
+              let decoded = try? JSONDecoder().decode(DeviceStateInfo.self, from: data) else {
+            fatalError("Failed to decode mock DeviceStateInfo")
+        }
+        return decoded
     }
 }

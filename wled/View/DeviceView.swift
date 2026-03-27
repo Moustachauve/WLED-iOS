@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct DeviceView: View {
@@ -12,7 +11,7 @@ struct DeviceView: View {
 
     var body: some View {
         ZStack {
-            WebView(url: getDeviceAddress(), reload: $shouldWebViewRefresh) { filePathDestination in
+            WebView(url: getDeviceAddress(), reload: $shouldWebViewRefresh) { _ in
                 withAnimation {
                     showDownloadFinished = true
                 }
@@ -23,7 +22,7 @@ struct DeviceView: View {
                     }
                 }
             }
-            if (showDownloadFinished) {
+            if showDownloadFinished {
                 VStack {
                     Spacer()
                     Text("Download Completed")
@@ -41,7 +40,6 @@ struct DeviceView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
     }
-
 
     @ToolbarContentBuilder
     var toolbar: some ToolbarContent {

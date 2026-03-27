@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct DeviceAddView: View {
@@ -31,7 +30,7 @@ struct DeviceAddView: View {
                         dismiss()
                     }
                 }
-                if (viewModel.currentStep.isForm) {
+                if viewModel.currentStep.isForm {
                     ToolbarItem(placement: .primaryAction) {
                         Button("Add", systemImage: "checkmark") {
                             withAnimation {

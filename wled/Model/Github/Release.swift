@@ -1,4 +1,3 @@
-
 import Foundation
 
 struct Release: Decodable {
@@ -23,7 +22,6 @@ struct Release: Decodable {
     var body: String
     var reactions: Reactions?
     var mentionsCount: Int?
-    
     
     enum CodingKeys: String, CodingKey {
         case url

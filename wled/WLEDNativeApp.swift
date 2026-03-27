@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 @main
@@ -11,12 +10,11 @@ struct WLEDNativeApp: App {
         WindowGroup {
             DeviceListView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                .onAppear() {
+                .onAppear {
                     refreshVersionsSync()
                 }
         }
     }
-    
     
     private func refreshVersionsSync() {
         Task {
@@ -30,7 +28,7 @@ struct WLEDNativeApp: App {
             guard let dateToRefresh = dateToRefresh else {
                 return
             }
-            if (dateNow <= dateToRefresh) {
+            if dateNow <= dateToRefresh {
                 return
             }
             print("Refreshing available Releases")

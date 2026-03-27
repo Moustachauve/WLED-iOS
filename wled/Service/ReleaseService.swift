@@ -20,7 +20,7 @@ class ReleaseService {
      *      otherwise an empty string.
      */
     func getNewerReleaseTag(versionName: String, branch: Branch, ignoreVersion: String) -> String {
-        if (versionName.isEmpty) {
+        if versionName.isEmpty {
             return ""
         }
         let latestVersion = getLatestVersion(branch: branch)
@@ -30,14 +30,13 @@ class ReleaseService {
 
         // If device is currently on a beta branch but the user selected a stable branch,
         // show the latest version as an update so that the user can get out of beta.
-        if (branch == .stable && versionName.contains("-b")) {
+        if branch == .stable && versionName.contains("-b") {
             return latestTagName
         }
 
         let versionCompare = latestTagName.compare(versionName, options: .numeric)
         return versionCompare == .orderedDescending ? latestTagName : ""
     }
-
 
     func getLatestVersion(branch: Branch) -> Version? {
         let fetchRequest = Version.fetchRequest()
@@ -48,7 +47,7 @@ class ReleaseService {
         // For now, nightly branches are not supported.
         predicates.append(NSPredicate(format: "tagName != %@", "nightly"))
 
-        if (branch == Branch.stable) {
+        if branch == Branch.stable {
             predicates.append(NSPredicate(format: "isPrerelease == %@", NSNumber(value: false)))
         }
 
@@ -62,7 +61,6 @@ class ReleaseService {
             return nil
         }
     }
-
 
     func refreshVersions() async {
         let allReleases = await GithubApi().getAllReleases()
