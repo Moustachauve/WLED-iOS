@@ -30,6 +30,30 @@ struct SemanticVersion: Comparable {
         self.preRelease = parts.count > 1 ? String(parts[1]) : nil
     }
 
+    /// Returns a `SemanticVersion` containing only the major, minor, and patch components.
+    var baseVersion: SemanticVersion {
+        return SemanticVersion(major: major, minor: minor, patch: patch, preRelease: nil)
+    }
+
+    private init(major: Int, minor: Int, patch: Int, preRelease: String?) {
+        self.major = major
+        self.minor = minor
+        self.patch = patch
+        self.preRelease = preRelease
+    }
+
+    /// Checks if this version is at least the other version, optionally ignoring the pre-release identifier.
+    /// - Parameters:
+    ///   - other: The version to compare against.
+    ///   - ignorePreRelease: If `true`, the comparison ignores pre-release identifiers (e.g., 0.16.0-b1 is treated as 0.16.0).
+    /// - Returns: `true` if this version is greater than or equal to the other version.
+    func isAtLeast(_ other: SemanticVersion, ignorePreRelease: Bool = false) -> Bool {
+        if ignorePreRelease {
+            return baseVersion >= other.baseVersion
+        }
+        return self >= other
+    }
+
     static func < (lhs: SemanticVersion, rhs: SemanticVersion) -> Bool {
         if lhs.major != rhs.major { return lhs.major < rhs.major }
         if lhs.minor != rhs.minor { return lhs.minor < rhs.minor }

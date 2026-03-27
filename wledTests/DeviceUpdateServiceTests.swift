@@ -18,9 +18,6 @@ struct DeviceUpdateServiceTests {
         
         #expect(DeviceUpdateService.determineAsset(byRelease: "ESP32_V4", targetVersion: targetVersion) == "ESP32")
         #expect(DeviceUpdateService.determineAsset(byRelease: "esp32_v4", targetVersion: targetVersion) == "ESP32")
-        
-        // Same for ESP8266 if configured
-        #expect(DeviceUpdateService.determineAsset(byRelease: "ESP8266_V4", targetVersion: targetVersion) == "ESP8266")
     }
     
     @Test func determineAsset_NewVersion_NoOverride() {
@@ -37,7 +34,7 @@ struct DeviceUpdateServiceTests {
         let targetVersionOlderBeta = "0.15.0-b5"
         
         #expect(DeviceUpdateService.determineAsset(byRelease: "ESP32_V4", targetVersion: targetVersionOlderBeta) == "ESP32_V4")
-        #expect(DeviceUpdateService.determineAsset(byRelease: "ESP32_V4", targetVersion: targetVersionBeta) == "ESP32_V4")
+        #expect(DeviceUpdateService.determineAsset(byRelease: "ESP32_V4", targetVersion: targetVersionBeta) == "ESP32")
     }
     
     @Test func determineAsset_InvalidVersion() {

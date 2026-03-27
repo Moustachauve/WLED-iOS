@@ -52,7 +52,7 @@ class DeviceUpdateService: ObservableObject {
     ]
     
     /**
-     * The minimum target version from which [RELEASE_NAME_OVERRIDES] are applied.
+     * The minimum target version from which [releaseNameOverrides] are applied.
      * Overrides only take effect when upgrading to this version or later.
      */
     static let releaseOverridesMinVersion = "0.16.0"
@@ -146,9 +146,8 @@ class DeviceUpdateService: ObservableObject {
             return releaseName
         }
         
-        if parsedTargetVersion >= minOverridesVersion {
-            let key = releaseName.uppercased()
-            if let override = releaseNameOverrides.first(where: { $0.key.uppercased() == key })?.value {
+        if parsedTargetVersion.isAtLeast(minOverridesVersion, ignorePreRelease: true) {
+            if let override = releaseNameOverrides[releaseName.uppercased()] {
                 return override
             }
         }
