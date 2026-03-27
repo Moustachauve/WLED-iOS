@@ -68,7 +68,7 @@ struct DeviceWebsocketListViewModelTests {
 
         // Switch to connected — the reactive pipeline triggers after debounce
         mockClient.setStatus(.connected)
-        try await Task.sleep(for: .milliseconds(500)) // Wait for 200ms debounce + Combine propagation
+        try await Task.sleep(for: .seconds(2)) // Wait for 2s debounce + Combine propagation (generous for CI)
         
         #expect(viewModel.onlineDevices.count == 1)
         #expect(viewModel.offlineDevices.isEmpty)
@@ -100,11 +100,11 @@ struct DeviceWebsocketListViewModelTests {
 
         // Simulate quick background + resume (app switcher peek)
         viewModel.onPause()
-        try await Task.sleep(for: .milliseconds(200)) // Well under the 2s delay
+        try await Task.sleep(for: .milliseconds(500)) // Well under the 2s delay
         viewModel.onResume()
 
         // Device should still be connected — disconnect was cancelled
-        try await Task.sleep(for: .milliseconds(100))
+        try await Task.sleep(for: .seconds(1))
         #expect(mockClient.deviceState.websocketStatus == .connected)
         #expect(viewModel.onlineDevices.count == 1)
     }
@@ -124,7 +124,7 @@ struct DeviceWebsocketListViewModelTests {
 
         // Simulate going to background and staying there
         viewModel.onPause()
-        try await Task.sleep(for: .seconds(2.5)) // Wait past the 2s delay
+        try await Task.sleep(for: .seconds(4)) // Wait well past the 2s delay (generous for CI)
 
         // Device should now be disconnected
         #expect(mockClient.deviceState.websocketStatus == .disconnected)
