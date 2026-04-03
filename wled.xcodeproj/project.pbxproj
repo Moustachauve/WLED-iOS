@@ -45,7 +45,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8813CE002EE9178D00B0A987 /* wled */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (8813CE392EE9178D00B0A987 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = wled; sourceTree = "<group>"; };
-		882CC9142F05CFE00080567C /* WLEDTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WLEDTests; sourceTree = "<group>"; };
+		882CC9142F05CFE00080567C /* WLEDTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = wledTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */

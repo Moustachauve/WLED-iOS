@@ -48,7 +48,7 @@ class DeviceUpdateService: ObservableObject {
      * See: https://github.com/Moustachauve/WLED-Android/issues/129
      */
     static let releaseNameOverrides: [String: String] = [
-        "ESP32_V4": "ESP32",
+        "ESP32_V4": "ESP32"
     ]
     
     /**
@@ -219,7 +219,7 @@ class DeviceUpdateService: ObservableObject {
             return false
         }
 
-        return await getGithubApi().downloadReleaseBinary(asset: asset, targetFile: localUrl)
+        return await getGithubApi().downloadReleaseBinary(assetId: asset.assetId, assetName: asset.name, targetFile: localUrl)
     }
 
     // MARK: - File System Helpers

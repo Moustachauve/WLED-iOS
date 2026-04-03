@@ -70,9 +70,11 @@ class DiscoveryService: NSObject, Identifiable {
     }
 
     private func resolveService(for result: NWBrowser.Result) {
-        var macAddress: String?
+        let macAddress: String?
         if case .bonjour(let txtRecord) = result.metadata {
             macAddress = txtRecord["mac"]
+        } else {
+            macAddress = nil
         }
         print("NW Browser: Added, mac: \(macAddress?.description ?? "nil")")
 
@@ -80,7 +82,7 @@ class DiscoveryService: NSObject, Identifiable {
             print("Connecting to \(name), MAC: \(macAddress?.description ?? "nil")")
             let connection = NWConnection(to: result.endpoint, using: .tcp)
             connection.stateUpdateHandler = { [weak self] state in
-                Task { @MainActor in
+                Task { @MainActor [weak self, macAddress] in
                     self?.handleConnectionState(state, connection: connection, name: name, macAddress: macAddress)
                 }
             }

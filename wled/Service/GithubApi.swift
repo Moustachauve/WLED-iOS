@@ -50,8 +50,8 @@ final class GithubApi: Sendable {
         }
     }
     
-    func downloadReleaseBinary(asset: Asset, targetFile: URL) async -> Bool {
-        let assetUrl = getApiUrl(path: "repos/\(repoOwner)/\(repoName)/releases/assets/\(asset.assetId)")
+    func downloadReleaseBinary(assetId: Int64, assetName: String?, targetFile: URL) async -> Bool {
+        let assetUrl = getApiUrl(path: "repos/\(repoOwner)/\(repoName)/releases/assets/\(assetId)")
         guard let assetUrl else {
             print("Can't retrieve releases, url nil")
             return false
@@ -79,7 +79,7 @@ final class GithubApi: Sendable {
                 return false
             }
         } catch {
-            print("Error while downloading asset '\(asset.name ?? "unknown")': \(error)")
+            print("Error while downloading asset '\(assetName ?? "unknown")': \(error)")
             return false
         }
     }
