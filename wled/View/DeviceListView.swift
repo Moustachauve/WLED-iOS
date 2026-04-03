@@ -93,6 +93,17 @@ struct DeviceListView: View {
     var list: some View {
         ZStack {
             List(selection: $selection) {
+                if viewModel.localNetworkDenied {
+                    Section {
+                        LocalNetworkWarningView(
+                            onOpenSettings: viewModel.openSettings
+                        )
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                    }
+                }
+
                 if !viewModel.onlineDevices.isEmpty {
                     deviceRows(for: viewModel.onlineDevices)
                 }
@@ -106,8 +117,9 @@ struct DeviceListView: View {
             }
             .listStyle(.plain)
             .refreshable(action: refreshList)
-            
-            if viewModel.onlineDevices.isEmpty && viewModel.offlineDevices.isEmpty {
+            .animation(.default, value: viewModel.localNetworkDenied)
+
+            if viewModel.onlineDevices.isEmpty && viewModel.offlineDevices.isEmpty && !viewModel.localNetworkDenied {
                 EmptyDeviceListView(
                     addDeviceButtonActive: $addDeviceButtonActive,
                     showHiddenDevices: $viewModel.showHiddenDevices,

@@ -12,6 +12,9 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     @Published var allDevicesWithState: [DeviceWithState] = []
     @Published var onlineDevices: [DeviceWithState] = []
     @Published var offlineDevices: [DeviceWithState] = []
+
+    /// Whether the local network permission has been denied by the user.
+    @Published var localNetworkDenied: Bool = false
     
     // Preferences
     @Published var showHiddenDevices: Bool = false {
@@ -99,6 +102,15 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateFilteredDevices(currentTime: Date())
+            }
+            .store(in: &cancellables)
+
+        // Observe local network permission status from the discovery service
+        discoveryService?.$isLocalNetworkGranted
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isGranted in
+                self?.localNetworkDenied = !isGranted
             }
             .store(in: &cancellables)
     }
@@ -354,6 +366,12 @@ class DeviceWebsocketListViewModel: NSObject, ObservableObject, NSFetchedResults
     func startDiscovery() {
         print("[ListVM] Starting discovery scan")
         discoveryService?.scan()
+    }
+
+    /// Opens the app's Settings page where the user can toggle Local Network permission.
+    func openSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 
     private func deviceDiscovered(at address: String, withMACAddress macAddress: String?) {

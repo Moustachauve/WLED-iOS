@@ -3,6 +3,7 @@ import SwiftUI
 enum CardStyle {
     case `default`
     case device(color: Color)
+    case warning
 }
 
 struct Card<Content: View>: View {
@@ -34,6 +35,11 @@ struct Card<Content: View>: View {
                 Rectangle().fill(color)
                 Rectangle().fill(.thickMaterial)
             }
+        case .warning:
+            ZStack {
+                Color(UIColor.secondarySystemBackground)
+                Color.red.opacity(0.1)
+            }
         }
     }
 }
@@ -46,7 +52,9 @@ struct Card_Previews: PreviewProvider {
             }
             Card(style: .device(color: .blue)) {
                 Text("Device Card")
-                    .foregroundStyle(.white)
+            }
+            Card(style: .warning) {
+                Text("Warning Card")
             }
         }
         .padding()
