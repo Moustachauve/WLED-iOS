@@ -11,17 +11,8 @@ struct DeviceWebsocketListViewModelTests {
     let context: NSManagedObjectContext
 
     init() {
-        self.container = PersistenceController.preview.container
+        self.container = PersistenceController(inMemory: true).container
         self.context = container.viewContext
-        
-        // Clear existing data from preview
-        let fetchRequest: NSFetchRequest<Device> = Device.fetchRequest()
-        if let devices = try? context.fetch(fetchRequest) {
-            for device in devices {
-                context.delete(device)
-            }
-        }
-        try? context.save()
     }
 
     @Test func testInitialLoadingAndSorting() async throws {
