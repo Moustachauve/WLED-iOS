@@ -10,6 +10,7 @@ import SwiftUI
 struct Settings: View {
     @Binding var showHiddenDevices: Bool
     @Binding var showOfflineDevices: Bool
+    var showChangelog: () -> Void = {}
 
     // Environment to dismiss the sheet
     @Environment(\.dismiss) private var dismiss
@@ -32,6 +33,13 @@ struct Settings: View {
                         Link(destination: url) {
                             Label("WLED Documentation", systemImage: "questionmark.circle")
                         }
+                    }
+
+                    Button {
+                        dismiss()
+                        showChangelog()
+                    } label: {
+                        Label("Show Changelog", systemImage: "sparkles")
                     }
                 } header: {
                     Text("About")
@@ -64,6 +72,9 @@ struct Settings: View {
 
 #Preview {
     Settings(
-        showHiddenDevices: .constant(true), showOfflineDevices: .constant(true)
+        showHiddenDevices: .constant(true),
+        showOfflineDevices: .constant(true),
+        showChangelog: {}
     )
 }
+
