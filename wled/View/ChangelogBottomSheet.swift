@@ -130,13 +130,14 @@ struct ChangelogBottomSheet: View {
             Text("Awesome")
                 .font(.headline.weight(.bold))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, 10)
         }
         .buttonStyle(.borderedProminent)
         .buttonBorderShape(.roundedRectangle(radius: 14))
         .controlSize(.large)
         .padding(.horizontal, 20)
         .padding(.bottom, 8)
+        .padding(.top, 16)
         .background(
             Rectangle()
                 .fill(.ultraThinMaterial)
