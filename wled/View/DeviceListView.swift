@@ -12,7 +12,10 @@ struct DeviceListView: View {
 
     @State private var addDeviceButtonActive: Bool = false
     @State private var showSettingsSheet: Bool = false
+    @State private var showChangelogSheet: Bool = false
     @State private var columnVisibility = NavigationSplitViewVisibility.doubleColumn
+
+    @StateObject private var changelogViewModel = ChangelogViewModel()
 
     @AppStorage("lastSelectedDeviceMac") private var lastSelectedDeviceMac: String = ""
 
@@ -46,8 +49,19 @@ struct DeviceListView: View {
                 .sheet(isPresented: $showSettingsSheet) {
                     Settings(
                         showHiddenDevices: $viewModel.showHiddenDevices,
-                        showOfflineDevices: $viewModel.showOfflineDevices
+                        showOfflineDevices: $viewModel.showOfflineDevices,
+                        showChangelog: {
+                            changelogViewModel.showAllChangelogs()
+                            showChangelogSheet = true
+                        }
                     )
+                }
+                .sheet(isPresented: $showChangelogSheet, onDismiss: {
+                    changelogViewModel.dismiss()
+                }) {
+                    ChangelogBottomSheet(viewModel: changelogViewModel)
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
                 }
                 .navigationBarTitleDisplayMode(.inline)
         } detail: {
@@ -55,6 +69,11 @@ struct DeviceListView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .onAppear(perform: appearAction)
+        .onReceive(changelogViewModel.$changelogContent) { content in
+            if content != nil && !showChangelogSheet {
+                showChangelogSheet = true
+            }
+        }
         .onChange(of: scenePhase) { newPhase in
             switch newPhase {
             case .active:
