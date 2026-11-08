@@ -11,6 +11,7 @@ struct WLEDNativeApp: App {
             DeviceListView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .onAppear {
+                    WatchSyncService.shared.start(context: persistenceController.container.viewContext)
                     refreshVersionsSync()
                 }
         }
