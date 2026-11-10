@@ -39,22 +39,14 @@ class ReleaseService {
     
     
     func getLatestStableVersion() -> Version? {
-        // Explicit `== nil` checks are required for optional Core Data attributes because
-        // SQLite evaluates `NOT (NULL LIKE '%beta%')` as NULL (falsy) in a negated predicate.
         return fetchLatestVersion(
-            predicate: NSPredicate(
-                format: "isPrerelease == NO AND (versionDescription == nil OR NOT (versionDescription CONTAINS[cd] %@)) AND NOT (tagName CONTAINS[cd] %@) AND (name == nil OR NOT (name CONTAINS[cd] %@))",
-                "beta", "beta", "beta"
-            )
+            predicate: NSPredicate(format: "isPrerelease == NO")
         )
     }
     
     func getLatestBetaVersion() -> Version? {
         return fetchLatestVersion(
-            predicate: NSPredicate(
-                format: "isPrerelease == YES OR versionDescription CONTAINS[cd] %@ OR tagName CONTAINS[cd] %@ OR name CONTAINS[cd] %@",
-                "beta", "beta", "beta"
-            )
+            predicate: NSPredicate(format: "isPrerelease == YES")
         )
     }
     
@@ -139,30 +131,18 @@ class ReleaseService {
     
     
     
-    func createVersion(release: Release) -> Version {
+    private func createVersion(release: Release) -> Version {
         let version = Version(context: context)
         version.tagName = release.tagName
         version.name = release.name
         version.versionDescription = release.body
-        version.isPrerelease = isBetaRelease(release: release)
+        version.isPrerelease = release.prerelease
         version.htmlUrl = release.htmlUrl
         
         let dateFormatter = ISO8601DateFormatter()
         version.publishedDate = dateFormatter.date(from: release.publishedAt)
         
         return version
-    }
-    
-    func isBetaRelease(release: Release) -> Bool {
-        if release.prerelease {
-            return true
-        }
-        let betaKeywords = ["beta", "bêta"]
-        return betaKeywords.contains { keyword in
-            release.tagName.localizedCaseInsensitiveContains(keyword) ||
-                release.name.localizedCaseInsensitiveContains(keyword) ||
-                release.body.localizedCaseInsensitiveContains(keyword)
-        }
     }
     
     private func createAssetsForVersion(version: Version, release: Release) -> [Asset] {
