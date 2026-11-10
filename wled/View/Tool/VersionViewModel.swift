@@ -4,6 +4,7 @@ import CoreData
 class VersionViewModel: ObservableObject {
 
     @Published var version: Version?
+    @Published var latestBetaVersion: Version?
 
     func loadVersion(_ versionTagParam: String, context: NSManagedObjectContext) {
         var versionTag = versionTagParam
@@ -11,7 +12,7 @@ class VersionViewModel: ObservableObject {
             versionTag = "v\(versionTag)"
         }
         let fetchRequest = Version.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "tagName == %@", versionTag)
+        fetchRequest.predicate = NSPredicate(format: "tagName == %@ OR tagName == %@", versionTagParam, versionTag)
 
         do {
             print("loading new version...")
@@ -20,5 +21,9 @@ class VersionViewModel: ObservableObject {
         } catch {
             print("Unexpected error when loading version: \(error)")
         }
+    }
+
+    func loadLatestBetaVersion(context: NSManagedObjectContext) {
+        latestBetaVersion = ReleaseService(context: context).getLatestBetaVersion()
     }
 }

@@ -198,14 +198,14 @@ class WLEDJsonApiHandler : WLEDRequestHandler {
                 print("Updating \(deviceStateInfo.info.name)")
                 
                 if (device.branchValue == Branch.unknown) {
-                    device.branchValue = (deviceStateInfo.info.version ?? "").contains("-b") ? Branch.beta : Branch.stable
+                    let productName = deviceStateInfo.info.product ?? device.productName ?? ""
+                    device.branchValue = productName.lowercased() == "en" ? Branch.beta : Branch.stable
                 }
                 
                 let deviceVersion = deviceStateInfo.info.version ?? ""
                 let releaseService = ReleaseService(context: context)
                 let latestUpdateVersionTagAvailable = releaseService.getNewerReleaseTag(
                     versionName: deviceVersion,
-                    branch: device.branchValue,
                     ignoreVersion: device.skipUpdateTag ?? ""
                 )
 

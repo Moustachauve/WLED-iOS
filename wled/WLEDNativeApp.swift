@@ -20,6 +20,8 @@ struct WLEDNativeApp: App {
     
     
     private func refreshVersionsSync() {
+        let releaseService = ReleaseService(context: persistenceController.container.viewContext)
+        releaseService.sanitizeDeviceUpdateTags()
         Task {
             // Only update automatically from Github once per 24 hours to avoid rate limits
             // and reduce network usage.
@@ -35,7 +37,8 @@ struct WLEDNativeApp: App {
                 return
             }
             print("Refreshing available Releases")
-            await ReleaseService(context: persistenceController.container.viewContext).refreshVersions()
+            await releaseService.refreshVersions()
+            releaseService.sanitizeDeviceUpdateTags()
             UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: WLEDNativeApp.dateLastUpdateKey)
         }
     }

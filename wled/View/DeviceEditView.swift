@@ -1,5 +1,6 @@
 
 import SwiftUI
+import MarkdownUI
 
 struct DeviceEditView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -18,6 +19,8 @@ struct DeviceEditView: View {
     @State private var isCheckingForUpdates: Bool = false
     @FocusState var isNameFieldFocused: Bool
     @State var showInstallingDialog = false
+    @State private var showBetaDisclaimerDialog = false
+    @State private var shouldStartBetaInstall = false
     @Binding var reloadParent: Bool
 
     @StateObject var versionViewModel = VersionViewModel()
@@ -86,9 +89,8 @@ struct DeviceEditView: View {
                     }
                     print("language changed! \(newBranch)")
                     device.branchValue = newBranch
-                    device.latestUpdateVersionTagAvailable = device.version
                     saveDevice()
-                    installVersion()
+                    installVersion(versionTag: device.version ?? "")
                 }
             }
             .padding(.bottom)
@@ -137,6 +139,18 @@ struct DeviceEditView: View {
             .background(Color(UIColor.secondarySystemBackground))
             .cornerRadius(8)
             
+            if let betaVersion = versionViewModel.latestBetaVersion,
+               let betaTagName = betaVersion.tagName,
+               ReleaseService.isVersionNewer(releaseTag: betaTagName, than: device.version ?? "") {
+                BetaUpdateAvailableCard(
+                    betaTagName: betaTagName,
+                    onTryBeta: {
+                        showBetaDisclaimerDialog = true
+                    }
+                )
+                .padding(.top, 4)
+            }
+            
             Spacer()
         }
         .padding()
@@ -147,6 +161,26 @@ struct DeviceEditView: View {
             customName = device.isCustomName ? (self.device.name ?? "") : ""
             hideDevice = device.isHidden
             branch = device.branchValue == Branch.beta ? "Beta" : "Stable"
+            versionViewModel.loadLatestBetaVersion(context: viewContext)
+        }
+        .sheet(isPresented: $showBetaDisclaimerDialog, onDismiss: {
+            if shouldStartBetaInstall, let betaTag = versionViewModel.latestBetaVersion?.tagName {
+                shouldStartBetaInstall = false
+                installVersion(versionTag: betaTag)
+            }
+        }) {
+            if let betaVersion = versionViewModel.latestBetaVersion {
+                BetaUpdateDisclaimerSheet(
+                    version: betaVersion,
+                    onCancel: {
+                        showBetaDisclaimerDialog = false
+                    },
+                    onAccept: {
+                        shouldStartBetaInstall = true
+                        showBetaDisclaimerDialog = false
+                    }
+                )
+            }
         }
         .fullScreenCover(isPresented: $showInstallingDialog) {
             if let version = versionViewModel.version {
@@ -199,7 +233,10 @@ struct DeviceEditView: View {
             isCheckingForUpdates = true
         }
         print("Refreshing available Releases")
-        await ReleaseService(context: viewContext).refreshVersions()
+        let releaseService = ReleaseService(context: viewContext)
+        await releaseService.refreshVersions()
+        releaseService.sanitizeDeviceUpdateTags()
+        versionViewModel.loadLatestBetaVersion(context: viewContext)
         UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: WLEDNativeApp.dateLastUpdateKey)
         
         device.skipUpdateTag = ""
@@ -219,10 +256,156 @@ struct DeviceEditView: View {
         }
     }
     
-    func installVersion() {
+    func installVersion(versionTag: String) {
         print("Opening install dialog")
+        versionViewModel.loadVersion(versionTag, context: viewContext)
         showInstallingDialog = true
-        versionViewModel.loadVersion(device.latestUpdateVersionTagAvailable ?? "", context: viewContext)
+    }
+}
+
+struct BetaUpdateAvailableCard: View {
+    let betaTagName: String
+    let onTryBeta: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                ExperimentIcon()
+                    .fill(Color.accentColor)
+                    .frame(width: 22, height: 22)
+                Text(String(format: String(localized: "beta_version_available"), betaTagName))
+                    .font(.headline)
+                    .foregroundColor(.accentColor)
+            }
+            if let url = URL(string: String(localized: "beta_cloudapp_url")) {
+                Link(destination: url) {
+                    HStack(spacing: 6) {
+                        Text("learn_more_beta_app")
+                            .underline()
+                            .multilineTextAlignment(.leading)
+                        Image(systemName: "link")
+                    }
+                    .font(.footnote)
+                    .foregroundColor(.accentColor)
+                }
+            }
+            Text("beta_migration_card_warning")
+                .font(.footnote)
+                .foregroundColor(.secondary)
+            Button(action: onTryBeta) {
+                Text("try_new_beta_version")
+            }
+            .buttonStyle(.bordered)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(8)
+    }
+}
+
+struct BetaUpdateDisclaimerSheet: View {
+    @ObservedObject var version: Version
+    let onCancel: () -> Void
+    let onAccept: () -> Void
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.red)
+                        Text(String(format: String(localized: "beta_update_disclaimer_title"), version.tagName ?? ""))
+                            .font(.title3)
+                            .bold()
+                    }
+                    
+                    Text("beta_update_disclaimer_warning")
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.red.opacity(0.85))
+                        .cornerRadius(8)
+                    
+                    if let description = version.versionDescription, !description.isEmpty {
+                        Divider()
+                        Markdown(description)
+                    }
+                }
+                .padding()
+            }
+            .safeAreaInset(edge: .bottom) {
+                HStack {
+                    Button("Cancel", role: .cancel, action: onCancel)
+                        .buttonStyle(.bordered)
+                    Spacer()
+                    Button(role: .destructive, action: onAccept) {
+                        Text("Install Now")
+                            .bold()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                }
+                .padding()
+                .background(.bar)
+            }
+        }
+    }
+}
+
+struct ExperimentIcon: Shape {
+    func path(in rect: CGRect) -> Path {
+        let scaleX = rect.width / 960.0
+        let scaleY = rect.height / 960.0
+        func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
+            CGPoint(x: rect.minX + x * scaleX, y: rect.minY + y * scaleY)
+        }
+        var path = Path()
+        // Outer flask contour (Material Symbols `experiment` 960x960 viewport)
+        path.move(to: pt(200, 840))
+        path.addQuadCurve(to: pt(127.5, 794.5), control: pt(149, 840))
+        path.addQuadCurve(to: pt(138, 710), control: pt(106, 749))
+        path.addLine(to: pt(360, 440))
+        path.addLine(to: pt(360, 200))
+        path.addLine(to: pt(320, 200))
+        path.addQuadCurve(to: pt(291.5, 188.5), control: pt(303, 200))
+        path.addQuadCurve(to: pt(280, 160), control: pt(280, 177))
+        path.addQuadCurve(to: pt(291.5, 131.5), control: pt(280, 143))
+        path.addQuadCurve(to: pt(320, 120), control: pt(303, 120))
+        path.addLine(to: pt(640, 120))
+        path.addQuadCurve(to: pt(668.5, 131.5), control: pt(657, 120))
+        path.addQuadCurve(to: pt(680, 160), control: pt(680, 143))
+        path.addQuadCurve(to: pt(668.5, 188.5), control: pt(680, 177))
+        path.addQuadCurve(to: pt(640, 200), control: pt(657, 200))
+        path.addLine(to: pt(600, 200))
+        path.addLine(to: pt(600, 440))
+        path.addLine(to: pt(822, 710))
+        path.addQuadCurve(to: pt(832.5, 794.5), control: pt(854, 749))
+        path.addQuadCurve(to: pt(760, 840), control: pt(811, 840))
+        path.addLine(to: pt(200, 840))
+        path.closeSubpath()
+        
+        // Liquid fill trapezoid inside flask
+        path.move(to: pt(280, 720))
+        path.addLine(to: pt(680, 720))
+        path.addLine(to: pt(544, 560))
+        path.addLine(to: pt(416, 560))
+        path.addLine(to: pt(280, 720))
+        path.closeSubpath()
+        
+        // Inner cutout (counter-clockwise for non-zero winding rule)
+        path.move(to: pt(200, 760))
+        path.addLine(to: pt(760, 760))
+        path.addLine(to: pt(520, 468))
+        path.addLine(to: pt(520, 200))
+        path.addLine(to: pt(440, 200))
+        path.addLine(to: pt(440, 468))
+        path.addLine(to: pt(200, 760))
+        path.closeSubpath()
+        
+        return path
     }
 }
 

@@ -13,49 +13,94 @@ class ReleaseService {
      * If a new version is available, returns the version tag of it.
      *
      * @param versionName Current version to check if a newer one exists
-     * @param branch Which branch to check for the update
      * @param ignoreVersion You can specify a version tag to be ignored as a new version. If this is
      *      set and match with the newest version, no version will be returned
      * @return The newest version if it is newer than versionName and different than ignoreVersion,
      *      otherwise an empty string.
      */
-    func getNewerReleaseTag(versionName: String, branch: Branch, ignoreVersion: String) -> String {
-        if (versionName.isEmpty) {
-            return ""
-        }
-        let latestVersion = getLatestVersion(branch: branch)
+    func getNewerReleaseTag(versionName: String, ignoreVersion: String) -> String {
+        let latestVersion = getLatestStableVersion()
         guard let latestTagName = latestVersion?.tagName, latestTagName != ignoreVersion else {
             return ""
         }
         
-        // If device is currently on a beta branch but the user selected a stable branch,
-        // show the latest version as an update so that the user can get out of beta.
-        if (branch == .stable && versionName.contains("-b")) {
-            return latestTagName
+        return Self.isVersionNewer(releaseTag: latestTagName, than: versionName) ? latestTagName : ""
+    }
+    
+    static func isVersionNewer(releaseTag: String, than currentVersion: String) -> Bool {
+        guard !currentVersion.isEmpty, !releaseTag.isEmpty else {
+            return false
         }
-        
-        let versionCompare = latestTagName.dropFirst().compare(versionName, options: .numeric)
-        return versionCompare == .orderedDescending ? latestTagName : ""
+        let strippedReleaseTag = releaseTag.hasPrefix("v")
+            ? String(releaseTag.dropFirst())
+            : releaseTag
+        return strippedReleaseTag.compare(currentVersion, options: .numeric) == .orderedDescending
     }
     
     
-    func getLatestVersion(branch: Branch) -> Version? {
+    func getLatestStableVersion() -> Version? {
+        // Explicit `== nil` checks are required for optional Core Data attributes because
+        // SQLite evaluates `NOT (NULL LIKE '%beta%')` as NULL (falsy) in a negated predicate.
+        return fetchLatestVersion(
+            predicate: NSPredicate(
+                format: "isPrerelease == NO AND (versionDescription == nil OR NOT (versionDescription CONTAINS[cd] %@)) AND NOT (tagName CONTAINS[cd] %@) AND (name == nil OR NOT (name CONTAINS[cd] %@))",
+                "beta", "beta", "beta"
+            )
+        )
+    }
+    
+    func getLatestBetaVersion() -> Version? {
+        return fetchLatestVersion(
+            predicate: NSPredicate(
+                format: "isPrerelease == YES OR versionDescription CONTAINS[cd] %@ OR tagName CONTAINS[cd] %@ OR name CONTAINS[cd] %@",
+                "beta", "beta", "beta"
+            )
+        )
+    }
+    
+    private func fetchLatestVersion(predicate: NSPredicate) -> Version? {
         let fetchRequest = Version.fetchRequest()
         fetchRequest.fetchLimit = 1
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "publishedDate", ascending: false)]
-        
-        if (branch == Branch.stable) {
-            fetchRequest.predicate = NSPredicate(format: "isPrerelease == %@", "0")
-        }
+        fetchRequest.predicate = predicate
         
         do {
             let versions = try context.fetch(fetchRequest)
             return versions.first
         } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             let nsError = error as NSError
             fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+        }
+    }
+    
+    func sanitizeDeviceUpdateTags() {
+        context.performAndWait {
+            let fetchRequest = Device.fetchRequest()
+            guard let devices = try? context.fetch(fetchRequest) else {
+                return
+            }
+            var hasChanges = false
+            for device in devices {
+                let currentUpdateTag = device.latestUpdateVersionTagAvailable ?? ""
+                if !currentUpdateTag.isEmpty {
+                    let validStableTag = getNewerReleaseTag(
+                        versionName: device.version ?? "",
+                        ignoreVersion: device.skipUpdateTag ?? ""
+                    )
+                    if validStableTag != currentUpdateTag {
+                        device.latestUpdateVersionTagAvailable = validStableTag
+                        hasChanges = true
+                    }
+                }
+            }
+            if hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    let nsError = error as NSError
+                    fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                }
+            }
         }
     }
     
@@ -94,18 +139,30 @@ class ReleaseService {
     
     
     
-    private func createVersion(release: Release) -> Version {
+    func createVersion(release: Release) -> Version {
         let version = Version(context: context)
         version.tagName = release.tagName
         version.name = release.name
         version.versionDescription = release.body
-        version.isPrerelease = release.prerelease
+        version.isPrerelease = isBetaRelease(release: release)
         version.htmlUrl = release.htmlUrl
         
         let dateFormatter = ISO8601DateFormatter()
         version.publishedDate = dateFormatter.date(from: release.publishedAt)
         
         return version
+    }
+    
+    func isBetaRelease(release: Release) -> Bool {
+        if release.prerelease {
+            return true
+        }
+        let betaKeywords = ["beta", "bêta"]
+        return betaKeywords.contains { keyword in
+            release.tagName.localizedCaseInsensitiveContains(keyword) ||
+                release.name.localizedCaseInsensitiveContains(keyword) ||
+                release.body.localizedCaseInsensitiveContains(keyword)
+        }
     }
     
     private func createAssetsForVersion(version: Version, release: Release) -> [Asset] {
