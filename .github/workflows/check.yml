@@ -35,6 +35,42 @@ jobs:
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO \
             2>&1 | xcbeautify --report junit --report-path . --junit-report-filename junit.xml
 
+  test-watch:
+    name: Run watchOS Unit Tests
+    runs-on: macos-26
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+
+      - name: Pick a watchOS simulator
+        id: simulator
+        run: |
+          # Watch simulator names change with every Xcode release: take the newest available one.
+          UDID=$(xcrun simctl list devices available --json \
+            | jq -r '[.devices | to_entries[] | select(.key | contains("watchOS")) | .value[]] | last | .udid // empty')
+          if [ -z "$UDID" ]; then
+            echo "::error::No watchOS simulator available"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Build and Test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project wled.xcodeproj \
+            -scheme WLEDWatch \
+            -destination 'platform=watchOS Simulator,id=${{ steps.simulator.outputs.udid }}' \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            -resultBundlePath WatchTestResults.xcresult \
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO \
+            2>&1 | xcbeautify --report junit --report-path . --junit-report-filename junit-watch.xml
+
   lint:
     name: Run Lint
     runs-on: macos-26

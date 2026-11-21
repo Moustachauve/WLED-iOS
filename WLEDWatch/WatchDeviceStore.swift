@@ -15,25 +15,31 @@ final class WatchDeviceStore: NSObject {
     @ObservationIgnored private static let cacheKey = "cachedDevices"
     private nonisolated static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "WLEDWatch", category: "WatchDeviceStore")
 
-    override init() {
+    @ObservationIgnored private let defaults: UserDefaults
+
+    /// - Parameters:
+    ///   - defaults: Where the device list is cached.
+    ///   - activateSession: Set to `false` to skip WatchConnectivity (tests).
+    init(defaults: UserDefaults = .standard, activateSession: Bool = true) {
+        self.defaults = defaults
         super.init()
-        if let data = UserDefaults.standard.data(forKey: Self.cacheKey) {
+        if let data = defaults.data(forKey: Self.cacheKey) {
             do {
                 devices = try WatchSync.decode(data)
             } catch {
                 Self.log.error("Cached device list is unreadable: \(error)")
             }
         }
-        guard WCSession.isSupported() else { return }
+        guard activateSession, WCSession.isSupported() else { return }
         let session = WCSession.default
         session.delegate = self
         session.activate()
     }
 
-    private func apply(devicesData data: Data) {
+    func apply(devicesData data: Data) {
         do {
             devices = try WatchSync.decode(data)
-            UserDefaults.standard.set(data, forKey: Self.cacheKey)
+            defaults.set(data, forKey: Self.cacheKey)
         } catch {
             Self.log.error("Received device list is unreadable: \(error)")
         }

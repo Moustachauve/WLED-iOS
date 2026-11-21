@@ -42,21 +42,30 @@ final class DeviceController {
     private enum Field { case power, brightness, nightlight }
 
     private let pollInterval: Duration = .seconds(2)
-    private let localChangeGrace: TimeInterval = 2
-    private let session: URLSession
+    /// How long polled values are ignored for a field after a local change.
+    private let localChangeGrace: TimeInterval
+    /// Delay before a brightness change is sent, to coalesce crown events.
+    private let brightnessDebounce: Duration
+    private let transport: any HTTPTransport
     private static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "WLEDWatch", category: "DeviceController")
 
-    init(device: WatchDevice) {
+    /// - Parameter transport: Sends the HTTP requests. Defaults to a `URLSession` with short timeouts.
+    init(
+        device: WatchDevice,
+        transport: (any HTTPTransport)? = nil,
+        localChangeGrace: TimeInterval = 2,
+        brightnessDebounce: Duration = .milliseconds(120)
+    ) {
         self.device = device
-        let config = URLSessionConfiguration.ephemeral
-        config.timeoutIntervalForRequest = 5
-        config.timeoutIntervalForResource = 8
-        config.waitsForConnectivity = false
-        session = URLSession(configuration: config)
+        self.transport = transport ?? URLSessionTransport()
+        self.localChangeGrace = localChangeGrace
+        self.brightnessDebounce = brightnessDebounce
     }
 
     deinit {
-        session.invalidateAndCancel()
+        brightnessSendTask?.cancel()
+        sendTask?.cancel()
+        transport.invalidate()
     }
 
     // MARK: - Lifecycle
@@ -117,7 +126,7 @@ final class DeviceController {
         brightnessSendTask?.cancel()
         brightnessSendTask = Task { [weak self] in
             // Debounce: the crown produces many values per second.
-            try? await Task.sleep(for: .milliseconds(120))
+            try? await Task.sleep(for: self?.brightnessDebounce ?? .zero)
             guard !Task.isCancelled else { return }
             // 0 = off. Don't send `bri: 0`, so the device keeps its brightness for next power on.
             self?.send(level == 0 ? DeviceStateUpdate(on: false) : DeviceStateUpdate(on: true, bri: level))
@@ -130,15 +139,28 @@ final class DeviceController {
         URL(string: "http://\(device.address)/json/state")
     }
 
-    private func refresh() async {
+    /// Fetches the device state once.
+    func refresh() async {
         guard let url = stateURL else { return }
         do {
-            let (data, _) = try await session.data(from: url)
+            let data = try await transport.data(for: URLRequest(url: url))
             apply(try JSONDecoder().decode(WledState.self, from: data))
         } catch {
             guard !Task.isCancelled else { return }
             Self.log.error("Poll failed for \(self.device.address, privacy: .public): \(error)")
             connection = .offline
+        }
+    }
+
+    /// Waits until the pending brightness change (if any) and every queued request are done,
+    /// including requests queued while waiting.
+    func waitForPendingRequests() async {
+        while true {
+            let brightness = brightnessSendTask
+            let send = sendTask
+            await brightness?.value
+            await send?.value
+            if brightness == brightnessSendTask, send == sendTask { return }
         }
     }
 
@@ -156,12 +178,15 @@ final class DeviceController {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = body
 
-        let session = session
+        let transport = transport
         let previous = sendTask
         sendTask = Task { [weak self] in
             await previous?.value
+            // The controller is gone (screen closed) and its transport invalidated:
+            // starting a request on it would raise an Objective-C exception.
+            guard self != nil, !Task.isCancelled else { return }
             do {
-                let (responseData, _) = try await session.data(for: request)
+                let responseData = try await transport.data(for: request)
                 do {
                     self?.apply(try JSONDecoder().decode(WledState.self, from: responseData))
                 } catch {
